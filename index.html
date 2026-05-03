@@ -30,7 +30,7 @@ a{text-decoration:none}
 
 /* HEADER */
 .hdr{position:sticky;top:0;z-index:100;background:var(--yellow);height:var(--hh);border-bottom:1px solid var(--yellow-d);box-shadow:var(--sh)}
-.hdr-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:20px;padding:0 28px;height:100%}
+.hdr-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:100%}
 .logo{flex-shrink:0;display:flex;align-items:center}
 .logo svg{height:17px;width:auto}
 .hdr-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
@@ -318,9 +318,6 @@ a{text-decoration:none}
   .loc-btn{display:none !important}
   .hdr-actions .icon-btn:not(.cart-toggle){display:none}
   .ham{display:flex}
-  .sbtn{padding:7px 12px;font-size:0;line-height:1;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-  .sbtn::before{content:'';display:block;width:14px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") center/contain no-repeat}
-  .search{flex:1;min-width:0;overflow:visible}
   .search input{padding:9px 8px 9px 14px;font-size:13px}
   .search-dd{position:fixed;top:calc(var(--hh) + var(--nh) + 4px);left:12px;right:12px;width:auto;border-radius:12px;z-index:200}
   .cnav-in{padding:0 14px;gap:0}
@@ -383,7 +380,6 @@ a{text-decoration:none}
   :root{--hh:52px;--nh:38px}
   .hdr-in{padding:0 12px;gap:8px}
   .logo svg{height:13px}
-  .sbtn{width:32px;height:32px}
   .hero{gap:10px}
   .hc1{min-height:260px;padding:16px}
   .hc1 h2{font-size:28px}
@@ -586,11 +582,6 @@ a{text-decoration:none}
       </svg>
     </a>
 
-    <div class="search">
-      <input type="text" placeholder="¿Qué estás buscando?" id="searchInput" autocomplete="off">
-      <button class="sbtn">Buscar</button>
-      
-    </div>
 
     <div class="hdr-actions">
       <button class="icon-btn loc-btn" title="Sucursal">
