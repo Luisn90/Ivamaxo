@@ -666,6 +666,43 @@ input,textarea,select,button{font-family:var(--f)}
     </button>
   </div>
 </div>
+<!-- CAT CONTENT -->
+<div id="catContent" style="display:none">
+  <div class="content">
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Categorías</div>
+          <div class="card-sub">Gestiona las categorías que aparecen en la tienda</div>
+        </div>
+        <div class="card-act">
+          <button class="ca-btn primary" onclick="openCatDrawer()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva categoría
+          </button>
+        </div>
+      </div>
+      <div class="ptable-wrap">
+        <table class="ptable">
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Slug</th>
+              <th>Ícono</th>
+              <th>Productos</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="catTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--g500);font-weight:600">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
@@ -855,27 +892,28 @@ function setPage(page, el){
   if(page==='productos'){
     document.getElementById('mainContent').style.display='block';
     document.getElementById('catContent').style.display='none';
-    document.getElementById('addCatBtn').style.display='none';
-    document.getElementById('payBtn').innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo producto';
-    document.getElementById('payBtn').onclick = openDrawer;
+    updateTopBtn('Nuevo producto', openDrawer);
     loadProducts();
   } else if(page==='categorias'){
     document.getElementById('mainContent').style.display='none';
     document.getElementById('catContent').style.display='block';
-    document.getElementById('addCatBtn').style.display='flex';
-    document.getElementById('payBtn').innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva categoría';
-    document.getElementById('payBtn').onclick = openCatDrawer;
+    updateTopBtn('Nueva categoría', openCatDrawer);
     loadCategories();
   } else {
     document.getElementById('mainContent').style.display='block';
     document.getElementById('catContent').style.display='none';
-    document.getElementById('addCatBtn').style.display='none';
-    document.getElementById('payBtn').innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo producto';
-    document.getElementById('payBtn').onclick = openDrawer;
+    updateTopBtn('Nuevo producto', openDrawer);
     document.getElementById('pageSub').textContent = 'Vista en desarrollo';
   }
 }
 let currentPage = 'productos';
+
+function updateTopBtn(label, fn){
+  const btn = document.getElementById('payBtn');
+  if(!btn) return;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${label}`;
+  btn.onclick = fn;
+}
 
 // ── MINI CHART ──
 function buildChart(){
