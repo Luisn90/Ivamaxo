@@ -179,6 +179,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .pico-inner svg{width:44px;height:44px;stroke:var(--g700);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .pico-inner span{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g500)}
 .pcard:hover .pico-inner{opacity:.45}
+.pcard:hover .pimg img{transform:scale(1.06)}
 .pbadge{position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:50px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;z-index:1}
 .bn{background:var(--bk);color:var(--wh)}
 .bs{background:var(--y);color:var(--bk)}
@@ -777,10 +778,10 @@ function renderProducts(){
     <div class="pcard" onclick="goProduct('${p.id}')">
       <div class="pimg">
         ${p.badge?`<span class="pbadge ${p.badge}">${p.badgeTxt||''}</span>`:''}
-        <div class="pico-inner">
-          ${CAT_ICONS[p.icon]||CAT_ICONS['default']}
-          <span>${p.brand}</span>
-        </div>
+        ${p.image_url
+          ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:12px;transition:transform .4s ease" loading="lazy">`
+          : `<div class="pico-inner">${CAT_ICONS[p.icon]||CAT_ICONS['default']}<span>${p.brand}</span></div>`
+        }
         <button class="pwish${wishlist.has(p.id)?' active':''}" onclick="toggleWish(event,'${p.id}')" title="Favorito">
           <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         </button>

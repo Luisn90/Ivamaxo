@@ -150,6 +150,8 @@ a{text-decoration:none}
 .pimg{position:relative;aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pimg .pico{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform .4s ease}
 .pcard:hover .pico{transform:scale(1.04)}
+.pcard:hover .pimg img{transform:scale(1.06) !important}
+.pcard:hover .pimg img{transform:scale(1.06)}
 .pico-inner{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.35}
 .pico-inner svg{width:40px;height:40px;stroke:var(--g700);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .pico-inner span{font-size:10px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.1em}
@@ -997,10 +999,10 @@ function renderProducts(overrideList){
       <div class="pimg">
         ${p.badge?`<span class="pbadge ${p.badge}">${p.badgeTxt}</span>`:''}
         <div class="pico">
-          <div class="pico-inner">
-            ${CAT_ICONS[p.icon]||''}
-            <span>${p.brand}</span>
-          </div>
+          ${p.image_url
+            ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:14px;transition:transform .4s ease" loading="lazy">`
+            : `<div class="pico-inner">${CAT_ICONS[p.icon]||''}<span>${p.brand}</span></div>`
+          }
         </div>
         <button class="pquick" onclick="addToCart(${p.id})">
           <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>

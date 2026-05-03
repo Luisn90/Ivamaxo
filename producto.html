@@ -548,7 +548,18 @@ async function loadProduct(){
   updateStockUI();
 
   // Main image
-  document.getElementById('mainImg').innerHTML = CAT_ICONS_SVG[PRODUCT.icon]||CAT_ICONS_SVG['default'];
+  // Show real image or icon fallback
+  const mainImgEl = document.getElementById('mainImg');
+  if(PRODUCT.image_url){
+    mainImgEl.innerHTML = `<img src="${PRODUCT.image_url}" alt="${PRODUCT.name}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">`;
+    // Also populate all 4 thumbnails with the same image (until multiple images are supported)
+    document.querySelectorAll('.g-thumb').forEach(t=>{
+      t.style.padding='4px';
+      t.innerHTML = `<img src="${PRODUCT.image_url}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:6px">`;
+    });
+  } else {
+    mainImgEl.innerHTML = CAT_ICONS_SVG[PRODUCT.icon]||CAT_ICONS_SVG['default'];
+  }
 
   // Description
   if(PRODUCT.description){
@@ -575,7 +586,10 @@ function renderRelated(products){
     <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
       <div class="pc-img">
         ${p.badge?`<span class="pc-badge pcb-y">${p.badge_text||''}</span>`:''}
-        <svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:#D0D0D0;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        \${p.image_url 
+          ? \`<img src="\${p.image_url}" alt="\${p.name}" style="width:90%;height:90%;object-fit:contain">\`
+          : '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:#D0D0D0;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>'
+        }
       </div>
       <div class="pc-info">
         <div class="pc-brand">${p.brand}</div>
