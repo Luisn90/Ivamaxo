@@ -300,146 +300,144 @@ a{text-decoration:none}
 .rev.vis{opacity:1;transform:translateY(0)}
 .rev.d1{transition-delay:.08s}.rev.d2{transition-delay:.18s}.rev.d3{transition-delay:.28s}.rev.d4{transition-delay:.38s}
 
-/* RESPONSIVE */
+/* ═══════════ RESPONSIVE ═══════════ */
+
 @media(max-width:1200px){
   .catgrid{grid-template-columns:repeat(4,1fr)}
   .pgrid{grid-template-columns:repeat(3,1fr)}
   .trust{grid-template-columns:repeat(2,1fr)}
-  .foot-main{grid-template-columns:1fr 1fr;gap:36px}
+  .foot-main{grid-template-columns:1fr 1fr;gap:32px}
 }
+
 @media(max-width:960px){
-  .hero{grid-template-columns:1fr 1fr}
-  .hc2{grid-column:span 2;min-height:300px}
-  .hcr{grid-column:span 2;flex-direction:row}
-  .hc2 h2{font-size:36px}
+  .hero{grid-template-columns:1fr 1fr;gap:14px}
+  .hcr{grid-column:1 / -1;flex-direction:row;gap:14px}
+  .hc3,.hc4{flex:1;min-height:180px}
+  .hc1,.hc2{min-height:360px}
+  .hc2 h2{font-size:34px}
   .pgrid{grid-template-columns:repeat(2,1fr)}
   .promo{flex-direction:column;text-align:center;padding:36px 28px;gap:24px}
-  .ptitle{font-size:38px}
+  .ptitle{font-size:36px}
   .promo-acts{justify-content:center;flex-wrap:wrap}
-  .nl{flex-direction:column;align-items:flex-start;padding:32px}
+  .nl{flex-direction:column;align-items:flex-start;padding:32px;gap:24px}
   .nl-form{max-width:100%;width:100%}
+  .foot-main{grid-template-columns:1fr 1fr;gap:28px}
 }
+
 @media(max-width:768px){
-  :root{--hh:58px;--nh:42px}
-  .main{padding:12px}
-  .hdr-in{gap:8px;padding:0 14px}
-  .cnav-in{padding:0 14px}
-  /* Hide desktop-only icons, show ham */
+  :root{--hh:56px;--nh:40px}
+  .hdr-in{padding:0 14px;gap:10px}
+  .logo svg{height:15px}
+  .loc-btn{display:none !important}
   .hdr-actions .icon-btn:not(.cart-toggle){display:none}
   .ham{display:flex}
-  /* Search shrinks */
-  .search{max-width:unset;flex:1}
-  .search-dd{left:0;right:0}
-  /* Hero stacks */
+  .sbtn{padding:7px 12px;font-size:0;line-height:1;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+  .sbtn::before{content:'';display:block;width:14px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") center/contain no-repeat}
+  .search{flex:1;min-width:0;overflow:visible}
+  .search input{padding:9px 8px 9px 14px;font-size:13px}
+  .search-dd{position:fixed;top:calc(var(--hh) + var(--nh) + 4px);left:12px;right:12px;width:auto;border-radius:12px;z-index:200}
+  .cnav-in{padding:0 14px;gap:0}
+  .clink{padding:4px 11px;font-size:11px}
+  .main{padding:12px}
   .hero{grid-template-columns:1fr;gap:12px}
-  .hc1{min-height:340px;padding:22px}
-  .hc2{grid-column:1;min-height:320px;padding:22px}
-  .hc2 h2{font-size:32px}
-  .hcr{grid-column:1;flex-direction:row;gap:12px}
-  .hc3,.hc4{min-height:160px;padding:18px}
-  .hc3 h3{font-size:28px}
-  .hc4 h3{font-size:24px}
-  /* Categories */
+  .hc1{min-height:300px;padding:20px}
+  .hc1 h2{font-size:32px}
+  .hc1 p{font-size:12px;margin-bottom:14px}
+  .hc1-product svg{width:110px;height:140px}
+  .hc2{grid-column:auto;min-height:270px;padding:20px}
+  .hc2 h2{font-size:28px}
+  .hcr{grid-column:auto;flex-direction:row;gap:12px}
+  .hc3,.hc4{flex:1;min-height:150px;padding:18px}
+  .hc3 h3{font-size:26px}
+  .hc4 h3{font-size:22px}
+  .mbar{margin-bottom:24px}
+  .mtrack{gap:32px}
+  .mname{font-size:14px}
+  .sec{margin-bottom:32px}
+  .stitle{font-size:24px}
+  .shead{margin-bottom:14px;gap:10px}
+  .see-all{padding:7px 14px;font-size:11px}
   .catgrid{grid-template-columns:repeat(4,1fr);gap:8px}
-  .ccard{padding:12px 6px;gap:7px}
+  .ccard{padding:12px 6px;gap:6px;border-radius:10px}
   .cico{width:40px;height:40px}
   .cico svg{width:18px;height:18px}
   .cname{font-size:10.5px}
   .ccount{display:none}
-  /* Products */
+  .ftabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;gap:6px}
+  .ftabs::-webkit-scrollbar{display:none}
+  .ftab{flex-shrink:0;padding:6px 16px;font-size:11.5px}
   .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pinfo{padding:10px 12px 12px}
   .pname{font-size:13px}
   .pprice{font-size:20px}
-  .pinfo{padding:10px 12px 12px}
-  /* Section */
-  .stitle{font-size:26px}
-  .shead{margin-bottom:16px}
-  /* Promo */
   .promo{padding:28px 20px}
-  .ptitle{font-size:30px}
-  /* Trust */
-  .trust{grid-template-columns:1fr;gap:10px}
-  .tcard{padding:16px}
-  /* Newsletter */
-  .nl{padding:24px;gap:20px}
-  .nl-left h3{font-size:24px}
+  .ptitle{font-size:26px}
+  .trust{grid-template-columns:1fr 1fr;gap:10px}
+  .tcard{padding:16px;gap:12px}
+  .ttitle{font-size:13px}
+  .tdesc{font-size:11px}
+  .nl{padding:22px;gap:20px}
+  .nl-left h3{font-size:22px}
   .nl-form{flex-direction:column;gap:8px}
-  .nl-form button{width:100%;padding:13px}
-  /* Footer */
-  .foot-main{grid-template-columns:1fr;gap:24px;padding:32px 16px 24px}
-  .foot-bot{padding:14px 16px;flex-direction:column;gap:4px;text-align:center;font-size:11px}
-  /* Mobile nav & spacing */
+  .nl-form input,.nl-form button{width:100%}
+  .nl-form button{padding:13px}
+  .foot-main{grid-template-columns:1fr;gap:22px;padding:32px 16px 24px}
+  .foot-bot{padding:14px 16px;flex-direction:column;gap:6px;text-align:center;font-size:11px}
   .mobnav{display:block}
-  body{padding-bottom:72px}
-  /* Cart full screen */
-  .cart{width:100%;max-width:100%}
-  /* Auth modal full screen */
+  body{padding-bottom:74px}
+  .cart{width:100%}
   .auth-overlay{padding:0;align-items:flex-end}
-  .auth-box{border-radius:20px 20px 0 0;max-width:100%;max-height:92vh;overflow-y:auto}
-  /* Marquee */
-  .mbar{margin-bottom:28px}
-  /* Marquee spacing */
-  .mtrack{gap:36px}
-  .mname{font-size:15px}
+  .auth-box{border-radius:20px 20px 0 0;max-width:100%;max-height:90vh;overflow-y:auto}
+  .toasts{left:50%;transform:translateX(-50%);bottom:84px;align-items:center}
+  .toast{white-space:nowrap}
 }
+
 @media(max-width:480px){
-  :root{--hh:54px;--nh:40px}
-  .main{padding:10px}
-  .hdr-in{gap:6px;padding:0 12px}
-  .logo svg{height:14px}
-  /* Search button text hidden */
-  .sbtn{padding:8px 14px;font-size:11.5px}
-  /* Hero */
-  .hc1{min-height:300px;padding:18px}
-  .hc1 h2{font-size:30px}
+  :root{--hh:52px;--nh:38px}
+  .hdr-in{padding:0 12px;gap:8px}
+  .logo svg{height:13px}
+  .sbtn{width:32px;height:32px}
+  .hero{gap:10px}
+  .hc1{min-height:260px;padding:16px}
+  .hc1 h2{font-size:28px}
   .hc1 p{display:none}
+  .hc1-body .btn-ol{padding:8px 16px;font-size:11px}
+  .hc2{min-height:240px;padding:16px}
+  .hc2 h2{font-size:24px}
+  .hc2 p{display:none}
   .hcr{flex-direction:column;gap:10px}
-  .hc3,.hc4{min-height:130px;padding:16px}
-  .hc3 h3{font-size:24px}
-  .hc4 h3{font-size:20px}
-  /* Categories 4 cols tight */
-  .catgrid{grid-template-columns:repeat(4,1fr);gap:6px}
+  .hc3,.hc4{min-height:120px;padding:16px}
+  .hc3 h3{font-size:22px}
+  .hc4 h3{font-size:19px}
+  .chips{gap:4px}
+  .chip{font-size:9px;padding:3px 8px}
+  .catgrid{gap:6px}
+  .ccard{padding:10px 4px;gap:5px;border-radius:8px}
   .cico{width:36px;height:36px}
-  .cico svg{width:16px;height:16px}
+  .cico svg{width:15px;height:15px}
   .cname{font-size:9.5px}
-  /* Products single column on very small */
-  .pgrid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .pgrid{gap:8px}
   .pinfo{padding:8px 10px 10px}
   .pbrand{font-size:9px}
   .pname{font-size:12px}
   .pprice{font-size:18px}
-  .star{font-size:10px}
   .prating{display:none}
   .atcbtn{width:30px;height:30px}
-  /* Sections */
-  .stitle{font-size:22px}
-  .sec{margin-bottom:36px}
-  .see-all{padding:7px 14px;font-size:11px}
-  .stag{font-size:10px}
-  /* Filter tabs */
-  .ftabs{gap:6px}
-  .ftab{padding:6px 14px;font-size:11px}
-  /* Promo */
-  .ptitle{font-size:24px}
-  .promo{padding:24px 16px}
+  .atcbtn svg{width:13px;height:13px}
+  .stitle{font-size:20px}
+  .stag{font-size:9.5px}
+  .see-all{padding:6px 12px;font-size:10.5px}
+  .ftab{padding:5px 12px;font-size:10.5px}
+  .ptitle{font-size:22px}
+  .promo{padding:22px 14px}
   .btn-ghost{display:none}
-  /* Trust */
-  .tico{width:40px;height:40px;border-radius:10px}
-  .tico svg{width:18px;height:18px}
-  .ttitle{font-size:13px}
-  /* Newsletter */
-  .nl{padding:20px 16px}
-  .nl-left h3{font-size:20px}
-  /* Footer */
-  .foot-main{padding:28px 12px 20px;gap:20px}
-  .chips{gap:5px}
-  .chip{font-size:9.5px;padding:3px 9px}
-  /* Marquee */
-  .mname{font-size:13px}
-  .mtrack{gap:28px}
-  /* Mobile menu drawer */
-  .mob-drawer-title{font-size:18px}
+  .trust{grid-template-columns:1fr}
+  .tcard{padding:14px}
+  .nl{padding:18px 14px}
+  .nl-left h3{font-size:19px}
+  .foot-main{padding:24px 12px 20px;gap:18px}
 }
+
 /* Mobile menu drawer */
 .mob-drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--black);z-index:500;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:0}
 .mob-drawer.open{transform:translateX(0)}
