@@ -33,19 +33,6 @@ a{text-decoration:none}
 .hdr-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:20px;padding:0 28px;height:100%}
 .logo{flex-shrink:0;display:flex;align-items:center}
 .logo svg{height:17px;width:auto}
-.search{flex:1;max-width:580px;display:flex;align-items:center;background:rgba(0,0,0,.08);border:2px solid transparent;border-radius:50px;overflow:visible;transition:var(--t);position:relative}
-.search:focus-within{border-color:var(--black);background:rgba(0,0,0,.12);box-shadow:0 0 0 4px rgba(0,0,0,.08)}
-.search input{flex:1;padding:10px 14px 10px 20px;border:none;background:transparent;font-family:var(--f);font-size:13px;font-weight:500;color:var(--black);outline:none}
-.search input::placeholder{color:rgba(0,0,0,.45)}
-.search-dd{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--white);border-radius:12px;box-shadow:var(--sl);border:1px solid var(--g200);overflow:hidden;display:none;z-index:10}
-.search:focus-within .search-dd{display:block}
-.sdd-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .15s;font-size:12.5px;font-weight:500}
-.sdd-item:hover{background:var(--g100)}
-.sdd-ico{width:32px;height:32px;background:var(--g100);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sdd-ico svg{width:15px;height:15px;stroke:var(--g700);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.sdd-tag{margin-left:auto;font-size:9.5px;color:var(--g500);background:var(--g100);padding:2px 8px;border-radius:50px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
-.sbtn{padding:8px 22px;margin:3px;background:var(--black);border:none;border-radius:50px;cursor:pointer;font-family:var(--f);font-weight:700;font-size:12.5px;color:var(--white);transition:var(--t);white-space:nowrap;letter-spacing:.01em}
-.sbtn:hover{background:var(--dark2);transform:scale(1.03)}
 .hdr-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .icon-btn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t);position:relative;color:var(--black)}
 .icon-btn:hover{background:rgba(0,0,0,.18);transform:scale(1.08)}
@@ -502,6 +489,63 @@ a{text-decoration:none}
 .auth-divider span{background:var(--white);padding:0 10px;position:relative;z-index:1}
 .auth-loader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:aspin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes aspin{to{transform:rotate(360deg)}}
+/* ── HERO MAIN ── */
+.hero-main{background:var(--black);position:relative;overflow:hidden;padding:72px 28px 64px}
+.hero-main::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(249,194,0,.12) 0%,transparent 70%);pointer-events:none}
+.hero-main::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(249,194,0,.07) 0%,transparent 70%);pointer-events:none}
+.hero-main-inner{max-width:760px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(249,194,0,.12);border:1px solid rgba(249,194,0,.25);border-radius:50px;padding:6px 16px;font-size:12px;font-weight:700;color:var(--yellow);letter-spacing:.04em;text-transform:uppercase;margin-bottom:24px}
+.hero-tag svg{width:13px;height:13px;stroke:var(--yellow);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero-h1{font-size:clamp(36px,6vw,76px);font-weight:700;color:var(--white);line-height:1.05;letter-spacing:-.03em;margin-bottom:20px}
+.hero-h1 span{color:var(--yellow)}
+.hero-sub{font-size:16px;font-weight:400;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:40px}
+/* Search */
+.hero-search{margin-bottom:36px}
+.hs-wrap{display:flex;align-items:center;background:var(--white);border-radius:50px;padding:5px 5px 5px 22px;box-shadow:0 8px 48px rgba(0,0,0,.4);transition:var(--t);max-width:640px;margin:0 auto 16px}
+.hs-wrap:focus-within{box-shadow:0 8px 48px rgba(0,0,0,.5),0 0 0 3px rgba(249,194,0,.4)}
+.hs-ico{width:18px;height:18px;stroke:var(--g500);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:12px}
+.hs-wrap input{flex:1;border:none;outline:none;font-family:var(--f);font-size:14.5px;font-weight:500;color:var(--black);background:transparent;min-width:0}
+.hs-wrap input::placeholder{color:var(--g500)}
+.hs-btn{display:flex;align-items:center;gap:8px;padding:12px 28px;background:var(--yellow);border:none;border-radius:50px;font-family:var(--f);font-size:14px;font-weight:700;color:var(--black);cursor:pointer;transition:var(--t);white-space:nowrap;flex-shrink:0}
+.hs-btn:hover{background:var(--yellow-d);transform:scale(1.03)}
+.hs-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.hs-suggestions{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.hs-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.35)}
+.hs-chip{padding:5px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:50px;font-family:var(--f);font-size:12px;font-weight:600;color:rgba(255,255,255,.6);cursor:pointer;transition:var(--t)}
+.hs-chip:hover{background:rgba(249,194,0,.15);border-color:rgba(249,194,0,.35);color:var(--yellow)}
+/* Stats */
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:0}
+.hstat{padding:0 32px;text-align:center}
+.hstat-n{font-size:28px;font-weight:700;color:var(--white);letter-spacing:-.03em;line-height:1}
+.hstat-l{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.hstat-div{width:1px;height:40px;background:rgba(255,255,255,.1)}
+
+/* Responsive hero */
+@media(max-width:768px){
+  .hero-main{padding:52px 20px 48px}
+  .hero-sub{font-size:14px;margin-bottom:32px}
+  .hs-wrap{padding:4px 4px 4px 16px}
+  .hs-wrap input{font-size:13.5px}
+  .hs-btn{padding:11px 20px;font-size:13px}
+  .hs-btn span{display:none}
+  .hs-btn{padding:11px;border-radius:50%;width:40px;height:40px;justify-content:center}
+  .hstat{padding:0 18px}
+  .hstat-n{font-size:22px}
+  .hero-tag{font-size:11px;padding:5px 14px}
+  .hero-stats{gap:0}
+}
+@media(max-width:480px){
+  .hero-main{padding:40px 16px 40px}
+  .hero-h1{margin-bottom:14px}
+  .hero-sub{font-size:13px;margin-bottom:28px}
+  .hs-suggestions{gap:6px}
+  .hs-chip{font-size:11px;padding:4px 12px}
+  .hstat{padding:0 12px}
+  .hstat-n{font-size:20px}
+  .hstat-l{font-size:10px}
+  .hstat-div{height:32px}
+}
+
 </style>
 </head>
 <body>
@@ -584,68 +628,44 @@ a{text-decoration:none}
 <div class="main">
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="hc1">
-      <div class="hc1-bg">
-        <svg viewBox="0 0 240 240" fill="none"><circle cx="120" cy="120" r="120" fill="#F9C200" opacity=".1"/><circle cx="120" cy="120" r="75" fill="#F9C200" opacity=".1"/><path d="M60 120L120 40L180 120L120 200Z" fill="#F9C200" opacity=".12"/></svg>
+  <section class="hero-main">
+    <div class="hero-main-inner">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Más de 500 repuestos disponibles
       </div>
-      <div class="hc1-product">
-        <svg width="155" height="195" viewBox="0 0 155 195" fill="none">
-          <rect x="60" y="4" width="35" height="33" rx="5" fill="#CACACA"/>
-          <rect x="55" y="36" width="45" height="19" rx="3" fill="#B0B0B0"/>
-          <rect x="57" y="53" width="41" height="10" rx="2" fill="#A0A0A0"/>
-          <rect x="59" y="62" width="37" height="62" rx="4" fill="#BEBEBE"/>
-          <rect x="61" y="64" width="2.5" height="58" fill="#B0B0B0"/>
-          <rect x="91.5" y="64" width="2.5" height="58" fill="#B0B0B0"/>
-          <rect x="59" y="122" width="37" height="34" rx="3" fill="#ABABAB"/>
-          <rect x="65" y="154" width="25" height="34" rx="12" fill="#999"/>
-          <polygon points="77.5,38 96,48 96,68 77.5,78 59,68 59,48" fill="#D0D0D0" stroke="#BFBFBF" stroke-width="1.5"/>
-          <polygon points="77.5,43 93,52.5 93,64.5 77.5,75 62,64.5 62,52.5" fill="#C0C0C0"/>
-          <rect x="59" y="92" width="37" height="7" rx="2" fill="#F9C200"/>
-          <rect x="73" y="184" width="9" height="8" rx="2" fill="#888"/>
-          <path d="M70 174 L77.5 164 L75 175 L82 167" stroke="#F9C200" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="hc1-body">
-        <h2>Bujías</h2>
-        <p>Encendido perfecto con tecnología iridio, platino y cobre de las marcas líderes del mercado.</p>
-        <button class="btn-ol">Ver colección <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-      </div>
-    </div>
+      <h1 class="hero-h1">Todo lo que<br>tu auto <span>necesita</span></h1>
+      <p class="hero-sub">Repuestos originales y accesorios de las mejores marcas del mundo.<br>Entrega en 24–48h en todo el país.</p>
 
-    <div class="hc2">
-      <div class="hc2-bg"></div><div class="hc2-glow"></div><div class="hc2-pattern"></div>
-      <div class="hc2-visual">
-        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88"/><path d="M40 100Q100 40 160 100Q100 160 40 100Z"/><circle cx="100" cy="100" r="28"/><line x1="100" y1="12" x2="100" y2="188"/><line x1="12" y1="100" x2="188" y2="100"/><circle cx="100" cy="100" r="55"/></svg>
+      <div class="hero-search">
+        <div class="hs-wrap">
+          <svg class="hs-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="heroSearch" placeholder="Busca por pieza, marca o modelo..." autocomplete="off">
+          <button class="hs-btn" onclick="doHeroSearch()">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Buscar</span>
+          </button>
+        </div>
+        <div class="hs-suggestions">
+          <span class="hs-label">Búsquedas frecuentes:</span>
+          <button class="hs-chip" onclick="setSearch('Bujías NGK')">Bujías NGK</button>
+          <button class="hs-chip" onclick="setSearch('Filtro aceite')">Filtro aceite</button>
+          <button class="hs-chip" onclick="setSearch('Pastillas Brembo')">Pastillas Brembo</button>
+          <button class="hs-chip" onclick="setSearch('Aceite Castrol')">Aceite Castrol</button>
+        </div>
       </div>
-      <span class="hc2-badge">Auto Repuestos</span>
-      <div class="hc2-body">
-        <h2>Contáctanos</h2>
-        <p>Nuestros expertos te ayudan a encontrar el repuesto exacto para tu vehículo. Asesoría gratuita.</p>
-        <button class="btn-y">Ver más <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-      </div>
-    </div>
 
-    <div class="hcr">
-      <div class="hc3">
-        <div>
-          <div class="hc3-tag"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Oferta del día</div>
-          <h3>Hasta<br>40% OFF</h3>
-        </div>
-        <div class="hc3-sub">En filtros y lubricantes seleccionados<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="hc4">
-        <div>
-          <div class="hc4-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>Marcas premium</div>
-          <h3>Las mejores<br>del mundo</h3>
-        </div>
-        <div class="chips">
-          <span class="chip">NGK</span><span class="chip">Bosch</span><span class="chip">Brembo</span>
-          <span class="chip">Monroe</span><span class="chip">Castrol</span><span class="chip">Gates</span>
-        </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-n">500+</div><div class="hstat-l">Productos</div></div>
+        <div class="hstat-div"></div>
+        <div class="hstat"><div class="hstat-n">50+</div><div class="hstat-l">Marcas</div></div>
+        <div class="hstat-div"></div>
+        <div class="hstat"><div class="hstat-n">24h</div><div class="hstat-l">Entrega</div></div>
+        <div class="hstat-div"></div>
+        <div class="hstat"><div class="hstat-n">100%</div><div class="hstat-l">Original</div></div>
       </div>
     </div>
-  </section>
+  </section>  </section>
 
   <!-- MARQUEE -->
   <div class="mbar rev">
@@ -931,9 +951,9 @@ let cart=[], currentFilter='todos';
 
 function starHTML(n){return Array.from({length:5},(_,i)=>`<span class="star${i>=n?' e':''}">★</span>`).join('');}
 
-function renderProducts(){
+function renderProducts(overrideList){
   const grid=document.getElementById('productsGrid');
-  const list=currentFilter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentFilter);
+  const list=overrideList||(currentFilter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentFilter));
   if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g500);font-weight:600">Sin productos en esta categoría</div>';return;}
   grid.innerHTML=list.map(p=>`
     <div class="pcard">
@@ -1035,6 +1055,36 @@ document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
 renderProducts();
 updateCart();
+
+// ── HERO SEARCH ──
+function doHeroSearch(){
+  const q = document.getElementById('heroSearch').value.trim();
+  if(!q) return;
+  currentFilter='todos';
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.ftab').classList.add('active');
+  const grid = document.getElementById('productsGrid');
+  const filtered = PRODUCTS.filter(p=>
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    p.brand.toLowerCase().includes(q.toLowerCase())
+  );
+  if(!filtered.length){
+    grid.innerHTML='<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--g500);font-weight:600">Sin resultados para "'+q+'"</div>';
+  } else {
+    const orig = currentFilter;
+    currentFilter='todos';
+    renderProducts(filtered);
+  }
+  // Scroll to products
+  document.querySelector('.sec').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function setSearch(val){
+  document.getElementById('heroSearch').value=val;
+  doHeroSearch();
+}
+document.getElementById('heroSearch').addEventListener('keydown',e=>{
+  if(e.key==='Enter') doHeroSearch();
+});
 
 // ── MOBILE DRAWER ──
 function openMobDrawer(){
