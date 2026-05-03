@@ -705,6 +705,91 @@ input,textarea,select,button{font-family:var(--f)}
 </div>
 
 
+<!-- ORDERS CONTENT -->
+<div id="ordersContent" style="display:none">
+  <div class="content">
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="search-field" style="flex:1;max-width:280px">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="orderSearch" placeholder="Buscar por # de orden..." oninput="filterOrders()">
+      </div>
+      <select class="filter-select" id="orderStatusFilter" onchange="filterOrders()">
+        <option value="">Todos los estados</option>
+        <option value="pending">Pendiente</option>
+        <option value="processing">Procesando</option>
+        <option value="shipped">Enviado</option>
+        <option value="delivered">Entregado</option>
+        <option value="cancelled">Cancelado</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Pedidos</div>
+          <div class="card-sub" id="ordersSub">Cargando...</div>
+        </div>
+      </div>
+      <div class="ptable-wrap">
+        <table class="ptable">
+          <thead>
+            <tr>
+              <th># Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--g500)">Cargando pedidos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL DRAWER -->
+<div class="modal-overlay" id="orderOverlay" onclick="closeOrderDrawer()"></div>
+<div class="drawer" id="orderDrawer" style="width:520px">
+  <div class="drawer-hdr">
+    <div>
+      <h3 id="orderDrawerNum">Pedido</h3>
+      <div id="orderDrawerDate" style="font-size:12px;color:var(--g500);font-weight:500;margin-top:2px"></div>
+    </div>
+    <button class="drawer-close" onclick="closeOrderDrawer()">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="orderDrawerBody" style="padding:0">
+    <!-- Rendered by JS -->
+  </div>
+  <div class="drawer-foot" style="flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px">
+      <button class="ca-btn" style="flex:1;justify-content:center;padding:11px" onclick="closeOrderDrawer()">Cerrar</button>
+      <button class="ca-btn primary" id="waClientBtn" style="flex:2;justify-content:center;padding:11px;gap:8px;background:#25D366;border-color:#25D366;color:#fff">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp al cliente
+      </button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="font-size:12px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">Cambiar estado:</label>
+      <select class="filter-select" id="orderStatusSelect" style="flex:1" onchange="updateOrderStatus()">
+        <option value="pending">⏳ Pendiente</option>
+        <option value="processing">⚙️ Procesando</option>
+        <option value="shipped">🚚 Enviado</option>
+        <option value="delivered">✅ Entregado</option>
+        <option value="cancelled">❌ Cancelado</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
@@ -896,18 +981,33 @@ function setPage(page, el){
   if(page==='productos'){
     document.getElementById('mainContent').style.display='block';
     document.getElementById('catContent').style.display='none';
+    document.getElementById('ordersContent').style.display='none';
+    document.getElementById('payBtn').style.display='flex';
     updateTopBtn('Nuevo producto', openDrawer);
     loadProducts();
   } else if(page==='categorias'){
     document.getElementById('mainContent').style.display='none';
     document.getElementById('catContent').style.display='block';
+    document.getElementById('ordersContent').style.display='none';
+    document.getElementById('payBtn').style.display='flex';
     updateTopBtn('Nueva categoría', openCatDrawer);
     loadCategories();
   } else {
-    document.getElementById('mainContent').style.display='block';
-    document.getElementById('catContent').style.display='none';
-    updateTopBtn('Nuevo producto', openDrawer);
-    document.getElementById('pageSub').textContent = 'Vista en desarrollo';
+    if(page==='pedidos'){
+      document.getElementById('mainContent').style.display='none';
+      document.getElementById('catContent').style.display='none';
+      document.getElementById('ordersContent').style.display='block';
+      updateTopBtn('', ()=>{});
+      document.getElementById('payBtn').style.display='none';
+      loadOrders();
+    } else {
+      document.getElementById('mainContent').style.display='block';
+      document.getElementById('catContent').style.display='none';
+      document.getElementById('ordersContent').style.display='none';
+      document.getElementById('payBtn').style.display='flex';
+      updateTopBtn('Nuevo producto', openDrawer);
+      document.getElementById('pageSub').textContent = 'Vista en desarrollo';
+    }
   }
 }
 let currentPage = 'productos';
@@ -1121,6 +1221,174 @@ async function deleteCat(id, name){
   if(error){ showToast('Error: '+error.message,'err'); return; }
   showToast('Categoría eliminada','err');
   loadCategories();
+}
+
+
+// ── ORDERS ──
+let ALL_ORDERS = [], currentOrderId = null;
+
+const ORDER_STATUS = {
+  pending:    {label:'Pendiente',    cls:'sp-pending',    color:'#B88A00',bg:'rgba(249,194,0,.15)'},
+  processing: {label:'Procesando',   cls:'sp-processing', color:'#2563EB',bg:'rgba(59,130,246,.1)'},
+  shipped:    {label:'Enviado',      cls:'sp-shipped',    color:'#7C3AED',bg:'rgba(168,85,247,.1)'},
+  delivered:  {label:'Entregado',    cls:'sp-delivered',  color:'#16A34A',bg:'rgba(34,197,94,.1)'},
+  cancelled:  {label:'Cancelado',    cls:'sp-cancelled',  color:'#E53E3E',bg:'rgba(229,62,62,.1)'},
+};
+
+const ADMIN_PHONE = '584127449626';
+
+async function loadOrders(){
+  document.getElementById('ordersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--g500)">Cargando...</td></tr>';
+  const {data,error} = await sb.from('orders').select('*').order('created_at',{ascending:false});
+  if(error){ showToast('Error cargando pedidos','err'); return; }
+  ALL_ORDERS = data||[];
+  document.getElementById('ordersSub').textContent = ALL_ORDERS.length + ' pedido'+(ALL_ORDERS.length!==1?'s':'');
+  // Update sidebar badge
+  const pendingCount = ALL_ORDERS.filter(o=>o.status==='pending'||o.status==='processing').length;
+  document.querySelectorAll('.sb-item .sb-badge').forEach((b,i)=>{ if(i===1) b.textContent=pendingCount; });
+  renderOrdersTable(ALL_ORDERS);
+}
+
+function filterOrders(){
+  const q = document.getElementById('orderSearch').value.toLowerCase();
+  const st = document.getElementById('orderStatusFilter').value;
+  const filtered = ALL_ORDERS.filter(o=>{
+    const matchQ = !q || o.order_number?.toLowerCase().includes(q) || o.notes?.toLowerCase().includes(q);
+    const matchSt = !st || o.status===st;
+    return matchQ && matchSt;
+  });
+  renderOrdersTable(filtered);
+}
+
+function renderOrdersTable(orders){
+  const body = document.getElementById('ordersTableBody');
+  if(!orders.length){
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--g500);font-weight:600">No hay pedidos</td></tr>';
+    return;
+  }
+  body.innerHTML = orders.map(o=>{
+    const st = ORDER_STATUS[o.status]||ORDER_STATUS.pending;
+    const date = new Date(o.created_at).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    // Extract client name from notes
+    const notes = o.notes||'';
+    const clientName = notes.split('|')[0]?.trim()||'Cliente';
+    const clientPhone = notes.split('|')[2]?.trim()||'';
+    return `<tr style="cursor:pointer" onclick="openOrderDrawer('${o.id}')">
+      <td><span style="font-size:13px;font-weight:700">${o.order_number}</span></td>
+      <td>
+        <div style="font-size:13px;font-weight:600">${clientName}</div>
+        ${clientPhone?`<div style="font-size:11px;color:var(--g500)">${clientPhone}</div>`:''}
+      </td>
+      <td style="font-size:12px;color:var(--g500);font-weight:500">${date}</td>
+      <td style="font-size:14px;font-weight:700">$${parseFloat(o.total).toFixed(2)}</td>
+      <td><span style="padding:3px 12px;border-radius:50px;font-size:10.5px;font-weight:800;color:${st.color};background:${st.bg}">${st.label}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="row-btn" onclick="event.stopPropagation();openWaAdmin('${o.id}')" title="WhatsApp admin" style="background:#25D366;border-color:#25D366">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </button>
+          <button class="row-btn del" onclick="event.stopPropagation();cancelOrder('${o.id}')" title="Cancelar">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openOrderDrawer(id){
+  const o = ALL_ORDERS.find(x=>x.id===id);
+  if(!o) return;
+  currentOrderId = id;
+  const notes = o.notes||'';
+  const parts = notes.split('|').map(s=>s.trim());
+  const clientName = parts[0]||'—';
+  const clientEmail = parts[1]||'—';
+  const clientPhone = parts[2]||'—';
+  const address = parts[3]||'—';
+  const payMethod = parts[4]||'—';
+  const date = new Date(o.created_at).toLocaleDateString('es-VE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const st = ORDER_STATUS[o.status]||ORDER_STATUS.pending;
+
+  document.getElementById('orderDrawerNum').textContent = o.order_number;
+  document.getElementById('orderDrawerDate').textContent = date;
+  document.getElementById('orderStatusSelect').value = o.status;
+
+  document.getElementById('orderDrawerBody').innerHTML = `
+    <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+      <!-- Status badge -->
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;background:${st.bg}">
+        <div style="width:10px;height:10px;border-radius:50%;background:${st.color};flex-shrink:0"></div>
+        <span style="font-size:14px;font-weight:700;color:${st.color}">${st.label}</span>
+        <span style="font-size:12px;color:var(--g500);margin-left:auto">Total: <strong style="color:var(--bk)">$${parseFloat(o.total).toFixed(2)}</strong></span>
+      </div>
+
+      <!-- Client info -->
+      <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:16px">
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Datos del cliente</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><div style="font-size:10px;color:var(--g500);font-weight:600">Nombre</div><div style="font-size:13.5px;font-weight:700;margin-top:2px">${clientName}</div></div>
+          <div><div style="font-size:10px;color:var(--g500);font-weight:600">Teléfono</div><div style="font-size:13.5px;font-weight:700;margin-top:2px">${clientPhone}</div></div>
+          <div style="grid-column:span 2"><div style="font-size:10px;color:var(--g500);font-weight:600">Email</div><div style="font-size:13.5px;font-weight:600;margin-top:2px">${clientEmail}</div></div>
+          <div style="grid-column:span 2"><div style="font-size:10px;color:var(--g500);font-weight:600">Dirección</div><div style="font-size:13.5px;font-weight:600;margin-top:2px">${address}</div></div>
+          <div style="grid-column:span 2"><div style="font-size:10px;color:var(--g500);font-weight:600">Método de pago</div><div style="font-size:13.5px;font-weight:600;margin-top:2px">${payMethod}</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Wire WhatsApp button to client
+  const waMsg = encodeURIComponent(
+`✅ *Hola ${clientName.split(' ')[0]}! Actualización de tu pedido IVAMAXO*
+━━━━━━━━━━━━━━━━━━━
+📦 Pedido: *${o.order_number}*
+📋 Estado: *${st.label}*
+━━━━━━━━━━━━━━━━━━━
+¿Necesitas algo más? Aquí estamos. 😊`
+  );
+  const phoneClean = clientPhone.replace(/\D/g,'');
+  const waUrl = phoneClean.length>=10 ? `https://wa.me/${phoneClean}?text=${waMsg}` : null;
+  const waBtn = document.getElementById('waClientBtn');
+  waBtn.onclick = waUrl ? ()=>window.open(waUrl,'_blank') : ()=>showToast('No hay teléfono del cliente','err');
+  waBtn.style.opacity = waUrl ? '1' : '.5';
+
+  document.getElementById('orderDrawer').classList.add('open');
+  document.getElementById('orderOverlay').classList.add('open');
+}
+
+function closeOrderDrawer(){
+  document.getElementById('orderDrawer').classList.remove('open');
+  document.getElementById('orderOverlay').classList.remove('open');
+}
+
+async function updateOrderStatus(){
+  if(!currentOrderId) return;
+  const newStatus = document.getElementById('orderStatusSelect').value;
+  const {error} = await sb.from('orders').update({status:newStatus,updated_at:new Date()}).eq('id',currentOrderId);
+  if(error){ showToast('Error actualizando estado','err'); return; }
+  showToast('Estado actualizado','ok');
+  closeOrderDrawer();
+  loadOrders();
+}
+
+async function cancelOrder(id){
+  if(!confirm('¿Cancelar este pedido?')) return;
+  const {error} = await sb.from('orders').update({status:'cancelled'}).eq('id',id);
+  if(error){ showToast('Error','err'); return; }
+  showToast('Pedido cancelado','err');
+  loadOrders();
+}
+
+function openWaAdmin(id){
+  const o = ALL_ORDERS.find(x=>x.id===id);
+  if(!o) return;
+  const msg = encodeURIComponent(
+`📦 *Pedido: ${o.order_number}*
+💰 Total: $${parseFloat(o.total).toFixed(2)}
+📋 Estado: ${ORDER_STATUS[o.status]?.label||o.status}
+📝 ${o.notes||''}`
+  );
+  window.open(`https://wa.me/${ADMIN_PHONE}?text=${msg}`,'_blank');
 }
 
 </script>
