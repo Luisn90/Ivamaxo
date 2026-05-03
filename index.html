@@ -948,6 +948,7 @@ async function loadProductsFromDB(){
       badge: p.badge||null,
       badgeTxt: p.badge_text||null,
       icon: p.icon||'filter',
+      image_url: p.image_url||null,
       stars: 5,
       reviews: Math.floor(Math.random()*200+10),
       discount: p.old_price ? Math.round((1-p.price/p.old_price)*100) : null,

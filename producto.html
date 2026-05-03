@@ -515,6 +515,7 @@ async function loadProduct(){
     price:parseFloat(p.price), old:p.old_price?parseFloat(p.old_price):null,
     stock:parseInt(p.stock)||0, sku:p.sku||'', badge:p.badge, badgeTxt:p.badge_text,
     icon:p.icon||'default', description:p.description||'',
+    image_url:p.image_url||null,
     discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
   };
 
