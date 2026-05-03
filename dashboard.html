@@ -1209,6 +1209,8 @@ const sb = createClient(SB_URL, SB_KEY);
   const {data:{session}} = await sb.auth.getSession();
   if(!session){ window.location.href='login.html'; return; }
   document.querySelector('.sb-uname').textContent = session.user.email.split('@')[0];
+  // Load categories first so product form select is always populated
+  await loadCategories();
   loadProducts();
 })();
 
