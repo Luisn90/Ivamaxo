@@ -191,6 +191,12 @@ img{display:block;width:100%}
 .t-ico svg{width:10px;height:10px;stroke:var(--bk);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 @keyframes tIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Loading state */
+.prod-loading .prod-info,
+.prod-loading .gallery{ opacity:0; }
+.prod-ready .prod-info,
+.prod-ready .gallery{ opacity:1; transition:opacity .3s ease; }
 /* RESPONSIVE */
 @media(max-width:960px){
   .prod-grid{grid-template-columns:1fr;gap:28px}
@@ -235,7 +241,7 @@ img{display:block;width:100%}
       </svg>
     </a>
     <div class="hdr-right">
-      <button class="icon-btn" onclick="window.location.href='index.html'" title="Tienda">
+      <button class="icon-btn" onclick="window.location.href='./'" title="Tienda">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </button>
       <button class="icon-btn" id="cartBtn" onclick="window.location.href='checkout.html'" title="Carrito">
@@ -249,7 +255,7 @@ img{display:block;width:100%}
 <!-- BREADCRUMB -->
 <div class="bread">
   <div class="bread-in">
-    <a href="index.html">Inicio</a>
+    <a href="./">Inicio</a>
     <span class="bread-sep">›</span>
     <a href="index.html" id="breadCat">Encendido</a>
     <span class="bread-sep">›</span>
@@ -260,26 +266,12 @@ img{display:block;width:100%}
 <div class="main">
 
   <!-- PRODUCT GRID -->
-  <div class="prod-grid">
+  <div class="prod-grid prod-loading" id="prodGrid">
 
     <!-- GALLERY -->
     <div class="gallery">
       <div class="gallery-main">
-        <div class="gallery-main-img" id="mainImg">
-          <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="37" y="5" width="26" height="24" rx="4" fill="#CACACA"/>
-            <rect x="33" y="27" width="34" height="14" rx="3" fill="#B0B0B0"/>
-            <rect x="35" y="39" width="30" height="8" rx="2" fill="#A0A0A0"/>
-            <rect x="36" y="46" width="28" height="46" rx="3" fill="#BCBCBC"/>
-            <rect x="38" y="48" width="3" height="42" fill="#B0B0B0"/>
-            <rect x="59" y="48" width="3" height="42" fill="#B0B0B0"/>
-            <rect x="36" y="90" width="28" height="24" rx="3" fill="#ABABAB"/>
-            <rect x="42" y="112" width="16" height="5" rx="2" fill="#888"/>
-            <polygon points="50,29 63,36 63,52 50,59 37,52 37,36" fill="#D0D0D0" stroke="#BFBFBF" stroke-width="1.5"/>
-            <polygon points="50,33 60.5,39.5 60.5,50.5 50,57 39.5,50.5 39.5,39.5" fill="#C0C0C0"/>
-            <rect x="36" y="66" width="28" height="5" rx="1.5" fill="#F9C200"/>
-            <path d="M43 108 L50 99 L48 109 L55 101" stroke="#F9C200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <div class="gallery-main-img" id="mainImg" style="background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skel 1.5s infinite;border-radius:8px">
         </div>
         <button class="gallery-zoom">
           <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -299,15 +291,15 @@ img{display:block;width:100%}
         <span class="pi-badge pib-k" id="badgeEl" style="display:none"></span>
         <span class="pi-badge pib-y">Disponible</span>
       </div>
-      <div class="pi-brand" id="piBrand">NGK</div>
-      <h1 class="pi-name" id="piName">Bujía Iridium IX BKR6EIX</h1>
-      <div class="pi-sku">Referencia: <span id="piSku">NGK-BKR6EIX</span></div>
+      <div class="pi-brand" id="piBrand" style="min-height:16px">&nbsp;</div>
+      <h1 class="pi-name" id="piName" style="min-height:32px"></h1>
+      <div class="pi-sku" style="min-height:18px">Referencia: <span id="piSku"></span></div>
 
       <div class="pi-rating">
         <div class="stars">
           <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
         </div>
-        <span class="rat-score">4.9</span>
+        <span class="rat-score" id="ratScore">—</span>
         <div class="rat-sep"></div>
         <span class="rat-count">128 reseñas</span>
         <div class="rat-sep"></div>
@@ -317,7 +309,7 @@ img{display:block;width:100%}
       <div class="pi-price-block">
         <div class="pi-price-old" id="piOld" style="display:none"></div>
         <div class="pi-price">
-          <span id="piPrice">$18.99</span>
+          <span id="piPrice">—</span>
           <span class="pi-discount" id="piDisc" style="display:none"></span>
         </div>
         <div class="pi-tax">Precio incluye IVA · Envío calculado al hacer checkout</div>
@@ -528,6 +520,10 @@ async function loadProduct(){
   document.getElementById('breadCat').textContent = PRODUCT.cat;
   document.getElementById('breadCat').href = 'tienda.html?cat='+PRODUCT.catSlug;
   document.getElementById('breadName').textContent = PRODUCT.name;
+  // Remove loading flash
+  const grid = document.getElementById('prodGrid');
+  grid.classList.remove('prod-loading');
+  grid.classList.add('prod-ready');
 
   // Badge
   if(PRODUCT.badge){

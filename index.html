@@ -996,7 +996,7 @@ function renderProducts(overrideList){
   const list=overrideList||(currentFilter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentFilter));
   if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g500);font-weight:600">Sin productos en esta categoría</div>';return;}
   grid.innerHTML=list.map(p=>`
-    <div class="pcard" onclick="goToProduct(p.id)" style="cursor:pointer">
+    <div class="pcard" onclick="goToProduct('${p.id}')" style="cursor:pointer">
       <div class="pimg">
         ${p.badge?`<span class="pbadge ${p.badge}">${p.badgeTxt}</span>`:''}
         <div class="pico">
@@ -1005,7 +1005,7 @@ function renderProducts(overrideList){
             : `<div class="pico-inner">${CAT_ICONS[p.icon]||''}<span>${p.brand}</span></div>`
           }
         </div>
-        <button class="pquick" onclick="addToCart(${p.id})">
+        <button class="pquick" onclick="addToCart('${p.id}')">
           <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Añadir al carrito
         </button>
@@ -1018,7 +1018,7 @@ function renderProducts(overrideList){
           <div>${p.old?`<span class="pprice-old">$${p.old.toFixed(2)}</span>`:''}<span class="pprice">$${p.price.toFixed(2)}</span></div>
           <div style="display:flex;align-items:center;gap:6px">
             ${p.discount?`<span class="pdsc">-${p.discount}%</span>`:''}
-            <button class="atcbtn" onclick="addToCart(${p.id})" aria-label="Añadir"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="atcbtn" onclick="addToCart('${p.id}')" aria-label="Añadir"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
           </div>
         </div>
       </div>
