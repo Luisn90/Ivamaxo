@@ -543,6 +543,8 @@ a{text-decoration:none}
   .hstat-div{height:32px}
 }
 
+@keyframes shimmer{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
+
 </style>
 </head>
 <body>
@@ -923,18 +925,70 @@ const CAT_ICONS = {
   belt:      `<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
 };
 
-const PRODUCTS = [
-  {id:1,name:'Bujía Iridium IX',  brand:'NGK',    cat:'mas-vendidos',price:18.99,old:24.99,badge:'bn',badgeTxt:'Top venta',icon:'spark',   stars:5,reviews:128},
-  {id:2,name:'Filtro de Aceite',  brand:'Bosch',  cat:'mas-vendidos',price:8.50, old:null,  badge:null,badgeTxt:null,      icon:'filter',  stars:5,reviews:97},
-  {id:3,name:'Aceite 5W-30 4L',   brand:'Castrol',cat:'ofertas',     price:28.90,old:39.90, badge:'bs',badgeTxt:'28% OFF', icon:'oil',     stars:4,reviews:204,discount:28},
-  {id:4,name:'Pastillas de Freno',brand:'Brembo', cat:'premium',     price:45.00,old:null,  badge:'bh',badgeTxt:'Destacado',icon:'brake',  stars:5,reviews:86},
-  {id:5,name:'Amortiguador Eccel',brand:'Monroe', cat:'nuevos',      price:62.00,old:79.00, badge:'bn',badgeTxt:'Nuevo',   icon:'shock',   stars:4,reviews:41,discount:22},
-  {id:6,name:'Filtro de Aire',    brand:'Mahle',  cat:'mas-vendidos',price:12.50,old:null,  badge:null,badgeTxt:null,      icon:'airfilter',stars:4,reviews:153},
-  {id:7,name:'Batería AGM 60Ah',  brand:'Bosch',  cat:'premium',     price:89.00,old:110.00,badge:'bs',badgeTxt:'19% OFF', icon:'battery', stars:5,reviews:72,discount:19},
-  {id:8,name:'Correa Distribución',brand:'Gates', cat:'nuevos',      price:35.90,old:null,  badge:'bn',badgeTxt:'Nuevo',   icon:'belt',    stars:4,reviews:29},
-];
-
+let PRODUCTS = [];
 let cart=[], currentFilter='todos';
+
+// ── SUPABASE PRODUCTS LOADER ──
+const SB_URL='https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY='sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const {createClient}=supabase;
+const sbStore=createClient(SB_URL,SB_KEY);
+
+async function loadProductsFromDB(){
+  showSkeleton();
+  try {
+    const {data,error}=await sbStore.from('products').select('*,categories(name,slug)').eq('status','active').order('created_at',{ascending:false});
+    if(error||!data||data.length===0){ showEmptyState(); return; }
+    PRODUCTS = data.map(p=>({
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      cat: p.categories?.slug||'todos',
+      catName: p.categories?.name||'',
+      price: parseFloat(p.price),
+      old: p.old_price ? parseFloat(p.old_price) : null,
+      badge: p.badge||null,
+      badgeTxt: p.badge_text||null,
+      icon: p.icon||'filter',
+      stars: 5,
+      reviews: Math.floor(Math.random()*200+10),
+      discount: p.old_price ? Math.round((1-p.price/p.old_price)*100) : null,
+      featured: p.featured,
+      stock: p.stock,
+    }));
+    renderProducts();
+  } catch(e){ showEmptyState(); }
+}
+
+function showSkeleton(){
+  const grid=document.getElementById('productsGrid');
+  grid.innerHTML=Array(4).fill(`
+    <div class="pcard" style="pointer-events:none">
+      <div class="pimg" style="background:var(--g200);animation:shimmer 1.5s infinite">
+        <div style="width:60px;height:60px;background:var(--g300);border-radius:8px;opacity:.5"></div>
+      </div>
+      <div class="pinfo">
+        <div style="height:10px;background:var(--g200);border-radius:4px;margin-bottom:10px;width:40%;animation:shimmer 1.5s infinite"></div>
+        <div style="height:14px;background:var(--g200);border-radius:4px;margin-bottom:8px;animation:shimmer 1.5s infinite"></div>
+        <div style="height:10px;background:var(--g200);border-radius:4px;margin-bottom:14px;width:60%;animation:shimmer 1.5s infinite"></div>
+        <div style="height:24px;background:var(--g200);border-radius:4px;width:50%;animation:shimmer 1.5s infinite"></div>
+      </div>
+    </div>`).join('');
+}
+
+function showEmptyState(){
+  const grid=document.getElementById('productsGrid');
+  grid.innerHTML=`
+    <div style="grid-column:1/-1;padding:80px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="width:72px;height:72px;background:var(--g200);border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--g300);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <div>
+        <p style="font-size:18px;font-weight:700;color:var(--g300);margin-bottom:6px">Pronto aquí</p>
+        <p style="font-size:13px;font-weight:500;color:var(--g500)">Estamos cargando el catálogo de productos.<br>Vuelve pronto.</p>
+      </div>
+    </div>`;
+}
 
 function starHTML(n){return Array.from({length:5},(_,i)=>`<span class="star${i>=n?' e':''}">★</span>`).join('');}
 
@@ -1040,7 +1094,7 @@ document.querySelectorAll('.clink').forEach(el=>{
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:0.1});
 document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
-renderProducts();
+loadProductsFromDB();
 updateCart();
 
 // ── HERO SEARCH ──
@@ -1096,10 +1150,7 @@ document.querySelectorAll('.mob-drawer-item').forEach(item=>{
 });
 
 // ── SUPABASE AUTH ──
-const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
-const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
-const { createClient } = supabase;
-const sb = createClient(SB_URL, SB_KEY);
+const sb = sbStore; // reuse existing client
 
 // Check session on load
 (async()=>{
