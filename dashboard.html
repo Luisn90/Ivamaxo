@@ -517,20 +517,27 @@ input,textarea,select,button{font-family:var(--f)}
         <small style="font-size:11px;color:var(--g500);margin-top:4px;display:block">Solo minúsculas, sin espacios, con guiones</small>
       </div>
       <div class="fgroup">
-        <label class="flabel">Ícono</label>
-        <select class="fselect" id="cIcon">
-          <option value="default">Genérico</option>
-          <option value="spark">Encendido / Bujías</option>
-          <option value="filter">Filtros</option>
-          <option value="oil">Lubricantes / Aceites</option>
-          <option value="brake">Frenos</option>
-          <option value="shock">Suspensión</option>
-          <option value="battery">Eléctrico / Batería</option>
-          <option value="belt">Correas / Transmisión</option>
-          <option value="airfilter">Filtro de Aire</option>
-          <option value="tools">Herramientas</option>
-          <option value="tire">Neumáticos</option>
-        </select>
+        <label class="flabel">Ícono SVG</label>
+        <div id="catIconUpload" onclick="document.getElementById('catIconFile').click()"
+          style="border:2px dashed var(--g300);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--g50)"
+          ondragover="event.preventDefault();this.style.borderColor='var(--y)'"
+          ondragleave="this.style.borderColor='var(--g300)'"
+          ondrop="handleCatIconDrop(event)">
+          <div id="catIconPreview" style="display:none;flex-direction:column;align-items:center;gap:8px">
+            <div id="catIconSvgPreview" style="width:52px;height:52px;background:var(--y);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:10px"></div>
+            <span style="font-size:11px;font-weight:600;color:var(--green)">✓ SVG cargado</span>
+            <button onclick="removeCatIcon(event)" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:700;font-family:var(--f)">Quitar ícono</button>
+          </div>
+          <div id="catIconPlaceholder">
+            <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--g300);fill:none;stroke-width:1.5;stroke-linecap:round;margin:0 auto 8px"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <p style="font-size:12.5px;font-weight:600;color:var(--g500);margin:0 0 4px">Subir ícono SVG</p>
+            <span style="font-size:11px;color:var(--g500)">Solo archivos .svg · 48×48px recomendado</span>
+          </div>
+        </div>
+        <input type="file" id="catIconFile" accept=".svg,image/svg+xml" style="display:none" onchange="handleCatIconFile(this)">
+        <input type="hidden" id="cIconSvg" value="">
+        <input type="hidden" id="cIcon" value="custom">
+        <small style="font-size:10.5px;color:var(--g500);margin-top:4px;display:block">El SVG se guardará como ícono de la categoría</small>
       </div>
     </div>
   </div>
@@ -936,6 +943,68 @@ function showToast(msg, type='ok'){
 renderTable();
 buildChart();
 
+
+// ── CATEGORY ICON UPLOAD ──
+let currentCatIconSvg = '';
+
+function handleCatIconDrop(e){
+  e.preventDefault();
+  e.currentTarget.style.borderColor='var(--g300)';
+  const file = e.dataTransfer.files[0];
+  if(file) loadCatIconFile(file);
+}
+
+function handleCatIconFile(input){
+  const file = input.files[0];
+  if(file) loadCatIconFile(file);
+}
+
+function loadCatIconFile(file){
+  if(!file.name.endsWith('.svg') && file.type !== 'image/svg+xml'){
+    showToast('Solo se permiten archivos SVG','err'); return;
+  }
+  if(file.size > 100*1024){
+    showToast('El SVG debe ser menor a 100KB','err'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const svgContent = e.target.result;
+    // Validate it's actually SVG
+    if(!svgContent.includes('<svg')){
+      showToast('El archivo no es un SVG válido','err'); return;
+    }
+    // Clean and normalize SVG
+    const cleaned = svgContent
+      .replace(/width="[^"]*"/g, 'width="100%"')
+      .replace(/height="[^"]*"/g, 'height="100%"');
+    
+    currentCatIconSvg = cleaned;
+    document.getElementById('cIconSvg').value = cleaned;
+    
+    // Show preview
+    document.getElementById('catIconSvgPreview').innerHTML = cleaned;
+    document.getElementById('catIconPlaceholder').style.display = 'none';
+    document.getElementById('catIconPreview').style.display = 'flex';
+    
+    showToast('Ícono SVG cargado','ok');
+  };
+  reader.readAsText(file);
+}
+
+function removeCatIcon(e){
+  e.stopPropagation();
+  currentCatIconSvg = '';
+  document.getElementById('cIconSvg').value = '';
+  document.getElementById('cIcon').value = 'custom';
+  document.getElementById('catIconPreview').style.display = 'none';
+  document.getElementById('catIconPlaceholder').style.display = 'block';
+  document.getElementById('catIconFile').value = '';
+}
+
+function resetCatIconUploader(){
+  removeCatIcon({stopPropagation:()=>{}});
+}
+
 // ── CATEGORIES ──
 let CATEGORIES = [], editingCatId = null;
 
@@ -964,7 +1033,11 @@ function renderCatTable(){
     return `<tr>
       <td><span style="font-size:14px;font-weight:600">${c.name}</span></td>
       <td><code style="background:var(--g100);padding:3px 8px;border-radius:6px;font-size:12px">${c.slug}</code></td>
-      <td><span style="font-size:12px;color:var(--g500)">${c.icon||'default'}</span></td>
+      <td>
+        ${c.icon_svg ? 
+          `<div style="width:36px;height:36px;background:var(--y);border-radius:8px;padding:6px;display:flex;align-items:center;justify-content:center">${c.icon_svg}</div>` : 
+          `<span style="font-size:11px;color:var(--g500);background:var(--g100);padding:2px 8px;border-radius:4px">Sin ícono</span>`}
+      </td>
       <td><span class="p-cat">${prodCount} producto${prodCount!==1?'s':''}</span></td>
       <td>
         <div class="row-actions">
@@ -984,9 +1057,22 @@ function openCatDrawer(id=null){
   editingCatId = id;
   const c = id ? CATEGORIES.find(x=>x.id===id) : null;
   document.getElementById('catDrawerTitle').textContent = c ? 'Editar categoría' : 'Nueva categoría';
-  document.getElementById('cName').value  = c?.name || '';
-  document.getElementById('cSlug').value  = c?.slug || '';
-  document.getElementById('cIcon').value  = c?.icon || 'default';
+  document.getElementById('cName').value = c?.name || '';
+  document.getElementById('cSlug').value = c?.slug || '';
+  
+  // Reset icon uploader
+  resetCatIconUploader();
+  
+  // If editing and has icon SVG stored
+  const existingSvg = c?.icon_svg || '';
+  if(existingSvg && existingSvg.includes('<svg')){
+    currentCatIconSvg = existingSvg;
+    document.getElementById('cIconSvg').value = existingSvg;
+    document.getElementById('catIconSvgPreview').innerHTML = existingSvg;
+    document.getElementById('catIconPlaceholder').style.display = 'none';
+    document.getElementById('catIconPreview').style.display = 'flex';
+  }
+  
   document.getElementById('catDrawer').classList.add('open');
   document.getElementById('catOverlay').classList.add('open');
 }
@@ -1018,12 +1104,13 @@ async function saveCat(){
 
   if(!name||!slug){ showToast('Nombre y slug son obligatorios','err'); return; }
 
+  const icon_svg = document.getElementById('cIconSvg').value || null;
   if(editingCatId){
-    const {error} = await sb.from('categories').update({name,slug,icon}).eq('id',editingCatId);
+    const {error} = await sb.from('categories').update({name,slug,icon:'custom',icon_svg}).eq('id',editingCatId);
     if(error){ showToast('Error: '+error.message,'err'); return; }
     showToast('Categoría actualizada','ok');
   } else {
-    const {error} = await sb.from('categories').insert({name,slug,icon});
+    const {error} = await sb.from('categories').insert({name,slug,icon:'custom',icon_svg});
     if(error){ showToast('Error: '+error.message,'err'); return; }
     showToast('Categoría creada','ok');
   }
