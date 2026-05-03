@@ -6,6 +6,7 @@
 <title>IVAMAXO — Auto Repuestos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --yellow:#F9C200; --yellow-d:#D9A800; --yellow-l:rgba(249,194,0,.12);
@@ -361,6 +362,40 @@ a{text-decoration:none}
 .loader-bar-fill{height:100%;background:var(--black);border-radius:2px;animation:lBar 1.6s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes lBar{from{width:0}to{width:100%}}
 .loader-label{font-family:var(--f);font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.4);animation:lIn .7s .2s both}
+/* ── AUTH MODAL ── */
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-overlay.open{opacity:1;pointer-events:all}
+.auth-box{background:var(--white);border-radius:20px;width:100%;max-width:420px;overflow:hidden;transform:scale(.95) translateY(10px);transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.auth-overlay.open .auth-box{transform:scale(1) translateY(0)}
+.auth-top{background:var(--yellow);padding:28px 28px 24px;position:relative}
+.auth-logo{margin-bottom:16px}
+.auth-logo svg{height:14px;width:auto}
+.auth-top h2{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--black)}
+.auth-top p{font-size:12.5px;font-weight:500;color:rgba(0,0,0,.55);margin-top:4px}
+.auth-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--t)}
+.auth-close:hover{background:rgba(0,0,0,.2)}
+.auth-close svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2.5;stroke-linecap:round}
+.auth-tabs{display:flex;border-bottom:1px solid var(--g200);background:var(--white)}
+.auth-tab{flex:1;padding:14px;border:none;background:none;font-family:var(--f);font-size:13px;font-weight:600;color:var(--g500);cursor:pointer;transition:var(--t);border-bottom:2px solid transparent;margin-bottom:-1px}
+.auth-tab.active{color:var(--black);border-bottom-color:var(--yellow)}
+.auth-body{padding:24px}
+.auth-fgroup{margin-bottom:14px}
+.auth-label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:6px}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-family:var(--f);font-size:13px;font-weight:500;color:var(--black);outline:none;transition:var(--t);background:var(--white)}
+.auth-input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(249,194,0,.15)}
+.auth-input::placeholder{color:var(--g500)}
+.auth-btn{width:100%;padding:13px;background:var(--black);border:none;border-radius:50px;font-family:var(--f);font-size:13.5px;font-weight:700;color:var(--white);cursor:pointer;transition:var(--t);margin-top:4px;letter-spacing:.01em}
+.auth-btn:hover{background:var(--dark2);transform:scale(1.02)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.auth-err{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:9px 13px;font-size:12px;font-weight:600;color:#DC2626;margin-bottom:14px;display:none}
+.auth-err.show{display:block}
+.auth-ok{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:9px 13px;font-size:12px;font-weight:600;color:#16A34A;margin-bottom:14px;display:none}
+.auth-ok.show{display:block}
+.auth-divider{text-align:center;font-size:11.5px;color:var(--g500);font-weight:600;margin:14px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--g200);z-index:0}
+.auth-divider span{background:var(--white);padding:0 10px;position:relative;z-index:1}
+.auth-loader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:aspin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes aspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -416,7 +451,7 @@ a{text-decoration:none}
       <button class="icon-btn loc-btn" title="Sucursal">
         <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
       </button>
-      <button class="icon-btn" title="Mi cuenta">
+      <button class="icon-btn" title="Mi cuenta" id="accountBtn" onclick="openAuth()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
       </button>
       <button class="icon-btn cart-toggle" id="cartToggle" title="Carrito">
@@ -647,6 +682,89 @@ a{text-decoration:none}
   </div>
 </nav>
 
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="handleOverlayClick(event)">
+  <div class="auth-box">
+    <div class="auth-top">
+      <div class="auth-logo">
+        <svg width="120" height="15" viewBox="0 0 172 22" fill="none">
+          <g clip-path="url(#am)">
+            <path d="M0 .594H5.67V21.4H0z" fill="#0A0A0A"/>
+            <path d="M21.086 22h-.05c-2.562 0-4.75-1.536-5.794-3.89L7.459.594h6.192l7.385 17.343L28.446.594h6.192l-7.783 17.491C25.81 20.44 23.622 22 21.061 22z" fill="#0A0A0A"/>
+            <path d="M45.133 0c2.66 0 5.073 1.536 6.167 3.865l5.57 11.892c1.591 3.394.149 5.648-3.606 5.648H41.552l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C39.91 1.511 42.572-.025 45.133-.025V0Z" fill="#0A0A0A"/>
+            <path d="M59.654 7.333c0-4.212 2.81-7.011 7.037-7.011 2.984 0 5.42 1.833 6.192 4.583l1.939 6.764 1.94-6.764c.77-2.725 3.207-4.583 6.191-4.583 4.203 0 7.037 2.824 7.037 7.011V21.43h-5.67V6.863c0-.793-.546-1.338-1.367-1.338-.472 0-.87.297-.994.743l-4.377 15.113h-5.545l-4.376-15.113c-.124-.447-.547-.743-.994-.743-.846 0-1.368.545-1.368 1.338V21.43h-5.67V7.333Z" fill="#0A0A0A"/>
+            <path d="M106.154 0c2.661 0 5.073 1.536 6.167 3.865l5.57 11.892c1.592 3.394.149 5.648-3.605 5.648h-11.712l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C101.131 1.511 103.593-.025 106.154-.025V0Z" fill="#0A0A0A"/>
+            <path d="M128.808 11 119.707.594h7.51l5.197 6.318 5.197-6.318h7.51L136.02 11l9.1 10.406h-7.51l-5.197-6.318-5.197 6.318h-7.51L128.808 11Z" fill="#0A0A0A"/>
+            <path d="M155.415.446h6.242c6.191 0 10.344 4.137 10.344 10.455 0 6.317-4.004 10.628-10.046 10.628h-6.241c-6.192 0-10.345-4.137-10.345-10.455 0-6.317 4.004-10.628 10.046-10.628ZM151.04 10.926c0 3.32 1.913 5.4 4.997 5.4h5.271c3.11 0 4.998-2.056 4.998-5.277 0-3.22-1.914-5.4-4.998-5.4h-5.27c-3.11 0-4.998 2.056-4.998 5.277Z" fill="#0A0A0A"/>
+          </g>
+          <defs><clipPath id="am"><rect width="172" height="22" fill="white"/></clipPath></defs>
+        </svg>
+      </div>
+      <h2 id="authTitle">Bienvenido</h2>
+      <p id="authSubtitle">Inicia sesión o crea tu cuenta</p>
+      <button class="auth-close" onclick="closeAuth()">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Crear cuenta</button>
+    </div>
+
+    <div class="auth-body">
+      <div class="auth-err" id="authErr"></div>
+      <div class="auth-ok" id="authOk"></div>
+
+      <!-- LOGIN -->
+      <div id="formLogin">
+        <div class="auth-fgroup">
+          <label class="auth-label">Correo electrónico</label>
+          <input class="auth-input" type="email" id="lEmail" placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="auth-fgroup">
+          <label class="auth-label">Contraseña</label>
+          <input class="auth-input" type="password" id="lPass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="auth-btn" id="btnLogin" onclick="doLogin()">Ingresar</button>
+        <div style="text-align:center;margin-top:14px">
+          <span style="font-size:12px;color:var(--g500);cursor:pointer;font-weight:600" onclick="switchTab('forgot')">¿Olvidaste tu contraseña?</span>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="formRegister" style="display:none">
+        <div class="auth-fgroup">
+          <label class="auth-label">Nombre completo</label>
+          <input class="auth-input" type="text" id="rName" placeholder="Tu nombre" autocomplete="name">
+        </div>
+        <div class="auth-fgroup">
+          <label class="auth-label">Correo electrónico</label>
+          <input class="auth-input" type="email" id="rEmail" placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="auth-fgroup">
+          <label class="auth-label">Contraseña</label>
+          <input class="auth-input" type="password" id="rPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <button class="auth-btn" id="btnRegister" onclick="doRegister()">Crear cuenta</button>
+      </div>
+
+      <!-- FORGOT -->
+      <div id="formForgot" style="display:none">
+        <p style="font-size:13px;color:var(--g500);margin-bottom:16px;font-weight:500">Te enviaremos un enlace para restablecer tu contraseña.</p>
+        <div class="auth-fgroup">
+          <label class="auth-label">Correo electrónico</label>
+          <input class="auth-input" type="email" id="fEmail" placeholder="tu@correo.com">
+        </div>
+        <button class="auth-btn" id="btnForgot" onclick="doForgot()">Enviar enlace</button>
+        <div style="text-align:center;margin-top:14px">
+          <span style="font-size:12px;color:var(--g500);cursor:pointer;font-weight:600" onclick="switchTab('login')">← Volver al inicio de sesión</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -781,6 +899,111 @@ document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
 renderProducts();
 updateCart();
+
+// ── SUPABASE AUTH ──
+const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_KEY);
+
+// Check session on load
+(async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(session) updateAccountBtn(session.user);
+})();
+
+function updateAccountBtn(user){
+  const btn = document.getElementById('accountBtn');
+  const initials = (user.user_metadata?.full_name || user.email).charAt(0).toUpperCase();
+  btn.style.background = 'rgba(0,0,0,.15)';
+  btn.innerHTML = `<span style="font-size:13px;font-weight:800;color:var(--black)">${initials}</span>`;
+  btn.onclick = ()=> window.location.href = 'cliente.html';
+  btn.title = 'Mi cuenta';
+}
+
+// ── MODAL ──
+function openAuth(){
+  document.getElementById('authOverlay').classList.add('open');
+  clearAuthForms();
+}
+function closeAuth(){ document.getElementById('authOverlay').classList.remove('open'); }
+function handleOverlayClick(e){ if(e.target===document.getElementById('authOverlay')) closeAuth(); }
+
+function switchTab(tab){
+  ['login','register','forgot'].forEach(t=>{
+    document.getElementById('form'+t.charAt(0).toUpperCase()+t.slice(1)).style.display = t===tab?'block':'none';
+  });
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  const titles = {login:['Bienvenido','Inicia sesión en tu cuenta'], register:['Crear cuenta','Únete a IVAMAXO'], forgot:['Recuperar acceso','Restablece tu contraseña']};
+  document.getElementById('authTitle').textContent    = titles[tab][0];
+  document.getElementById('authSubtitle').textContent = titles[tab][1];
+  clearAuthForms();
+}
+
+function clearAuthForms(){
+  document.getElementById('authErr').classList.remove('show');
+  document.getElementById('authOk').classList.remove('show');
+}
+
+function setAuthLoading(btnId, loading){
+  const btn = document.getElementById(btnId);
+  if(loading){ btn.disabled=true; btn.innerHTML=`<span class="auth-loader"></span>Un momento...`; }
+  else{ btn.disabled=false; }
+}
+
+function showAuthErr(msg){ const e=document.getElementById('authErr'); e.textContent=msg; e.classList.add('show'); document.getElementById('authOk').classList.remove('show'); }
+function showAuthOk(msg){ const e=document.getElementById('authOk'); e.textContent=msg; e.classList.add('show'); document.getElementById('authErr').classList.remove('show'); }
+
+// LOGIN
+async function doLogin(){
+  const email = document.getElementById('lEmail').value.trim();
+  const pass  = document.getElementById('lPass').value;
+  if(!email||!pass){ showAuthErr('Completa todos los campos.'); return; }
+  setAuthLoading('btnLogin', true);
+  const {data,error} = await sb.auth.signInWithPassword({email, password:pass});
+  if(error){ showAuthErr('Correo o contraseña incorrectos.'); document.getElementById('btnLogin').innerHTML='Ingresar'; document.getElementById('btnLogin').disabled=false; return; }
+  closeAuth();
+  updateAccountBtn(data.user);
+  showToast('Sesión iniciada correctamente');
+  setTimeout(()=> window.location.href='cliente.html', 1000);
+}
+
+// REGISTER
+async function doRegister(){
+  const name  = document.getElementById('rName').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const pass  = document.getElementById('rPass').value;
+  if(!name||!email||!pass){ showAuthErr('Completa todos los campos.'); return; }
+  if(pass.length < 6){ showAuthErr('La contraseña debe tener al menos 6 caracteres.'); return; }
+  setAuthLoading('btnRegister', true);
+  const {data,error} = await sb.auth.signUp({email, password:pass, options:{data:{full_name:name}}});
+  if(error){ showAuthErr('Error al crear la cuenta. Intenta con otro correo.'); document.getElementById('btnRegister').innerHTML='Crear cuenta'; document.getElementById('btnRegister').disabled=false; return; }
+  showAuthOk('¡Cuenta creada! Revisa tu correo para confirmar y luego inicia sesión.');
+  document.getElementById('btnRegister').innerHTML='Crear cuenta';
+  document.getElementById('btnRegister').disabled=false;
+}
+
+// FORGOT PASSWORD
+async function doForgot(){
+  const email = document.getElementById('fEmail').value.trim();
+  if(!email){ showAuthErr('Ingresa tu correo electrónico.'); return; }
+  setAuthLoading('btnForgot', true);
+  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo:'https://luisn90.github.io/Ivamaxo/cliente.html'});
+  document.getElementById('btnForgot').innerHTML='Enviar enlace';
+  document.getElementById('btnForgot').disabled=false;
+  if(error){ showAuthErr('Error al enviar. Verifica tu correo.'); return; }
+  showAuthOk('Enlace enviado. Revisa tu bandeja de entrada.');
+}
+
+// Enter key support
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeAuth();
+  if(e.key==='Enter'){
+    if(document.getElementById('formLogin').style.display!=='none') doLogin();
+    else if(document.getElementById('formRegister').style.display!=='none') doRegister();
+  }
+});
 
 // Loader
 window.addEventListener('load',()=>{
