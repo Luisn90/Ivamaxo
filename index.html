@@ -315,44 +315,152 @@ a{text-decoration:none}
   .pgrid{grid-template-columns:repeat(2,1fr)}
   .promo{flex-direction:column;text-align:center;padding:36px 28px;gap:24px}
   .ptitle{font-size:38px}
-  .promo-acts{justify-content:center}
+  .promo-acts{justify-content:center;flex-wrap:wrap}
   .nl{flex-direction:column;align-items:flex-start;padding:32px}
   .nl-form{max-width:100%;width:100%}
 }
 @media(max-width:768px){
   :root{--hh:58px;--nh:42px}
-  .main{padding:16px}
-  .search{max-width:unset}
-  .hdr-in{gap:10px;padding:0 16px}
-  .cnav-in{padding:0 16px}
-  .hdr-actions .icon-btn:not(.cart-toggle):not(.loc-btn){display:none}
+  .main{padding:12px}
+  .hdr-in{gap:8px;padding:0 14px}
+  .cnav-in{padding:0 14px}
+  /* Hide desktop-only icons, show ham */
+  .hdr-actions .icon-btn:not(.cart-toggle){display:none}
   .ham{display:flex}
-  .hero{grid-template-columns:1fr}
-  .hc2{grid-column:1;min-height:360px}
-  .hcr{grid-column:1;flex-direction:column}
+  /* Search shrinks */
+  .search{max-width:unset;flex:1}
+  .search-dd{left:0;right:0}
+  /* Hero stacks */
+  .hero{grid-template-columns:1fr;gap:12px}
+  .hc1{min-height:340px;padding:22px}
+  .hc2{grid-column:1;min-height:320px;padding:22px}
+  .hc2 h2{font-size:32px}
+  .hcr{grid-column:1;flex-direction:row;gap:12px}
+  .hc3,.hc4{min-height:160px;padding:18px}
+  .hc3 h3{font-size:28px}
+  .hc4 h3{font-size:24px}
+  /* Categories */
   .catgrid{grid-template-columns:repeat(4,1fr);gap:8px}
-  .ccard{padding:14px 6px}
-  .cico{width:44px;height:44px}
-  .cico svg{width:20px;height:20px}
-  .trust{grid-template-columns:1fr 1fr}
-  .foot-main{grid-template-columns:1fr;gap:28px;padding:40px 16px 28px}
-  .foot-bot{padding:16px;flex-direction:column;gap:6px;text-align:center}
+  .ccard{padding:12px 6px;gap:7px}
+  .cico{width:40px;height:40px}
+  .cico svg{width:18px;height:18px}
+  .cname{font-size:10.5px}
+  .ccount{display:none}
+  /* Products */
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pname{font-size:13px}
+  .pprice{font-size:20px}
+  .pinfo{padding:10px 12px 12px}
+  /* Section */
+  .stitle{font-size:26px}
+  .shead{margin-bottom:16px}
+  /* Promo */
+  .promo{padding:28px 20px}
+  .ptitle{font-size:30px}
+  /* Trust */
+  .trust{grid-template-columns:1fr;gap:10px}
+  .tcard{padding:16px}
+  /* Newsletter */
+  .nl{padding:24px;gap:20px}
+  .nl-left h3{font-size:24px}
+  .nl-form{flex-direction:column;gap:8px}
+  .nl-form button{width:100%;padding:13px}
+  /* Footer */
+  .foot-main{grid-template-columns:1fr;gap:24px;padding:32px 16px 24px}
+  .foot-bot{padding:14px 16px;flex-direction:column;gap:4px;text-align:center;font-size:11px}
+  /* Mobile nav & spacing */
   .mobnav{display:block}
   body{padding-bottom:72px}
-  .cart{width:100%}
-  .stitle{font-size:28px}
-  .pgrid{gap:10px}
+  /* Cart full screen */
+  .cart{width:100%;max-width:100%}
+  /* Auth modal full screen */
+  .auth-overlay{padding:0;align-items:flex-end}
+  .auth-box{border-radius:20px 20px 0 0;max-width:100%;max-height:92vh;overflow-y:auto}
+  /* Marquee */
+  .mbar{margin-bottom:28px}
+  /* Marquee spacing */
+  .mtrack{gap:36px}
+  .mname{font-size:15px}
 }
 @media(max-width:480px){
-  .catgrid{gap:6px}
-  .cname{font-size:10px}
-  .promo{padding:28px 20px}
-  .ptitle{font-size:28px}
-  .hc1{min-height:380px}
-  .hc1 h2{font-size:34px}
-  .stitle{font-size:26px}
-  .pgrid{grid-template-columns:repeat(2,1fr)}
+  :root{--hh:54px;--nh:40px}
+  .main{padding:10px}
+  .hdr-in{gap:6px;padding:0 12px}
+  .logo svg{height:14px}
+  /* Search button text hidden */
+  .sbtn{padding:8px 14px;font-size:11.5px}
+  /* Hero */
+  .hc1{min-height:300px;padding:18px}
+  .hc1 h2{font-size:30px}
+  .hc1 p{display:none}
+  .hcr{flex-direction:column;gap:10px}
+  .hc3,.hc4{min-height:130px;padding:16px}
+  .hc3 h3{font-size:24px}
+  .hc4 h3{font-size:20px}
+  /* Categories 4 cols tight */
+  .catgrid{grid-template-columns:repeat(4,1fr);gap:6px}
+  .cico{width:36px;height:36px}
+  .cico svg{width:16px;height:16px}
+  .cname{font-size:9.5px}
+  /* Products single column on very small */
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .pinfo{padding:8px 10px 10px}
+  .pbrand{font-size:9px}
+  .pname{font-size:12px}
+  .pprice{font-size:18px}
+  .star{font-size:10px}
+  .prating{display:none}
+  .atcbtn{width:30px;height:30px}
+  /* Sections */
+  .stitle{font-size:22px}
+  .sec{margin-bottom:36px}
+  .see-all{padding:7px 14px;font-size:11px}
+  .stag{font-size:10px}
+  /* Filter tabs */
+  .ftabs{gap:6px}
+  .ftab{padding:6px 14px;font-size:11px}
+  /* Promo */
+  .ptitle{font-size:24px}
+  .promo{padding:24px 16px}
+  .btn-ghost{display:none}
+  /* Trust */
+  .tico{width:40px;height:40px;border-radius:10px}
+  .tico svg{width:18px;height:18px}
+  .ttitle{font-size:13px}
+  /* Newsletter */
+  .nl{padding:20px 16px}
+  .nl-left h3{font-size:20px}
+  /* Footer */
+  .foot-main{padding:28px 12px 20px;gap:20px}
+  .chips{gap:5px}
+  .chip{font-size:9.5px;padding:3px 9px}
+  /* Marquee */
+  .mname{font-size:13px}
+  .mtrack{gap:28px}
+  /* Mobile menu drawer */
+  .mob-drawer-title{font-size:18px}
 }
+/* Mobile menu drawer */
+.mob-drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--black);z-index:500;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:0}
+.mob-drawer.open{transform:translateX(0)}
+.mob-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:499;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(2px)}
+.mob-drawer-overlay.open{opacity:1;pointer-events:all}
+.mob-drawer-top{background:var(--yellow);padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between}
+.mob-drawer-title{font-size:20px;font-weight:700;color:var(--black);letter-spacing:-.02em}
+.mob-drawer-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mob-drawer-close svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2.5;stroke-linecap:round}
+.mob-drawer-search{padding:14px}
+.mob-drawer-search input{width:100%;padding:10px 14px;border:none;border-radius:8px;background:rgba(255,255,255,.1);font-family:var(--f);font-size:13px;font-weight:500;color:var(--white);outline:none}
+.mob-drawer-search input::placeholder{color:rgba(255,255,255,.4)}
+.mob-drawer-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.3);padding:4px 14px 8px}
+.mob-drawer-nav{flex:1;overflow-y:auto;padding:0 8px}
+.mob-drawer-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:8px;color:rgba(255,255,255,.65);font-size:13px;font-weight:500;cursor:pointer;transition:var(--t);border:none;background:none;width:100%;text-align:left}
+.mob-drawer-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mob-drawer-item:hover,.mob-drawer-item.active{color:var(--yellow);background:rgba(249,194,0,.08)}
+.mob-drawer-foot{padding:16px;border-top:1px solid rgba(255,255,255,.08)}
+.mob-drawer-foot a{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;text-decoration:none;padding:8px 4px;transition:color .2s}
+.mob-drawer-foot a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mob-drawer-foot a:hover{color:var(--yellow)}
 /* LOADER */
 .loader{position:fixed;inset:0;background:var(--yellow);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;transition:opacity .6s ease, visibility .6s ease}
 .loader.done{opacity:0;visibility:hidden}
@@ -682,6 +790,36 @@ a{text-decoration:none}
   </div>
 </nav>
 
+<!-- MOBILE DRAWER -->
+<div class="mob-drawer-overlay" id="mobOverlay" onclick="closeMobDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+  <div class="mob-drawer-top">
+    <span class="mob-drawer-title">Menú</span>
+    <button class="mob-drawer-close" onclick="closeMobDrawer()">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="mob-drawer-search">
+    <input type="text" placeholder="Buscar productos...">
+  </div>
+  <div class="mob-drawer-label">Categorías</div>
+  <div class="mob-drawer-nav">
+    <button class="mob-drawer-item active"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Todos los productos</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>Encendido</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12"/><circle cx="19" cy="17" r="2"/></svg>Filtros</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 9 5 12s3 7 7 10c4-3 7-7 7-10S16 2 12 2z"/></svg>Lubricantes</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Frenos</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><path d="M3 18l9-12 9 12M6 18v-5M18 18v-5M12 6v12"/></svg>Suspensión</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Eléctrico</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Carrocería</button>
+    <button class="mob-drawer-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>Neumáticos</button>
+  </div>
+  <div class="mob-drawer-foot">
+    <a href="cliente.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>Mi cuenta</a>
+    <a href="#" onclick="openCart();closeMobDrawer()"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>Carrito</a>
+  </div>
+</div>
+
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay" onclick="handleOverlayClick(event)">
   <div class="auth-box">
@@ -899,6 +1037,28 @@ document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
 renderProducts();
 updateCart();
+
+// ── MOBILE DRAWER ──
+function openMobDrawer(){
+  document.getElementById('mobDrawer').classList.add('open');
+  document.getElementById('mobOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobDrawer(){
+  document.getElementById('mobDrawer').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('hamBtn').addEventListener('click', openMobDrawer);
+
+// Mobile drawer category items
+document.querySelectorAll('.mob-drawer-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.mob-drawer-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    closeMobDrawer();
+  });
+});
 
 // ── SUPABASE AUTH ──
 const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
