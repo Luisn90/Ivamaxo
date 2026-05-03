@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IVAMAXO — Mi cuenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--y:#F9C200;--yd:#D9A800;--bk:#0A0A0A;--dk:#111;--g100:#F5F5F5;--g200:#EBEBEB;--g300:#D5D5D5;--g500:#888;--wh:#fff;--green:#22C55E;--red:#E53E3E;--f:'Montserrat',sans-serif;--r:12px;--t:all .2s ease;--sh:0 2px 8px rgba(0,0,0,.06);--sm:0 4px 20px rgba(0,0,0,.09)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--g100);color:var(--bk)}
+svg{display:block}
+a{text-decoration:none}
+
+/* HEADER */
+.hdr{background:var(--y);height:64px;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.hdr-in{max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo svg{height:16px;width:auto}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-name{font-size:13px;font-weight:600;color:rgba(0,0,0,.7)}
+.btn-logout{padding:7px 16px;background:rgba(0,0,0,.1);border:none;border-radius:50px;font-family:var(--f);font-size:12px;font-weight:700;color:var(--bk);cursor:pointer;transition:var(--t);display:flex;align-items:center;gap:6px}
+.btn-logout:hover{background:rgba(0,0,0,.18)}
+.btn-logout svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-store{padding:7px 16px;background:var(--bk);border:none;border-radius:50px;font-family:var(--f);font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:var(--t)}
+.btn-store:hover{opacity:.85}
+
+/* LAYOUT */
+.wrap{max-width:1200px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+
+/* SIDEBAR */
+.sidebar{background:var(--wh);border-radius:var(--r);border:1px solid var(--g200);overflow:hidden;position:sticky;top:88px}
+.user-card{padding:24px;text-align:center;border-bottom:1px solid var(--g200)}
+.avatar{width:64px;height:64px;background:var(--y);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 12px}
+.uname{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.uemail{font-size:12px;color:var(--g500);font-weight:500;margin-top:3px}
+.sb-nav{padding:8px 0}
+.sb-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--g500);cursor:pointer;transition:var(--t);border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent}
+.sb-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sb-item:hover{color:var(--bk);background:var(--g100)}
+.sb-item.active{color:var(--bk);background:var(--g100);border-left-color:var(--y);font-weight:700}
+
+/* CONTENT PANELS */
+.panel{display:none}
+.panel.active{display:block}
+.panel-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:20px}
+
+/* CARDS */
+.card{background:var(--wh);border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px}
+.card-hdr{padding:18px 22px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+
+/* ORDERS */
+.order-item{padding:18px 22px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:16px;transition:background .15s}
+.order-item:last-child{border-bottom:none}
+.order-item:hover{background:var(--g100)}
+.order-num{font-size:13px;font-weight:700;letter-spacing:-.01em;flex:1}
+.order-date{font-size:11.5px;color:var(--g500);font-weight:500;margin-top:2px}
+.order-total{font-size:15px;font-weight:700;letter-spacing:-.01em;flex-shrink:0}
+.status-pill{padding:3px 12px;border-radius:50px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
+.sp-pending{background:rgba(249,194,0,.15);color:#B88A00}
+.sp-processing{background:rgba(59,130,246,.1);color:#2563EB}
+.sp-shipped{background:rgba(168,85,247,.1);color:#7C3AED}
+.sp-delivered{background:rgba(34,197,94,.1);color:#16A34A}
+.sp-cancelled{background:rgba(229,62,62,.1);color:var(--red)}
+.order-empty{padding:48px 24px;text-align:center;color:var(--g500)}
+.order-empty svg{width:48px;height:48px;stroke:var(--g300);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px}
+.order-empty p{font-size:16px;font-weight:700;color:var(--g300);margin-bottom:6px}
+.order-empty span{font-size:12.5px;font-weight:500}
+
+/* WISHLIST */
+.wish-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px}
+.wish-card{border:1.5px solid var(--g200);border-radius:10px;overflow:hidden;transition:var(--t)}
+.wish-card:hover{border-color:var(--y);box-shadow:0 4px 16px rgba(249,194,0,.15)}
+.wish-img{aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:40px}
+.wish-info{padding:12px}
+.wish-brand{font-size:9.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.1em}
+.wish-name{font-size:13px;font-weight:600;letter-spacing:-.01em;margin-top:2px}
+.wish-price{font-size:16px;font-weight:700;margin-top:6px}
+.wish-btn{width:100%;padding:8px;background:var(--bk);border:none;border-radius:8px;font-family:var(--f);font-size:12px;font-weight:700;color:var(--wh);cursor:pointer;transition:var(--t);margin-top:8px}
+.wish-btn:hover{background:var(--y);color:var(--bk)}
+
+/* PROFILE FORM */
+.form-grid{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fgroup{display:flex;flex-direction:column;gap:6px}
+.fgroup.full{grid-column:span 2}
+.flabel{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500)}
+.finput{padding:10px 14px;border:1.5px solid var(--g200);border-radius:10px;font-family:var(--f);font-size:13px;font-weight:500;color:var(--bk);outline:none;transition:var(--t)}
+.finput:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(249,194,0,.12)}
+.finput::placeholder{color:var(--g500)}
+.form-foot{padding:0 22px 22px;display:flex;gap:10px}
+.btn-save{padding:10px 24px;background:var(--y);border:none;border-radius:50px;font-family:var(--f);font-size:13px;font-weight:700;color:var(--bk);cursor:pointer;transition:var(--t)}
+.btn-save:hover{background:var(--yd)}
+.btn-cancel{padding:10px 20px;background:var(--g100);border:none;border-radius:50px;font-family:var(--f);font-size:13px;font-weight:600;color:var(--g700);cursor:pointer;transition:var(--t)}
+.btn-cancel:hover{background:var(--g200)}
+
+/* ADDRESS */
+.addr-list{padding:16px;display:grid;gap:10px}
+.addr-card{border:1.5px solid var(--g200);border-radius:10px;padding:16px;display:flex;align-items:flex-start;gap:14px;transition:var(--t)}
+.addr-card.default{border-color:var(--y);background:rgba(249,194,0,.04)}
+.addr-ico{width:38px;height:38px;background:var(--g100);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.addr-ico svg{width:18px;height:18px;stroke:var(--g500);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.addr-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.addr-default-badge{background:var(--y);color:var(--bk);padding:1px 8px;border-radius:50px;font-size:9px;font-weight:800}
+.addr-street{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.addr-city{font-size:12px;color:var(--g500);font-weight:500;margin-top:2px}
+.add-addr-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px dashed var(--g300);border-radius:10px;background:none;font-family:var(--f);font-size:13px;font-weight:600;color:var(--g500);cursor:pointer;transition:var(--t)}
+.add-addr-btn:hover{border-color:var(--y);color:var(--bk)}
+.add-addr-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* STATS ROW */
+.stats-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.sm-stat{background:var(--wh);border:1px solid var(--g200);border-radius:var(--r);padding:18px;text-align:center}
+.sm-val{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--bk)}
+.sm-lbl{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+
+/* TOAST */
+.toasts{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--bk);color:var(--wh);padding:11px 18px;border-radius:50px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.2);animation:tIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* LOADER */
+.pg-loader{position:fixed;inset:0;background:var(--wh);z-index:500;display:flex;align-items:center;justify-content:center}
+.spinner{width:36px;height:36px;border:3px solid var(--g200);border-top-color:var(--y);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .wrap{grid-template-columns:1fr;padding:16px}
+  .sidebar{position:static}
+  .wish-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .fgroup.full{grid-column:1}
+  .stats-mini{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="pg-loader" id="pgLoader"><div class="spinner"></div></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="index.html" class="logo">
+      <svg width="140" height="18" viewBox="0 0 172 22" fill="none">
+        <g clip-path="url(#lh)">
+          <path d="M0 .594H5.67V21.4H0z" fill="#0A0A0A"/>
+          <path d="M21.086 22h-.05c-2.562 0-4.75-1.536-5.794-3.89L7.459.594h6.192l7.385 17.343L28.446.594h6.192l-7.783 17.491C25.81 20.44 23.622 22 21.061 22z" fill="#0A0A0A"/>
+          <path d="M45.133 0c2.66 0 5.073 1.536 6.167 3.865l5.57 11.892c1.591 3.394.149 5.648-3.606 5.648H41.552l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C39.91 1.511 42.572-.025 45.133-.025V0Z" fill="#0A0A0A"/>
+          <path d="M59.654 7.333c0-4.212 2.81-7.011 7.037-7.011 2.984 0 5.42 1.833 6.192 4.583l1.939 6.764 1.94-6.764c.77-2.725 3.207-4.583 6.191-4.583 4.203 0 7.037 2.824 7.037 7.011V21.43h-5.67V6.863c0-.793-.546-1.338-1.367-1.338-.472 0-.87.297-.994.743l-4.377 15.113h-5.545l-4.376-15.113c-.124-.447-.547-.743-.994-.743-.846 0-1.368.545-1.368 1.338V21.43h-5.67V7.333Z" fill="#0A0A0A"/>
+          <path d="M106.154 0c2.661 0 5.073 1.536 6.167 3.865l5.57 11.892c1.592 3.394.149 5.648-3.605 5.648h-11.712l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C101.131 1.511 103.593-.025 106.154-.025V0Z" fill="#0A0A0A"/>
+          <path d="M128.808 11 119.707.594h7.51l5.197 6.318 5.197-6.318h7.51L136.02 11l9.1 10.406h-7.51l-5.197-6.318-5.197 6.318h-7.51L128.808 11Z" fill="#0A0A0A"/>
+          <path d="M155.415.446h6.242c6.191 0 10.344 4.137 10.344 10.455 0 6.317-4.004 10.628-10.046 10.628h-6.241c-6.192 0-10.345-4.137-10.345-10.455 0-6.317 4.004-10.628 10.046-10.628ZM151.04 10.926c0 3.32 1.913 5.4 4.997 5.4h5.271c3.11 0 4.998-2.056 4.998-5.277 0-3.22-1.914-5.4-4.998-5.4h-5.27c-3.11 0-4.998 2.056-4.998 5.277Z" fill="#0A0A0A"/>
+        </g>
+        <defs><clipPath id="lh"><rect width="172" height="22" fill="white"/></clipPath></defs>
+      </svg>
+    </a>
+    <div class="hdr-right">
+      <span class="hdr-name" id="hdrName"></span>
+      <a href="index.html" class="btn-store">← Tienda</a>
+      <button class="btn-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Salir
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="user-card">
+      <div class="avatar" id="avatarInitials">?</div>
+      <div class="uname" id="profileName">Cargando...</div>
+      <div class="uemail" id="profileEmail"></div>
+    </div>
+    <nav class="sb-nav">
+      <button class="sb-item active" onclick="showPanel('pedidos',this)">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        Mis pedidos
+      </button>
+      <button class="sb-item" onclick="showPanel('favoritos',this)">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Favoritos
+      </button>
+      <button class="sb-item" onclick="showPanel('direcciones',this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Direcciones
+      </button>
+      <button class="sb-item" onclick="showPanel('perfil',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+        Mi perfil
+      </button>
+    </nav>
+  </aside>
+
+  <!-- PANELS -->
+  <div>
+
+    <!-- PEDIDOS -->
+    <div class="panel active" id="panel-pedidos">
+      <div class="panel-title">Mis pedidos</div>
+      <div class="stats-mini">
+        <div class="sm-stat"><div class="sm-val" id="totalOrders">0</div><div class="sm-lbl">Pedidos</div></div>
+        <div class="sm-stat"><div class="sm-val" id="totalSpent">$0</div><div class="sm-lbl">Total gastado</div></div>
+        <div class="sm-stat"><div class="sm-val" id="pendingOrders">0</div><div class="sm-lbl">En proceso</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Historial de pedidos</div></div>
+        <div id="ordersList">
+          <div class="order-empty">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <p>Sin pedidos aún</p>
+            <span>Tus pedidos aparecerán aquí</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAVORITOS -->
+    <div class="panel" id="panel-favoritos">
+      <div class="panel-title">Mis favoritos</div>
+      <div class="card">
+        <div class="wish-grid" id="wishGrid">
+          <div style="grid-column:span 3;padding:40px;text-align:center;color:var(--g500)">
+            <p style="font-size:15px;font-weight:600;color:var(--g300)">Sin favoritos aún</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIRECCIONES -->
+    <div class="panel" id="panel-direcciones">
+      <div class="panel-title">Mis direcciones</div>
+      <div class="card">
+        <div class="addr-list" id="addrList">
+          <button class="add-addr-btn" onclick="showToast('Próximamente')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar dirección
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="panel" id="panel-perfil">
+      <div class="panel-title">Mi perfil</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Información personal</div></div>
+        <div class="form-grid">
+          <div class="fgroup">
+            <label class="flabel">Nombre completo</label>
+            <input class="finput" id="pName" type="text" placeholder="Tu nombre">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Teléfono</label>
+            <input class="finput" id="pPhone" type="tel" placeholder="+58 412 000 0000">
+          </div>
+          <div class="fgroup full">
+            <label class="flabel">Correo electrónico</label>
+            <input class="finput" id="pEmail" type="email" disabled style="opacity:.6;cursor:not-allowed">
+          </div>
+        </div>
+        <div class="form-foot">
+          <button class="btn-save" onclick="saveProfile()">Guardar cambios</button>
+          <button class="btn-cancel" onclick="loadProfile()">Cancelar</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-hdr"><div class="card-title">Cambiar contraseña</div></div>
+        <div class="form-grid">
+          <div class="fgroup full">
+            <label class="flabel">Nueva contraseña</label>
+            <input class="finput" id="pNewPass" type="password" placeholder="Mínimo 6 caracteres">
+          </div>
+        </div>
+        <div class="form-foot">
+          <button class="btn-save" onclick="changePassword()">Actualizar contraseña</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_KEY);
+
+let currentUser = null;
+
+// ── INIT ──
+(async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ window.location.href='index.html'; return; }
+  currentUser = session.user;
+  document.getElementById('hdrName').textContent = currentUser.email;
+  document.getElementById('profileEmail').textContent = currentUser.email;
+  document.getElementById('pEmail').value = currentUser.email;
+  await loadProfile();
+  await loadOrders();
+  await loadWishlist();
+  await loadAddresses();
+  document.getElementById('pgLoader').style.display='none';
+})();
+
+// ── PROFILE ──
+async function loadProfile(){
+  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(data){
+    const name = data.full_name || currentUser.email.split('@')[0];
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('pName').value = data.full_name || '';
+    document.getElementById('pPhone').value = data.phone || '';
+  }
+}
+
+async function saveProfile(){
+  const full_name = document.getElementById('pName').value.trim();
+  const phone     = document.getElementById('pPhone').value.trim();
+  const {error} = await sb.from('profiles').upsert({id:currentUser.id, full_name, phone});
+  if(error){ showToast('Error al guardar'); return; }
+  showToast('Perfil actualizado ✓');
+  loadProfile();
+}
+
+async function changePassword(){
+  const pass = document.getElementById('pNewPass').value;
+  if(pass.length < 6){ showToast('Mínimo 6 caracteres'); return; }
+  const {error} = await sb.auth.updateUser({password:pass});
+  if(error){ showToast('Error al actualizar'); return; }
+  document.getElementById('pNewPass').value='';
+  showToast('Contraseña actualizada ✓');
+}
+
+// ── ORDERS ──
+const STATUS_MAP = {
+  pending:    {label:'Pendiente',   cls:'sp-pending'},
+  processing: {label:'Procesando',  cls:'sp-processing'},
+  shipped:    {label:'Enviado',     cls:'sp-shipped'},
+  delivered:  {label:'Entregado',   cls:'sp-delivered'},
+  cancelled:  {label:'Cancelado',   cls:'sp-cancelled'},
+};
+
+async function loadOrders(){
+  const {data,error} = await sb.from('orders').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(error||!data) return;
+  const total = data.reduce((s,o)=>s+parseFloat(o.total),0);
+  const pending = data.filter(o=>['pending','processing','shipped'].includes(o.status)).length;
+  document.getElementById('totalOrders').textContent  = data.length;
+  document.getElementById('totalSpent').textContent   = '$'+total.toFixed(2);
+  document.getElementById('pendingOrders').textContent= pending;
+  if(!data.length) return;
+  document.getElementById('ordersList').innerHTML = data.map(o=>{
+    const s = STATUS_MAP[o.status]||{label:o.status,cls:'sp-pending'};
+    const date = new Date(o.created_at).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="order-item">
+      <div style="flex:1"><div class="order-num">${o.order_number}</div><div class="order-date">${date}</div></div>
+      <span class="status-pill ${s.cls}">${s.label}</span>
+      <div class="order-total">$${parseFloat(o.total).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── WISHLIST ──
+async function loadWishlist(){
+  const {data} = await sb.from('wishlist').select('*, products(*)').eq('user_id',currentUser.id);
+  if(!data||!data.length) return;
+  document.getElementById('wishGrid').innerHTML = data.map(w=>{
+    const p = w.products;
+    if(!p) return '';
+    return `<div class="wish-card">
+      <div class="wish-img" style="font-size:40px">⚙️</div>
+      <div class="wish-info">
+        <div class="wish-brand">${p.brand}</div>
+        <div class="wish-name">${p.name}</div>
+        <div class="wish-price">$${parseFloat(p.price).toFixed(2)}</div>
+        <button class="wish-btn">Añadir al carrito</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ADDRESSES ──
+async function loadAddresses(){
+  const {data} = await sb.from('addresses').select('*').eq('user_id',currentUser.id);
+  if(!data||!data.length) return;
+  const addBtn = `<button class="add-addr-btn" onclick="showToast('Próximamente')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar dirección</button>`;
+  document.getElementById('addrList').innerHTML = data.map(a=>`
+    <div class="addr-card${a.is_default?' default':''}">
+      <div class="addr-ico"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+      <div>
+        <div class="addr-label">${a.label}${a.is_default?'<span class="addr-default-badge">Principal</span>':''}</div>
+        <div class="addr-street">${a.street}</div>
+        <div class="addr-city">${a.city}${a.state?', '+a.state:''} · ${a.country}</div>
+      </div>
+    </div>`).join('')+addBtn;
+}
+
+// ── NAV ──
+function showPanel(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── AUTH ──
+function logout(){ sb.auth.signOut().then(()=>window.location.href='index.html'); }
+
+// ── TOAST ──
+function showToast(msg){
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  c.appendChild(el);
+  setTimeout(()=>{el.style.transition='all .3s';el.style.opacity='0';el.style.transform='translateX(12px)';setTimeout(()=>el.remove(),300);},2500);
+}
+</script>
+</body>
+</html>

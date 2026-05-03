@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IVAMAXO — Backoffice</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -792,3 +793,85 @@ buildChart();
 </script>
 </body>
 </html>
+<script>
+// ── SUPABASE ──
+const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_KEY);
+
+// Auth guard - redirect to login if not authenticated
+(async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ window.location.href='login.html'; return; }
+  document.querySelector('.sb-uname').textContent = session.user.email.split('@')[0];
+  loadProducts();
+})();
+
+// Load real products from Supabase
+async function loadProducts(){
+  const {data,error} = await sb.from('products').select('*, categories(name)').order('created_at',{ascending:false});
+  if(error){ console.error(error); return; }
+  PRODUCTS = data.map(p=>({
+    id: p.id,
+    name: p.name,
+    brand: p.brand,
+    cat: p.categories?.name || '',
+    price: parseFloat(p.price),
+    old: p.old_price ? parseFloat(p.old_price) : null,
+    stock: p.stock,
+    status: p.status,
+    badge: p.badge,
+    sku: p.sku || '',
+    icon: p.icon || 'filter',
+  }));
+  renderTable();
+  document.getElementById('pageSub').textContent = `${PRODUCTS.length} productos · ${PRODUCTS.filter(p=>p.stock===0).length} sin stock`;
+  document.querySelector('.stat-val').textContent = PRODUCTS.length;
+}
+
+// Override saveProduct to use Supabase
+const _origSave = window.saveProduct;
+window.saveProduct = async function(){
+  const name   = document.getElementById('fName').value.trim();
+  const brand  = document.getElementById('fBrand').value;
+  const cat    = document.getElementById('fCat').value;
+  const price  = parseFloat(document.getElementById('fPrice').value);
+  const old    = parseFloat(document.getElementById('fOldPrice').value)||null;
+  const stock  = parseInt(document.getElementById('fStock').value)||0;
+  const sku    = document.getElementById('fSku').value.trim();
+  const status = document.getElementById('fStatus').value;
+  const badge  = document.getElementById('fBadge').value||null;
+  const desc   = document.getElementById('fDesc').value.trim();
+
+  if(!name||!brand||!cat||!price){ showToast('Completa los campos obligatorios','err'); return; }
+
+  // Get category_id
+  const {data:cats} = await sb.from('categories').select('id').eq('name',cat).single();
+  const category_id = cats?.id || null;
+
+  if(editingId){
+    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,description:desc,updated_at:new Date()}).eq('id',editingId);
+    if(error){ showToast('Error al actualizar','err'); return; }
+    showToast('Producto actualizado','ok');
+  } else {
+    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,description:desc,featured:document.getElementById('fFeatured').checked});
+    if(error){ showToast('Error al crear producto','err'); return; }
+    showToast('Producto creado','ok');
+  }
+  closeDrawer();
+  loadProducts();
+};
+
+// Override deleteProduct
+window.deleteProduct = async function(id){
+  if(!confirm('¿Eliminar este producto?')) return;
+  const {error} = await sb.from('products').delete().eq('id',id);
+  if(error){ showToast('Error al eliminar','err'); return; }
+  showToast('Producto eliminado','err');
+  loadProducts();
+};
+
+// Logout
+function logout(){ sb.auth.signOut().then(()=>window.location.href='login.html'); }
+</script>
