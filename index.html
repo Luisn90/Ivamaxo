@@ -670,15 +670,11 @@ a{text-decoration:none}
       <div><div class="stag">Catálogo completo</div><h2 class="stitle">Categorías</h2></div>
       <a href="tienda.html" class="see-all">Ver todas <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
     </div>
-    <div class="catgrid">
-      <div class="ccard" style="cursor:pointer" onclick="window.location.href='tienda.html?cat=encendido'"><div class="cico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div><div class="cname">Encendido</div><div class="ccount">248 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12"/><circle cx="19" cy="17" r="2"/></svg></div><div class="cname">Filtros</div><div class="ccount">183 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 9 5 12s3 7 7 10c4-3 7-7 7-10S16 2 12 2z"/><path d="M12 8v4"/></svg></div><div class="cname">Lubricantes</div><div class="ccount">97 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.5"/></svg></div><div class="cname">Frenos</div><div class="ccount">312 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div class="cname">Eléctrico</div><div class="ccount">156 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><path d="M3 18l9-12 9 12M6 18v-5M18 18v-5M12 6v12"/></svg></div><div class="cname">Suspensión</div><div class="ccount">204 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><div class="cname">Carrocería</div><div class="ccount">89 productos</div></div>
-      <div class="ccard" style="cursor:pointer"><div class="cico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><div class="cname">Neumáticos</div><div class="ccount">67 productos</div></div>
+    <div class="catgrid" id="catGrid">
+      <!-- Loaded dynamically from Supabase -->
+      <div style="grid-column:1/-1;display:flex;gap:12px">
+        ${[1,2,3,4,5,6,7,8].map(()=>`<div style="flex:1;height:110px;background:var(--g200);border-radius:14px;animation:shimmer 1.5s infinite"></div>`).join('')}
+      </div>
     </div>
   </section>
 
@@ -1095,7 +1091,41 @@ const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersec
 document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
 loadProductsFromDB();
+loadCategories();
 updateCart();
+
+
+// ── CATEGORY ICONS MAP ──
+const IDX_CAT_ICONS={
+  'encendido':`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'filtros':`<svg viewBox="0 0 24 24" fill="none"><path d="M3 7h18M3 12h18M3 17h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="19" cy="17" r="2" stroke="currentColor" stroke-width="1.7"/></svg>`,
+  'lubricantes':`<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8 2 5 9 5 12s3 7 7 10c4-3 7-7 7-10S16 2 12 2z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'frenos':`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg>`,
+  'suspension':`<svg viewBox="0 0 24 24" fill="none"><path d="M3 18l9-12 9 12M6 18v-5M18 18v-5M12 6v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'electrico':`<svg viewBox="0 0 24 24" fill="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  'carroceria':`<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  'neumaticos':`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'herramientas':`<svg viewBox="0 0 24 24" fill="none"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'accesorios':`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  'belt':`<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  'default':`<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
+
+async function loadCategories(){
+  const {data,error}=await sbStore.from('categories').select('*, products(count)').order('name');
+  if(error||!data?.length) return;
+  const grid=document.getElementById('catGrid');
+  if(!grid) return;
+  grid.innerHTML=data.map(c=>{
+    const count=c.products?.[0]?.count||0;
+    const ico=IDX_CAT_ICONS[c.icon]||IDX_CAT_ICONS[c.slug]||IDX_CAT_ICONS['default'];
+    return `<div class="ccard" style="cursor:pointer" onclick="window.location.href='tienda.html?cat=${c.slug}'">
+      <div class="cico">${ico}</div>
+      <div class="cname">${c.name}</div>
+      <div class="ccount">${count} producto${count!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
 
 function goToProduct(id){ window.location.href='producto.html?id='+id; }
 
@@ -1129,13 +1159,7 @@ document.getElementById('heroSearch').addEventListener('keydown',e=>{
   if(e.key==='Enter') doHeroSearch();
 });
 
-// ── CATEGORY CARDS NAV ──
-document.querySelectorAll('.ccard').forEach(card=>{
-  const name=card.querySelector('.cname')?.textContent?.trim();
-  const slugMap={'Encendido':'encendido','Filtros':'filtros','Lubricantes':'lubricantes','Frenos':'frenos','Eléctrico':'electrico','Suspensión':'suspension','Carrocería':'carroceria','Neumáticos':'neumaticos'};
-  const slug=slugMap[name];
-  if(slug) card.addEventListener('click',()=>window.location.href='tienda.html?cat='+slug);
-});
+
 
 // ── MOBILE DRAWER ──
 function openMobDrawer(){

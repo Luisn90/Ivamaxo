@@ -593,6 +593,9 @@ const CAT_ICONS={
 // ── SUPABASE LOAD ──
 async function loadProducts(){
   showSkeletons();
+  // Load categories independently so empty ones show too
+  const {data:catData}=await sb.from('categories').select('*').order('name');
+  if(catData) window.ALL_CATS=catData;
   try{
     const {data,error}=await sb.from('products').select('*,categories(name,slug)').eq('status','active').order('created_at',{ascending:false});
     if(error||!data?.length){ showEmpty('No hay productos disponibles aún'); return; }
@@ -616,8 +619,13 @@ async function loadProducts(){
 
 // ── BUILD FILTERS ──
 function buildFilters(){
-  // Categories
-  const cats=[...new Map(ALL_PRODUCTS.map(p=>[p.cat,{slug:p.cat,name:p.catName,count:ALL_PRODUCTS.filter(x=>x.cat===p.cat).length}])).values()];
+  // Categories - use DB cats if available, fallback to product-derived
+  let cats;
+  if(window.ALL_CATS?.length){
+    cats=window.ALL_CATS.map(c=>({slug:c.slug,name:c.name,count:ALL_PRODUCTS.filter(x=>x.cat===c.slug).length}));
+  } else {
+    cats=[...new Map(ALL_PRODUCTS.map(p=>[p.cat,{slug:p.cat,name:p.catName,count:ALL_PRODUCTS.filter(x=>x.cat===p.cat).length}])).values()];
+  }
   const total=ALL_PRODUCTS.length;
   const catHTML=`<button class="cat-pill${activeCategory==='todos'?' active':''}" onclick="setCategory('todos',this)">
     <div class="cp-ico">${CAT_ICONS['default']}</div>
