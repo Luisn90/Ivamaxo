@@ -196,7 +196,7 @@ input,textarea,select,button{font-family:var(--f)}
 .fcheck-row span{font-size:13px;font-weight:500}
 
 /* Upload zone */
-.upload-zone{border:2px dashed var(--g300);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:var(--t);margin-bottom:16px}
+.upload-zone{border:2px dashed var(--g300);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:var(--t);margin-bottom:16px}.upload-zone.drag-over{border-color:var(--y);background:var(--yl)}
 .upload-zone:hover{border-color:var(--y);background:var(--yl)}
 .upload-zone svg{width:32px;height:32px;stroke:var(--g400,#bbb);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 10px}
 .upload-zone p{font-size:13px;font-weight:600;color:var(--g700);margin-bottom:4px}
@@ -503,11 +503,29 @@ input,textarea,select,button{font-family:var(--f)}
   </div>
   <div class="drawer-body">
 
-    <div class="upload-zone" onclick="showToast('Seleccionar imagen','warn')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <p>Subir imagen del producto</p>
-      <span>PNG, JPG hasta 4MB · Recomendado 800×800px</span>
+    <!-- IMAGE UPLOADER -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imgFileInput').click()" 
+         ondragover="event.preventDefault();this.classList.add('drag-over')" 
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <div id="uploadPreview" style="display:none;position:relative">
+        <img id="previewImg" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px" src="" alt="Preview">
+        <button onclick="removeImage(event)" style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--red);border:none;color:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:700">×</button>
+      </div>
+      <div id="uploadPlaceholder">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <p>Arrastra tu imagen aquí</p>
+        <span>o haz clic para seleccionar · PNG, JPG hasta 4MB</span>
+      </div>
+      <div id="uploadProgress" style="display:none;width:100%;margin-top:8px">
+        <div style="background:var(--g200);border-radius:4px;height:4px;overflow:hidden">
+          <div id="uploadBar" style="background:var(--y);height:100%;width:0%;transition:width .3s;border-radius:4px"></div>
+        </div>
+        <span style="font-size:11px;color:var(--g500);margin-top:4px;display:block">Subiendo imagen...</span>
+      </div>
     </div>
+    <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleFileSelect(this)">
+    <input type="hidden" id="fImageUrl" value="">
 
     <div class="form-row">
       <div class="fgroup full">
@@ -657,7 +675,7 @@ function renderTable(){
     <tr>
       <td>
         <div class="p-info">
-          <div class="p-thumb">${CICO[p.cat]||''}</div>
+          <div class="p-thumb">${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:CICO[p.cat]||''}</div>
           <div>
             <div class="p-name">${p.name}</div>
             <div class="p-brand">${p.brand} · ${p.sku}</div>
@@ -705,6 +723,18 @@ function openDrawer(id=null){
   document.getElementById('fStatus').value  = p?.status || 'active';
   document.getElementById('fBadge').value   = p?.badge || '';
   document.getElementById('fDesc').value    = '';
+  // Load existing image if editing
+  const existingImg = p?.image_url||'';
+  document.getElementById('fImageUrl').value = existingImg;
+  currentImageUrl = existingImg;
+  if(existingImg){
+    document.getElementById('uploadPlaceholder').style.display='none';
+    document.getElementById('uploadPreview').style.display='block';
+    document.getElementById('previewImg').src=existingImg;
+  } else {
+    document.getElementById('uploadPlaceholder').style.display='block';
+    document.getElementById('uploadPreview').style.display='none';
+  }
   document.getElementById('fFeatured').checked = false;
   document.getElementById('drawer').classList.add('open');
   document.getElementById('modalOverlay').classList.add('open');
@@ -713,6 +743,7 @@ function openDrawer(id=null){
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('modalOverlay').classList.remove('open');
+  resetUploader();
 }
 
 function editProduct(id){ openDrawer(String(id)); }
@@ -795,6 +826,77 @@ buildChart();
 </body>
 </html>
 <script>
+// ── IMAGE UPLOAD ──
+let currentImageUrl = '';
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file) uploadImage(file);
+}
+
+function handleFileSelect(input){
+  const file = input.files[0];
+  if(file) uploadImage(file);
+}
+
+async function uploadImage(file){
+  if(!file.type.startsWith('image/')){ showToast('Solo se permiten imágenes','err'); return; }
+  if(file.size > 4*1024*1024){ showToast('Máximo 4MB','err'); return; }
+
+  // Show progress
+  document.getElementById('uploadPlaceholder').style.display='none';
+  document.getElementById('uploadProgress').style.display='block';
+  document.getElementById('uploadBar').style.width='0%';
+  
+  // Animate progress bar
+  let prog=0;
+  const progInterval=setInterval(()=>{ prog=Math.min(prog+8,85); document.getElementById('uploadBar').style.width=prog+'%'; },100);
+
+  try{
+    const ext=file.name.split('.').pop();
+    const filename=Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+    const {data,error}=await sb.storage.from('products').upload(filename,file,{contentType:file.type,upsert:false});
+    
+    clearInterval(progInterval);
+    document.getElementById('uploadBar').style.width='100%';
+    
+    if(error){ throw error; }
+    
+    const {data:{publicUrl}}=sb.storage.from('products').getPublicUrl(filename);
+    currentImageUrl=publicUrl;
+    document.getElementById('fImageUrl').value=publicUrl;
+    
+    // Show preview
+    setTimeout(()=>{
+      document.getElementById('uploadProgress').style.display='none';
+      document.getElementById('uploadPreview').style.display='block';
+      document.getElementById('previewImg').src=publicUrl;
+      showToast('Imagen subida','ok');
+    },300);
+
+  }catch(err){
+    clearInterval(progInterval);
+    document.getElementById('uploadProgress').style.display='none';
+    document.getElementById('uploadPlaceholder').style.display='block';
+    showToast('Error subiendo imagen: '+err.message,'err');
+  }
+}
+
+function removeImage(e){
+  e.stopPropagation();
+  currentImageUrl='';
+  document.getElementById('fImageUrl').value='';
+  document.getElementById('uploadPreview').style.display='none';
+  document.getElementById('uploadPlaceholder').style.display='block';
+  document.getElementById('imgFileInput').value='';
+}
+
+function resetUploader(){
+  removeImage({stopPropagation:()=>{}});
+}
+
 // ── SUPABASE ──
 const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
 const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
@@ -825,6 +927,7 @@ async function loadProducts(){
     badge: p.badge,
     sku: p.sku || '',
     icon: p.icon || 'filter',
+    image_url: p.image_url||null,
   }));
   renderTable();
   document.getElementById('pageSub').textContent = `${PRODUCTS.length} productos · ${PRODUCTS.filter(p=>p.stock===0).length} sin stock`;
@@ -852,11 +955,11 @@ window.saveProduct = async function(){
   const category_id = cats?.id || null;
 
   if(editingId){
-    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,updated_at:new Date()}).eq('id',editingId);
+    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,image_url:document.getElementById('fImageUrl').value||null,updated_at:new Date()}).eq('id',editingId);
     if(error){ showToast('Error al actualizar','err'); return; }
     showToast('Producto actualizado','ok');
   } else {
-    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,featured:document.getElementById('fFeatured').checked});
+    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,featured:document.getElementById('fFeatured').checked,image_url:document.getElementById('fImageUrl').value||null});
     if(error){ showToast('Error al crear producto','err'); return; }
     showToast('Producto creado','ok');
   }
