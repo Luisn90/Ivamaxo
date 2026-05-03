@@ -594,12 +594,7 @@ input,textarea,select,button{font-family:var(--f)}
     <div class="form-row">
       <div class="fgroup">
         <label class="flabel">Marca</label>
-        <select class="fselect" id="fBrand">
-          <option value="">Seleccionar marca</option>
-          <option>NGK</option><option>Bosch</option><option>Brembo</option>
-          <option>Monroe</option><option>Castrol</option><option>Gates</option>
-          <option>Mahle</option><option>Denso</option><option>ACDelco</option>
-        </select>
+        <input class="finput" type="text" id="fBrand" placeholder="ej. Bosch, NGK, Brembo..." list="brandSuggestions"><datalist id="brandSuggestions"><option value="NGK"><option value="Bosch"><option value="Brembo"><option value="Monroe"><option value="Castrol"><option value="Gates"><option value="Mahle"><option value="Denso"><option value="ACDelco"><option value="Mobil"><option value="3M"></datalist>
       </div>
       <div class="fgroup">
         <label class="flabel">Categoría</label>
@@ -805,7 +800,7 @@ function filterTable(){ renderTable(); }
 
 // ── DRAWER ──
 function openDrawer(id=null){
-  editingId = id;
+  editingId = id || null;
   const p = id ? PRODUCTS.find(x=>String(x.id)===String(id)) : null;
   document.getElementById('drawerTitle').textContent = p ? 'Editar producto' : 'Nuevo producto';
   document.getElementById('fName').value    = p?.name || '';
@@ -1242,7 +1237,7 @@ async function loadProducts(){
 const _origSave = window.saveProduct;
 window.saveProduct = async function(){
   const name   = document.getElementById('fName').value.trim();
-  const brand  = document.getElementById('fBrand').value;
+  const brand  = document.getElementById('fBrand').value.trim();
   const cat    = document.getElementById('fCat').value;
   const price  = parseFloat(document.getElementById('fPrice').value);
   const old    = parseFloat(document.getElementById('fOldPrice').value)||null;
@@ -1250,25 +1245,62 @@ window.saveProduct = async function(){
   const sku    = document.getElementById('fSku').value.trim();
   const status = document.getElementById('fStatus').value;
   const badge  = document.getElementById('fBadge').value||null;
+  const badgeText = badge ? document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text : null;
   const desc   = document.getElementById('fDesc').value.trim();
+  const imageUrl = document.getElementById('fImageUrl')?.value||null;
+  const featured = document.getElementById('fFeatured')?.checked||false;
 
-  if(!name||!brand||!cat||!price){ showToast('Completa los campos obligatorios','err'); return; }
+  // Validation with clear messages
+  if(!name){ showToast('El nombre es obligatorio','err'); return; }
+  if(!brand){ showToast('La marca es obligatoria','err'); return; }
+  if(!price||isNaN(price)){ showToast('El precio es obligatorio','err'); return; }
 
-  // Get category_id
-  const {data:cats} = await sb.from('categories').select('id').eq('name',cat).single();
-  const category_id = cats?.id || null;
+  // Get or resolve category_id
+  let category_id = null;
+  if(cat){
+    const {data:catData} = await sb.from('categories').select('id').eq('name',cat).single();
+    category_id = catData?.id || null;
+    if(!category_id){
+      showToast('La categoría "'+cat+'" no existe en la BD. Créala primero en Categorías.','err');
+      return;
+    }
+  }
 
+  // Build product object
+  const productData = {
+    name, brand, category_id,
+    price: price,
+    old_price: old,
+    stock, sku: sku||null,
+    status: status||'active',
+    badge: badge||null,
+    badge_text: badgeText||null,
+    description: desc||null,
+    image_url: imageUrl||null,
+  };
+
+  let error;
   if(editingId){
-    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,image_url:document.getElementById('fImageUrl').value||null,updated_at:new Date()}).eq('id',editingId);
-    if(error){ showToast('Error al actualizar','err'); return; }
-    showToast('Producto actualizado','ok');
+    const res = await sb.from('products').update({...productData, updated_at: new Date()}).eq('id', editingId);
+    error = res.error;
+    if(error){ 
+      console.error('Update error:', error);
+      showToast('Error: '+error.message,'err'); 
+      return; 
+    }
+    showToast('Producto actualizado correctamente','ok');
   } else {
-    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,featured:document.getElementById('fFeatured').checked,image_url:document.getElementById('fImageUrl').value||null});
-    if(error){ showToast('Error al crear producto','err'); return; }
-    showToast('Producto creado','ok');
+    const res = await sb.from('products').insert({...productData, featured});
+    error = res.error;
+    if(error){ 
+      console.error('Insert error:', error);
+      showToast('Error: '+error.message,'err'); 
+      return; 
+    }
+    showToast('Producto creado correctamente','ok');
   }
   closeDrawer();
-  loadProducts();
+  await loadProducts();
 };
 
 // Override deleteProduct
