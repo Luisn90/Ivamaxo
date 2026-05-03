@@ -800,6 +800,8 @@ function filterTable(){ renderTable(); }
 
 // ── DRAWER ──
 function openDrawer(id=null){
+  // Guard: if called from button click, id may be a PointerEvent — ignore it
+  if(id && typeof id === 'object') id = null;
   editingId = id || null;
   const p = id ? PRODUCTS.find(x=>String(x.id)===String(id)) : null;
   document.getElementById('drawerTitle').textContent = p ? 'Editar producto' : 'Nuevo producto';
