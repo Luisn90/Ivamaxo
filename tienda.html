@@ -1018,6 +1018,16 @@ function showToast(msg,type='ok'){
 
 // ── INIT ──
 updateCartUI();
+
+// Read URL params on load
+(function(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('cat')) activeCategory=params.get('cat');
+  if(params.get('brand')){ activeBrands.clear(); activeBrands.add(params.get('brand')); }
+  if(params.get('q')) document.getElementById('searchInput').value=params.get('q');
+  if(params.get('sale')) document.getElementById('onSaleOnly').checked=true;
+})();
+
 loadProducts();
 </script>
 </body>

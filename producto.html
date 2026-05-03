@@ -482,29 +482,109 @@ img{display:block;width:100%}
 <div class="toasts" id="toasts"></div>
 
 <script>
-// Cart from localStorage
-let cart = JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
-let qty = 1;
-let wished = false;
+const SB_URL='https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY='sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const {createClient}=supabase;
+const sb=createClient(SB_URL,SB_KEY);
 
-const PRODUCT = {
-  id: new URLSearchParams(location.search).get('id') || '1',
-  name: 'Bujía Iridium IX BKR6EIX',
-  brand: 'NGK',
-  price: 18.99,
-  old: 24.99,
-  stock: 43,
-  sku: 'NGK-BKR6EIX',
-  cat: 'Encendido',
-  discount: 24,
+let cart=JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
+let qty=1, wished=false;
+let PRODUCT={}, RELATED=[];
+const PRODUCT_ID=new URLSearchParams(location.search).get('id');
+
+const CAT_ICONS_SVG={
+  spark:`<svg viewBox="0 0 100 120" fill="none"><rect x="37" y="5" width="26" height="24" rx="4" fill="#CACACA"/><rect x="33" y="27" width="34" height="14" rx="3" fill="#B0B0B0"/><rect x="35" y="39" width="30" height="8" rx="2" fill="#A0A0A0"/><rect x="36" y="46" width="28" height="46" rx="3" fill="#BCBCBC"/><polygon points="50,29 63,36 63,52 50,59 37,52 37,36" fill="#D0D0D0" stroke="#BFBFBF" stroke-width="1.5"/><rect x="36" y="66" width="28" height="5" rx="1.5" fill="#F9C200"/><path d="M43 108 L50 99 L48 109 L55 101" stroke="#F9C200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  filter:`<svg viewBox="0 0 100 120" fill="none"><rect x="18" y="10" width="64" height="100" rx="12" fill="#D5D5D5" stroke="#C0C0C0" stroke-width="1.5"/><rect x="24" y="18" width="52" height="7" rx="3" fill="#B8B8B8"/><rect x="24" y="30" width="52" height="7" rx="3" fill="#B8B8B8"/><rect x="24" y="42" width="52" height="7" rx="3" fill="#B8B8B8"/><rect x="24" y="66" width="36" height="7" rx="3" fill="#F9C200"/></svg>`,
+  oil:`<svg viewBox="0 0 100 120" fill="none"><path d="M16 44C16 28 32 12 50 6C68 12 84 28 84 44C84 76 68 100 50 114C32 100 16 76 16 44Z" fill="#E8C040" stroke="#D4A800" stroke-width="1.5"/><path d="M30 52C30 38 39 24 50 16C61 24 70 38 70 52C70 72 61 90 50 104C39 90 30 72 30 52Z" fill="#F9C200" opacity=".6"/></svg>`,
+  brake:`<svg viewBox="0 0 120 120" fill="none"><circle cx="60" cy="60" r="50" stroke="#C0C0C0" stroke-width="8" fill="#E5E5E5"/><circle cx="60" cy="60" r="34" stroke="#ABABAB" stroke-width="7" fill="#D0D0D0"/><circle cx="60" cy="60" r="7" fill="#F9C200"/></svg>`,
+  battery:`<svg viewBox="0 0 120 100" fill="none"><rect x="6" y="22" width="108" height="66" rx="8" fill="#2A2A2A"/><rect x="10" y="26" width="100" height="58" rx="6" fill="#1A1A1A"/><rect x="30" y="13" width="18" height="12" rx="3" fill="#E53E3E"/><rect x="72" y="13" width="18" height="12" rx="3" fill="#555"/><path d="M50 50L62 36L59 52L71 40" stroke="#F9C200" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  default:`<svg viewBox="0 0 100 100" fill="none"><path d="M50 10L90 30V70L50 90L10 70V30Z" stroke="#CACACA" stroke-width="4" fill="#EBEBEB"/><circle cx="50" cy="50" r="15" stroke="#CACACA" stroke-width="3" fill="none"/></svg>`,
 };
 
-const RELATED = [
-  {id:2,name:'Filtro de Aceite',brand:'Bosch',price:8.50,old:null,badge:null,icon:'filter'},
-  {id:3,name:'Aceite 5W-30 4L',brand:'Castrol',price:28.90,old:39.90,badge:'28% OFF',icon:'oil'},
-  {id:4,name:'Pastillas de Freno',brand:'Brembo',price:45.00,old:null,badge:'Destacado',icon:'brake'},
-  {id:8,name:'Correa Distribución',brand:'Gates',price:35.90,old:null,badge:'Nuevo',icon:'belt'},
-];
+// ── LOAD PRODUCT FROM SUPABASE ──
+async function loadProduct(){
+  if(!PRODUCT_ID){ showNotFound(); return; }
+
+  const {data:p,error}=await sb.from('products').select('*,categories(name,slug)').eq('id',PRODUCT_ID).single();
+
+  if(error||!p){ showNotFound(); return; }
+
+  PRODUCT={
+    id:p.id, name:p.name, brand:p.brand,
+    cat:p.categories?.name||'', catSlug:p.categories?.slug||'',
+    price:parseFloat(p.price), old:p.old_price?parseFloat(p.old_price):null,
+    stock:parseInt(p.stock)||0, sku:p.sku||'', badge:p.badge, badgeTxt:p.badge_text,
+    icon:p.icon||'default', description:p.description||'',
+    discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
+  };
+
+  // Populate UI
+  document.title = 'IVAMAXO — '+PRODUCT.name;
+  document.getElementById('piBrand').firstChild.textContent = PRODUCT.brand;
+  document.getElementById('piName').textContent = PRODUCT.name;
+  document.getElementById('piSku').textContent = PRODUCT.sku||'—';
+  document.getElementById('piPrice').textContent = '$'+PRODUCT.price.toFixed(2);
+  document.getElementById('breadCat').textContent = PRODUCT.cat;
+  document.getElementById('breadCat').href = 'tienda.html?cat='+PRODUCT.catSlug;
+  document.getElementById('breadName').textContent = PRODUCT.name;
+
+  // Badge
+  if(PRODUCT.badge){
+    const b=document.getElementById('badgeEl');
+    b.style.display='inline-flex';
+    b.textContent=PRODUCT.badgeTxt||'';
+    b.className='pi-badge pib-'+PRODUCT.badge;
+  }
+
+  // Old price & discount
+  if(PRODUCT.old){
+    document.getElementById('piOld').style.display='block';
+    document.getElementById('piOld').textContent='$'+PRODUCT.old.toFixed(2);
+    document.getElementById('piDisc').style.display='inline';
+    document.getElementById('piDisc').textContent='-'+PRODUCT.discount+'%';
+  }
+
+  // Stock
+  updateStockUI();
+
+  // Main image
+  document.getElementById('mainImg').innerHTML = CAT_ICONS_SVG[PRODUCT.icon]||CAT_ICONS_SVG['default'];
+
+  // Description
+  if(PRODUCT.description){
+    document.getElementById('tab-desc').querySelector('.desc-body').innerHTML =
+      '<p>'+PRODUCT.description.split('\n').join('</p><p>')+'</p>';
+  }
+
+  // Load related
+  const {data:related}=await sb.from('products').select('*,categories(name)').eq('status','active').neq('id',PRODUCT_ID).limit(4);
+  if(related?.length) renderRelated(related);
+}
+
+function showNotFound(){
+  document.body.innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Montserrat',sans-serif;background:#F5F5F5">
+    <svg viewBox="0 0 24 24" style="width:56px;height:56px;stroke:#D5D5D5;fill:none;stroke-width:1;stroke-linecap:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    <h2 style="font-size:22px;font-weight:700;color:#D5D5D5">Producto no encontrado</h2>
+    <a href="tienda.html" style="padding:12px 28px;background:#F9C200;border-radius:50px;font-size:14px;font-weight:700;color:#0A0A0A;text-decoration:none">Volver a la tienda</a>
+  </div>`;
+}
+
+function renderRelated(products){
+  const icons={encendido:'spark',filtros:'filter',lubricantes:'oil',frenos:'brake',electrico:'battery'};
+  document.getElementById('relatedGrid').innerHTML=products.map(p=>`
+    <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
+      <div class="pc-img">
+        ${p.badge?`<span class="pc-badge pcb-y">${p.badge_text||''}</span>`:''}
+        <svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:#D0D0D0;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <div class="pc-info">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.old_price?`<div class="pc-old">$${parseFloat(p.old_price).toFixed(2)}</div>`:''}
+        <div class="pc-price">$${parseFloat(p.price).toFixed(2)}</div>
+      </div>
+    </div>`).join('');
+}
 
 const ICONS_SVG = {
   filter:`<svg viewBox="0 0 24 24" fill="none" style="width:70px;height:70px"><path d="M3 7h18M3 12h18M3 17h12" stroke="#C0C0C0" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="17" r="2" stroke="#C0C0C0" stroke-width="1.5"/></svg>`,
@@ -515,17 +595,7 @@ const ICONS_SVG = {
 
 // Init
 updateCartBadge();
-if(PRODUCT.old){ document.getElementById('piOld').style.display='block'; document.getElementById('piOld').textContent='$'+PRODUCT.old.toFixed(2); }
-if(PRODUCT.discount){ document.getElementById('piDisc').style.display='inline'; document.getElementById('piDisc').textContent='-'+PRODUCT.discount+'%'; }
-document.getElementById('piBrand').innerHTML = PRODUCT.brand + '<span style="flex:1;height:1px;background:var(--g200);display:block"></span>';
-document.getElementById('piName').textContent = PRODUCT.name;
-document.getElementById('piSku').textContent = PRODUCT.sku;
-document.getElementById('piPrice').textContent = '$'+PRODUCT.price.toFixed(2);
-document.getElementById('breadCat').textContent = PRODUCT.cat;
-document.getElementById('breadName').textContent = PRODUCT.name;
-
-renderRelated();
-updateStockUI();
+loadProduct();
 
 function updateStockUI(){
   const dot = document.getElementById('stockDot');
