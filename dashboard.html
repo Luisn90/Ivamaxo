@@ -673,13 +673,13 @@ function renderTable(){
       <td><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:${statusDot(p.status)};display:inline-block;flex-shrink:0"></span>${statusLabel(p.status)}</span></td>
       <td>
         <div class="row-actions">
-          <button class="row-btn" onclick="editProduct(${p.id})" title="Editar">
+          <button class="row-btn" onclick="editProduct('${p.id}')" title="Editar">
             <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="row-btn" onclick="dupeProduct(${p.id})" title="Duplicar">
+          <button class="row-btn" onclick="dupeProduct('${p.id}')" title="Duplicar">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
-          <button class="row-btn del" onclick="deleteProduct(${p.id})" title="Eliminar">
+          <button class="row-btn del" onclick="deleteProduct('${p.id}')" title="Eliminar">
             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
           </button>
         </div>
@@ -693,7 +693,7 @@ function filterTable(){ renderTable(); }
 // ── DRAWER ──
 function openDrawer(id=null){
   editingId = id;
-  const p = id ? PRODUCTS.find(x=>x.id===id) : null;
+  const p = id ? PRODUCTS.find(x=>String(x.id)===String(id)) : null;
   document.getElementById('drawerTitle').textContent = p ? 'Editar producto' : 'Nuevo producto';
   document.getElementById('fName').value    = p?.name || '';
   document.getElementById('fBrand').value   = p?.brand || '';
@@ -715,7 +715,7 @@ function closeDrawer(){
   document.getElementById('modalOverlay').classList.remove('open');
 }
 
-function editProduct(id){ openDrawer(id); }
+function editProduct(id){ openDrawer(String(id)); }
 
 function saveProduct(){
   const name  = document.getElementById('fName').value.trim();
@@ -743,13 +743,14 @@ function saveProduct(){
 
 function deleteProduct(id){
   if(!confirm('¿Eliminar este producto?')) return;
-  PRODUCTS = PRODUCTS.filter(p=>p.id!==id);
+  PRODUCTS = PRODUCTS.filter(p=>String(p.id)!==String(id));
   renderTable(); showToast('Producto eliminado','err');
 }
 
 function dupeProduct(id){
-  const p = PRODUCTS.find(x=>x.id===id);
+  const p = PRODUCTS.find(x=>String(x.id)===String(id));
   if(!p) return;
+  // In Supabase version, this gets overridden below
   PRODUCTS.push({...p, id:Date.now(), name:p.name+' (copia)', sku:p.sku+'-C', status:'draft'});
   renderTable(); showToast('Producto duplicado','warn');
 }
@@ -851,11 +852,11 @@ window.saveProduct = async function(){
   const category_id = cats?.id || null;
 
   if(editingId){
-    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,description:desc,updated_at:new Date()}).eq('id',editingId);
+    const {error} = await sb.from('products').update({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,updated_at:new Date()}).eq('id',editingId);
     if(error){ showToast('Error al actualizar','err'); return; }
     showToast('Producto actualizado','ok');
   } else {
-    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,description:desc,featured:document.getElementById('fFeatured').checked});
+    const {error} = await sb.from('products').insert({name,brand,category_id,price,old_price:old,stock,sku,status,badge,badge_text:document.getElementById('fBadge').options[document.getElementById('fBadge').selectedIndex]?.text||null,description:desc,featured:document.getElementById('fFeatured').checked});
     if(error){ showToast('Error al crear producto','err'); return; }
     showToast('Producto creado','ok');
   }
@@ -866,8 +867,12 @@ window.saveProduct = async function(){
 // Override deleteProduct
 window.deleteProduct = async function(id){
   if(!confirm('¿Eliminar este producto?')) return;
-  const {error} = await sb.from('products').delete().eq('id',id);
-  if(error){ showToast('Error al eliminar','err'); return; }
+  const {data,error} = await sb.from('products').delete().eq('id',id).select();
+  if(error){ 
+    console.error('Delete error:', error);
+    showToast('Error: '+error.message,'err'); 
+    return; 
+  }
   showToast('Producto eliminado','err');
   loadProducts();
 };
