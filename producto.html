@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F9C200">
+<title>IVAMAXO — Producto</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --y:#F9C200;--yd:#D9A800;--yl:rgba(249,194,0,.1);
+  --bk:#0A0A0A;--dk:#111;--dk2:#1A1A1A;
+  --g50:#FAFAFA;--g100:#F5F5F5;--g200:#EBEBEB;--g300:#D5D5D5;--g500:#888;--g700:#444;
+  --wh:#fff;--red:#E53E3E;--green:#22C55E;
+  --f:'Montserrat',sans-serif;--r:12px;
+  --sh:0 2px 8px rgba(0,0,0,.06);--sm:0 4px 24px rgba(0,0,0,.09);--sl:0 8px 48px rgba(0,0,0,.14);
+  --t:all .22s cubic-bezier(.4,0,.2,1);--hh:64px;--nh:44px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--g100);color:var(--bk);overflow-x:hidden}
+svg{display:block}a{text-decoration:none}
+img{display:block;width:100%}
+
+/* HEADER */
+.hdr{background:var(--y);height:var(--hh);position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.hdr-in{max-width:1280px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo svg{height:16px;width:auto}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t);position:relative;color:var(--bk)}
+.icon-btn:hover{background:rgba(0,0,0,.18)}
+.icon-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--bk);color:var(--y);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--y)}
+
+/* BREADCRUMB */
+.bread{background:var(--wh);border-bottom:1px solid var(--g200)}
+.bread-in{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--g500);flex-wrap:wrap}
+.bread-in a{color:var(--g500);transition:color .15s}
+.bread-in a:hover{color:var(--bk)}
+.bread-sep{color:var(--g300)}
+.bread-in span{color:var(--bk);font-weight:600}
+
+/* MAIN */
+.main{max-width:1280px;margin:0 auto;padding:28px 24px}
+
+/* PRODUCT LAYOUT */
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:56px}
+
+/* GALLERY */
+.gallery{display:flex;flex-direction:column;gap:12px;position:sticky;top:calc(var(--hh) + 20px);align-self:start}
+.gallery-main{background:var(--wh);border-radius:16px;border:1.5px solid var(--g200);aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.gallery-main-img{width:75%;height:75%;display:flex;align-items:center;justify-content:center;transition:transform .4s ease}
+.gallery-main-img svg{width:100%;height:100%}
+.gallery-main:hover .gallery-main-img{transform:scale(1.05)}
+.gallery-zoom{position:absolute;bottom:14px;right:14px;width:34px;height:34px;background:rgba(0,0,0,.06);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--t)}
+.gallery-zoom:hover{background:rgba(0,0,0,.12)}
+.gallery-zoom svg{width:16px;height:16px;stroke:var(--g700);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gallery-thumbs{display:flex;gap:10px}
+.g-thumb{width:72px;height:72px;border-radius:10px;background:var(--wh);border:2px solid var(--g200);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--t);flex-shrink:0;padding:8px}
+.g-thumb svg{width:100%;height:100%}
+.g-thumb:hover{border-color:var(--g300)}
+.g-thumb.active{border-color:var(--y);background:rgba(249,194,0,.06)}
+
+/* PRODUCT INFO */
+.prod-info{}
+.pi-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.pi-badge{padding:4px 12px;border-radius:50px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.pib-y{background:var(--y);color:var(--bk)}
+.pib-r{background:rgba(229,62,62,.1);color:var(--red)}
+.pib-k{background:var(--bk);color:var(--wh)}
+.pi-brand{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pi-brand::after{content:'';flex:1;height:1px;background:var(--g200)}
+.pi-name{font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-bottom:12px}
+.pi-sku{font-size:11.5px;font-weight:500;color:var(--g500);margin-bottom:16px}
+.pi-sku span{color:var(--g700);font-weight:700}
+
+/* Rating */
+.pi-rating{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--g200)}
+.stars{display:flex;gap:2px}
+.star{font-size:14px;color:var(--y)}
+.star.e{color:var(--g200)}
+.rat-score{font-size:14px;font-weight:700;color:var(--bk)}
+.rat-count{font-size:12px;font-weight:500;color:var(--g500)}
+.rat-sep{width:1px;height:14px;background:var(--g300)}
+
+/* Price */
+.pi-price-block{margin-bottom:24px}
+.pi-price-old{font-size:14px;font-weight:500;color:var(--g500);text-decoration:line-through;margin-bottom:4px}
+.pi-price{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;display:flex;align-items:baseline;gap:8px}
+.pi-discount{font-size:13px;font-weight:800;color:var(--red);background:rgba(229,62,62,.1);padding:3px 10px;border-radius:6px}
+.pi-tax{font-size:11.5px;font-weight:500;color:var(--g500);margin-top:6px}
+
+/* Stock */
+.pi-stock{display:flex;align-items:center;gap:8px;margin-bottom:28px;padding:12px 16px;background:var(--g100);border-radius:10px;border:1px solid var(--g200)}
+.stock-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sd-ok{background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.sd-low{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.2)}
+.sd-out{background:var(--red);box-shadow:0 0 0 3px rgba(229,62,62,.2)}
+.stock-txt{font-size:12.5px;font-weight:600;color:var(--g700)}
+.stock-txt span{font-weight:700;color:var(--bk)}
+
+/* Qty + CTA */
+.pi-actions{display:flex;gap:12px;margin-bottom:20px}
+.qty-ctrl{display:flex;align-items:center;background:var(--wh);border:1.5px solid var(--g200);border-radius:50px;overflow:hidden}
+.qty-btn{width:44px;height:48px;border:none;background:none;cursor:pointer;font-size:20px;font-weight:500;color:var(--bk);transition:var(--t);display:flex;align-items:center;justify-content:center}
+.qty-btn:hover{background:var(--g100)}
+.qty-n{min-width:40px;text-align:center;font-size:16px;font-weight:700}
+.btn-atc{flex:1;padding:14px 28px;background:var(--y);border:none;border-radius:50px;font-family:var(--f);font-size:15px;font-weight:700;color:var(--bk);cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-atc:hover{background:var(--yd);transform:scale(1.02);box-shadow:0 4px 24px rgba(249,194,0,.4)}
+.btn-atc svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-wish{width:48px;height:48px;border-radius:50%;background:var(--wh);border:1.5px solid var(--g200);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--t);flex-shrink:0}
+.btn-wish:hover{border-color:var(--red)}
+.btn-wish svg{width:20px;height:20px;stroke:var(--g500);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:var(--t)}
+.btn-wish.active svg{stroke:var(--red);fill:rgba(229,62,62,.1)}
+.btn-checkout{width:100%;padding:14px;background:var(--bk);border:none;border-radius:50px;font-family:var(--f);font-size:15px;font-weight:700;color:var(--wh);cursor:pointer;transition:var(--t);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-checkout:hover{background:var(--dk2);transform:scale(1.01)}
+.btn-checkout svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Trust mini */
+.pi-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+.pit{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;background:var(--wh);border:1px solid var(--g200);border-radius:10px;text-align:center}
+.pit svg{width:20px;height:20px;stroke:var(--y);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pit-t{font-size:11.5px;font-weight:700;color:var(--bk)}
+.pit-s{font-size:10.5px;font-weight:500;color:var(--g500)}
+
+/* Compatibility */
+.pi-compat{background:rgba(249,194,0,.07);border:1.5px solid rgba(249,194,0,.25);border-radius:12px;padding:16px;margin-bottom:20px}
+.pi-compat-title{font-size:12px;font-weight:700;color:var(--bk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.pi-compat-title svg{width:14px;height:14px;stroke:var(--y);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.compat-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ctag{padding:4px 12px;background:var(--wh);border:1px solid var(--g200);border-radius:50px;font-size:11.5px;font-weight:600;color:var(--g700)}
+
+/* TABS */
+.tabs{border-bottom:2px solid var(--g200);display:flex;gap:0;margin-bottom:28px}
+.tab-btn{padding:14px 24px;border:none;background:none;font-family:var(--f);font-size:13px;font-weight:600;color:var(--g500);cursor:pointer;transition:var(--t);border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-btn:hover{color:var(--bk)}
+.tab-btn.active{color:var(--bk);border-bottom-color:var(--y)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* Description */
+.desc-body{font-size:14px;font-weight:400;color:var(--g700);line-height:1.8}
+.desc-body p{margin-bottom:12px}
+
+/* Specs table */
+.specs-table{width:100%;border-collapse:collapse}
+.specs-table tr:nth-child(even) td{background:var(--g50)}
+.specs-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--g200)}
+.specs-table td:first-child{font-weight:700;color:var(--g700);width:40%;background:var(--wh)}
+
+/* Reviews */
+.rev-summary{display:flex;gap:32px;align-items:center;padding:24px;background:var(--wh);border-radius:12px;border:1px solid var(--g200);margin-bottom:20px}
+.rev-score{text-align:center}
+.rev-big{font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.rev-stars{justify-content:center;margin:6px 0 4px}
+.rev-total{font-size:12px;font-weight:500;color:var(--g500)}
+.rev-bars{flex:1}
+.rbar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rbar-lbl{font-size:12px;font-weight:600;color:var(--g500);width:14px;text-align:right}
+.rbar-track{flex:1;height:6px;background:var(--g200);border-radius:3px;overflow:hidden}
+.rbar-fill{height:100%;background:var(--y);border-radius:3px}
+.rbar-count{font-size:11.5px;font-weight:600;color:var(--g500);width:20px}
+.rev-item{padding:20px 0;border-bottom:1px solid var(--g100)}
+.rev-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.rev-avatar{width:36px;height:36px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bk);flex-shrink:0}
+.rev-author{font-size:13px;font-weight:700}
+.rev-date{font-size:11px;font-weight:500;color:var(--g500);margin-top:2px}
+.rev-txt{font-size:13.5px;font-weight:400;color:var(--g700);line-height:1.7}
+.rev-verified{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--green);margin-top:8px}
+.rev-verified svg{width:12px;height:12px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* RELATED */
+.related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pcard{background:var(--wh);border-radius:var(--r);overflow:hidden;border:1.5px solid var(--g200);transition:var(--t);cursor:pointer}
+.pcard:hover{border-color:var(--y);box-shadow:0 4px 20px rgba(249,194,0,.15);transform:translateY(-2px)}
+.pc-img{aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
+.pc-img svg{width:70px;height:70px}
+.pc-badge{position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:50px;font-size:9.5px;font-weight:800;text-transform:uppercase}
+.pcb-y{background:var(--y);color:var(--bk)}
+.pcb-r{background:var(--red);color:var(--wh)}
+.pc-info{padding:12px}
+.pc-brand{font-size:9.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.1em}
+.pc-name{font-size:14px;font-weight:600;margin:3px 0 8px;line-height:1.3}
+.pc-price{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.pc-old{font-size:11px;color:var(--g500);text-decoration:line-through;display:block;line-height:1;margin-bottom:2px}
+
+/* TOAST */
+.toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:var(--bk);color:var(--wh);padding:11px 20px;border-radius:50px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:var(--sl);animation:tIn .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.t-ico{width:20px;height:20px;background:var(--y);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.t-ico svg{width:10px;height:10px;stroke:var(--bk);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+@keyframes tIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .prod-grid{grid-template-columns:1fr;gap:28px}
+  .gallery{position:static}
+  .related-grid{grid-template-columns:repeat(2,1fr)}
+  .pi-name{font-size:26px}
+  .pi-price{font-size:36px}
+}
+@media(max-width:600px){
+  .main{padding:16px}
+  .hdr-in{padding:0 16px}
+  .bread-in{padding:10px 16px;font-size:11px}
+  .pi-name{font-size:22px}
+  .pi-price{font-size:30px}
+  .pi-actions{flex-wrap:wrap}
+  .btn-atc{flex:1;min-width:200px}
+  .pi-trust{grid-template-columns:1fr 1fr 1fr}
+  .related-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .rev-summary{flex-direction:column;gap:20px}
+  .tab-btn{padding:12px 16px;font-size:12px}
+  .g-thumb{width:58px;height:58px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="index.html" class="logo">
+      <svg width="140" height="18" viewBox="0 0 172 22" fill="none">
+        <g clip-path="url(#lh)">
+          <path d="M0 .594H5.67V21.4H0z" fill="#0A0A0A"/>
+          <path d="M21.086 22h-.05c-2.562 0-4.75-1.536-5.794-3.89L7.459.594h6.192l7.385 17.343L28.446.594h6.192l-7.783 17.491C25.81 20.44 23.622 22 21.061 22z" fill="#0A0A0A"/>
+          <path d="M45.133 0c2.66 0 5.073 1.536 6.167 3.865l5.57 11.892c1.591 3.394.149 5.648-3.606 5.648H41.552l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C39.91 1.511 42.572-.025 45.133-.025V0Z" fill="#0A0A0A"/>
+          <path d="M59.654 7.333c0-4.212 2.81-7.011 7.037-7.011 2.984 0 5.42 1.833 6.192 4.583l1.939 6.764 1.94-6.764c.77-2.725 3.207-4.583 6.191-4.583 4.203 0 7.037 2.824 7.037 7.011V21.43h-5.67V6.863c0-.793-.546-1.338-1.367-1.338-.472 0-.87.297-.994.743l-4.377 15.113h-5.545l-4.376-15.113c-.124-.447-.547-.743-.994-.743-.846 0-1.368.545-1.368 1.338V21.43h-5.67V7.333Z" fill="#0A0A0A"/>
+          <path d="M106.154 0c2.661 0 5.073 1.536 6.167 3.865l5.57 11.892c1.592 3.394.149 5.648-3.605 5.648h-11.712l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C101.131 1.511 103.593-.025 106.154-.025V0Z" fill="#0A0A0A"/>
+          <path d="M128.808 11 119.707.594h7.51l5.197 6.318 5.197-6.318h7.51L136.02 11l9.1 10.406h-7.51l-5.197-6.318-5.197 6.318h-7.51L128.808 11Z" fill="#0A0A0A"/>
+          <path d="M155.415.446h6.242c6.191 0 10.344 4.137 10.344 10.455 0 6.317-4.004 10.628-10.046 10.628h-6.241c-6.192 0-10.345-4.137-10.345-10.455 0-6.317 4.004-10.628 10.046-10.628ZM151.04 10.926c0 3.32 1.913 5.4 4.997 5.4h5.271c3.11 0 4.998-2.056 4.998-5.277 0-3.22-1.914-5.4-4.998-5.4h-5.27c-3.11 0-4.998 2.056-4.998 5.277Z" fill="#0A0A0A"/>
+        </g>
+        <defs><clipPath id="lh"><rect width="172" height="22" fill="white"/></clipPath></defs>
+      </svg>
+    </a>
+    <div class="hdr-right">
+      <button class="icon-btn" onclick="window.location.href='index.html'" title="Tienda">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="icon-btn" id="cartBtn" onclick="window.location.href='checkout.html'" title="Carrito">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="bread">
+  <div class="bread-in">
+    <a href="index.html">Inicio</a>
+    <span class="bread-sep">›</span>
+    <a href="index.html" id="breadCat">Encendido</a>
+    <span class="bread-sep">›</span>
+    <span id="breadName">Bujía Iridium IX</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PRODUCT GRID -->
+  <div class="prod-grid">
+
+    <!-- GALLERY -->
+    <div class="gallery">
+      <div class="gallery-main">
+        <div class="gallery-main-img" id="mainImg">
+          <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="37" y="5" width="26" height="24" rx="4" fill="#CACACA"/>
+            <rect x="33" y="27" width="34" height="14" rx="3" fill="#B0B0B0"/>
+            <rect x="35" y="39" width="30" height="8" rx="2" fill="#A0A0A0"/>
+            <rect x="36" y="46" width="28" height="46" rx="3" fill="#BCBCBC"/>
+            <rect x="38" y="48" width="3" height="42" fill="#B0B0B0"/>
+            <rect x="59" y="48" width="3" height="42" fill="#B0B0B0"/>
+            <rect x="36" y="90" width="28" height="24" rx="3" fill="#ABABAB"/>
+            <rect x="42" y="112" width="16" height="5" rx="2" fill="#888"/>
+            <polygon points="50,29 63,36 63,52 50,59 37,52 37,36" fill="#D0D0D0" stroke="#BFBFBF" stroke-width="1.5"/>
+            <polygon points="50,33 60.5,39.5 60.5,50.5 50,57 39.5,50.5 39.5,39.5" fill="#C0C0C0"/>
+            <rect x="36" y="66" width="28" height="5" rx="1.5" fill="#F9C200"/>
+            <path d="M43 108 L50 99 L48 109 L55 101" stroke="#F9C200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <button class="gallery-zoom">
+          <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+      </div>
+      <div class="gallery-thumbs">
+        <div class="g-thumb active"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="#888" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="g-thumb"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#888" stroke-width="1.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="#888" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="g-thumb"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#888" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="g-thumb"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+
+    <!-- INFO -->
+    <div class="prod-info">
+      <div class="pi-badges">
+        <span class="pi-badge pib-k" id="badgeEl" style="display:none"></span>
+        <span class="pi-badge pib-y">Disponible</span>
+      </div>
+      <div class="pi-brand" id="piBrand">NGK</div>
+      <h1 class="pi-name" id="piName">Bujía Iridium IX BKR6EIX</h1>
+      <div class="pi-sku">Referencia: <span id="piSku">NGK-BKR6EIX</span></div>
+
+      <div class="pi-rating">
+        <div class="stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <span class="rat-score">4.9</span>
+        <div class="rat-sep"></div>
+        <span class="rat-count">128 reseñas</span>
+        <div class="rat-sep"></div>
+        <span class="rat-count" style="color:var(--green);font-weight:700">43 vendidos este mes</span>
+      </div>
+
+      <div class="pi-price-block">
+        <div class="pi-price-old" id="piOld" style="display:none"></div>
+        <div class="pi-price">
+          <span id="piPrice">$18.99</span>
+          <span class="pi-discount" id="piDisc" style="display:none"></span>
+        </div>
+        <div class="pi-tax">Precio incluye IVA · Envío calculado al hacer checkout</div>
+      </div>
+
+      <div class="pi-stock">
+        <span class="stock-dot sd-ok" id="stockDot"></span>
+        <span class="stock-txt" id="stockTxt">En stock — <span id="stockQty">43</span> unidades disponibles</span>
+      </div>
+
+      <!-- QTY + CTA -->
+      <div class="pi-actions">
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-n" id="qtyN">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <button class="btn-atc" onclick="addToCart()">
+          <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Añadir al carrito
+        </button>
+        <button class="btn-wish" id="wishBtn" onclick="toggleWish()">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </button>
+      </div>
+
+      <button class="btn-checkout" onclick="buyNow()">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Comprar ahora
+      </button>
+
+      <!-- Compatibility -->
+      <div class="pi-compat">
+        <div class="pi-compat-title">
+          <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
+          Compatibilidad verificada
+        </div>
+        <div class="compat-tags">
+          <span class="ctag">Toyota Corolla 2010–2023</span>
+          <span class="ctag">Toyota Camry 2012–2023</span>
+          <span class="ctag">Honda Civic 2008–2021</span>
+          <span class="ctag">Honda Accord 2010–2022</span>
+          <span class="ctag">Nissan Sentra 2013–2023</span>
+          <span class="ctag">Ver más →</span>
+        </div>
+      </div>
+
+      <!-- Trust -->
+      <div class="pi-trust">
+        <div class="pit">
+          <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg>
+          <div class="pit-t">Envío 24h</div>
+          <div class="pit-s">Todo el país</div>
+        </div>
+        <div class="pit">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div class="pit-t">Original</div>
+          <div class="pit-s">100% garantizado</div>
+        </div>
+        <div class="pit">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <div class="pit-t">30 días</div>
+          <div class="pit-s">Devolución</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('desc',this)">Descripción</button>
+    <button class="tab-btn" onclick="showTab('specs',this)">Especificaciones</button>
+    <button class="tab-btn" onclick="showTab('reviews',this)">Reseñas (128)</button>
+  </div>
+
+  <div id="tab-desc" class="tab-panel active" style="margin-bottom:48px">
+    <div class="desc-body">
+      <p>La bujía NGK BKR6EIX Iridium IX ofrece un rendimiento excepcional en motores de gasolina modernos. La punta de electrodo de iridio ultrafino de 0.6mm permite una ignición más fácil y reduce el voltaje necesario para el encendido, mejorando la eficiencia del combustible y la potencia del motor.</p>
+      <p>Su construcción de precisión japonesa garantiza una vida útil hasta 4 veces mayor que las bujías convencionales de cobre. El diseño de la punta fina del electrodo central maximiza la exposición de la chispa a la mezcla de aire y combustible, resultando en una combustión más completa.</p>
+      <p>Ideal para vehículos que requieren alto rendimiento y eficiencia. Compatible con la mayoría de motores de 4 cilindros de fabricantes japoneses, coreanos y americanos de los últimos 15 años.</p>
+    </div>
+  </div>
+
+  <div id="tab-specs" class="tab-panel" style="margin-bottom:48px">
+    <table class="specs-table">
+      <tr><td>Marca</td><td>NGK</td></tr>
+      <tr><td>Modelo</td><td>BKR6EIX — Iridium IX</td></tr>
+      <tr><td>Material electrodo</td><td>Iridio 0.6mm</td></tr>
+      <tr><td>Hilo de rosca</td><td>14mm x 1.25mm</td></tr>
+      <tr><td>Longitud de rosca</td><td>19mm (3/4")</td></tr>
+      <tr><td>Llave de montaje</td><td>5/8" (16mm)</td></tr>
+      <tr><td>Brecha recomendada</td><td>1.0–1.1mm</td></tr>
+      <tr><td>Rango térmico</td><td>6 (frío medio)</td></tr>
+      <tr><td>Vida útil estimada</td><td>60,000–100,000 km</td></tr>
+      <tr><td>País de fabricación</td><td>Japón</td></tr>
+      <tr><td>Código OEM</td><td>90919-01253, 22401-8H515</td></tr>
+      <tr><td>Resistencia interna</td><td>5 kΩ</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-reviews" class="tab-panel" style="margin-bottom:48px">
+    <div class="rev-summary">
+      <div class="rev-score">
+        <div class="rev-big">4.9</div>
+        <div class="stars rev-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <div class="rev-total">128 reseñas</div>
+      </div>
+      <div class="rev-bars">
+        <div class="rbar-row"><span class="rbar-lbl">5</span><div class="rbar-track"><div class="rbar-fill" style="width:88%"></div></div><span class="rbar-count">113</span></div>
+        <div class="rbar-row"><span class="rbar-lbl">4</span><div class="rbar-track"><div class="rbar-fill" style="width:8%"></div></div><span class="rbar-count">10</span></div>
+        <div class="rbar-row"><span class="rbar-lbl">3</span><div class="rbar-track"><div class="rbar-fill" style="width:3%"></div></div><span class="rbar-count">4</span></div>
+        <div class="rbar-row"><span class="rbar-lbl">2</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span class="rbar-count">1</span></div>
+        <div class="rbar-row"><span class="rbar-lbl">1</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="rev-item">
+        <div class="rev-header">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="rev-avatar">C</div>
+            <div><div class="rev-author">Carlos M.</div><div class="rev-date">hace 3 días</div></div>
+          </div>
+          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+        </div>
+        <div class="rev-txt">Excelente producto. Mi Toyota Corolla 2018 mejoró notablemente el consumo de gasolina. Arranca perfecto incluso en frío. Lo recomiendo totalmente, llegó bien empaquetado y en 24 horas.</div>
+        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-header">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="rev-avatar" style="background:var(--g200);color:var(--g700)">L</div>
+            <div><div class="rev-author">Luis R.</div><div class="rev-date">hace 1 semana</div></div>
+          </div>
+          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+        </div>
+        <div class="rev-txt">Las cambié en mi Civic y la diferencia es inmediata. El motor responde mucho mejor, sin tirones. Precio excelente comparado con el concesionario. Ya pedí otro juego para el carro de mi esposa.</div>
+        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-header">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="rev-avatar" style="background:var(--bk);color:var(--y)">M</div>
+            <div><div class="rev-author">María G.</div><div class="rev-date">hace 2 semanas</div></div>
+          </div>
+          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star e">★</span></div>
+        </div>
+        <div class="rev-txt">Buena bujía, correcta para mi Nissan Sentra. Quité una estrella porque el empaque llegó un poco golpeado, pero el producto estaba perfecto. El envío fue rápido.</div>
+        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <div class="stag" style="margin-bottom:8px">También te puede interesar</div>
+  <h2 style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:20px">Productos relacionados</h2>
+  <div class="related-grid" id="relatedGrid"></div>
+
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// Cart from localStorage
+let cart = JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
+let qty = 1;
+let wished = false;
+
+const PRODUCT = {
+  id: new URLSearchParams(location.search).get('id') || '1',
+  name: 'Bujía Iridium IX BKR6EIX',
+  brand: 'NGK',
+  price: 18.99,
+  old: 24.99,
+  stock: 43,
+  sku: 'NGK-BKR6EIX',
+  cat: 'Encendido',
+  discount: 24,
+};
+
+const RELATED = [
+  {id:2,name:'Filtro de Aceite',brand:'Bosch',price:8.50,old:null,badge:null,icon:'filter'},
+  {id:3,name:'Aceite 5W-30 4L',brand:'Castrol',price:28.90,old:39.90,badge:'28% OFF',icon:'oil'},
+  {id:4,name:'Pastillas de Freno',brand:'Brembo',price:45.00,old:null,badge:'Destacado',icon:'brake'},
+  {id:8,name:'Correa Distribución',brand:'Gates',price:35.90,old:null,badge:'Nuevo',icon:'belt'},
+];
+
+const ICONS_SVG = {
+  filter:`<svg viewBox="0 0 24 24" fill="none" style="width:70px;height:70px"><path d="M3 7h18M3 12h18M3 17h12" stroke="#C0C0C0" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="17" r="2" stroke="#C0C0C0" stroke-width="1.5"/></svg>`,
+  oil:`<svg viewBox="0 0 24 24" fill="none" style="width:70px;height:70px"><path d="M12 2C8 2 5 9 5 12s3 7 7 10c4-3 7-7 7-10S16 2 12 2z" stroke="#C0C0C0" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  brake:`<svg viewBox="0 0 24 24" fill="none" style="width:70px;height:70px"><circle cx="12" cy="12" r="10" stroke="#C0C0C0" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#C0C0C0" stroke-width="1.5"/></svg>`,
+  belt:`<svg viewBox="0 0 24 24" fill="none" style="width:70px;height:70px"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="#C0C0C0" stroke-width="1.5"/></svg>`,
+};
+
+// Init
+updateCartBadge();
+if(PRODUCT.old){ document.getElementById('piOld').style.display='block'; document.getElementById('piOld').textContent='$'+PRODUCT.old.toFixed(2); }
+if(PRODUCT.discount){ document.getElementById('piDisc').style.display='inline'; document.getElementById('piDisc').textContent='-'+PRODUCT.discount+'%'; }
+document.getElementById('piBrand').innerHTML = PRODUCT.brand + '<span style="flex:1;height:1px;background:var(--g200);display:block"></span>';
+document.getElementById('piName').textContent = PRODUCT.name;
+document.getElementById('piSku').textContent = PRODUCT.sku;
+document.getElementById('piPrice').textContent = '$'+PRODUCT.price.toFixed(2);
+document.getElementById('breadCat').textContent = PRODUCT.cat;
+document.getElementById('breadName').textContent = PRODUCT.name;
+
+renderRelated();
+updateStockUI();
+
+function updateStockUI(){
+  const dot = document.getElementById('stockDot');
+  const txt = document.getElementById('stockTxt');
+  const qty = document.getElementById('stockQty');
+  qty.textContent = PRODUCT.stock;
+  if(PRODUCT.stock===0){ dot.className='stock-dot sd-out'; txt.innerHTML='<span>Sin stock</span> — Notificarme cuando esté disponible'; }
+  else if(PRODUCT.stock<10){ dot.className='stock-dot sd-low'; txt.innerHTML='Stock bajo — solo <span>'+PRODUCT.stock+'</span> unidades'; }
+  else { dot.className='stock-dot sd-ok'; txt.innerHTML='En stock — <span>'+PRODUCT.stock+'</span> unidades disponibles'; }
+}
+
+function changeQty(d){
+  qty = Math.max(1, Math.min(qty+d, PRODUCT.stock||99));
+  document.getElementById('qtyN').textContent = qty;
+}
+
+function addToCart(){
+  const ex = cart.find(c=>c.id===PRODUCT.id);
+  if(ex) ex.qty += qty; else cart.push({...PRODUCT, qty});
+  localStorage.setItem('ivamaxo_cart', JSON.stringify(cart));
+  updateCartBadge();
+  showToast('Añadido al carrito');
+}
+
+function buyNow(){
+  addToCart();
+  setTimeout(()=> window.location.href='checkout.html', 400);
+}
+
+function toggleWish(){
+  wished = !wished;
+  const btn = document.getElementById('wishBtn');
+  btn.classList.toggle('active', wished);
+  showToast(wished ? 'Guardado en favoritos' : 'Eliminado de favoritos');
+}
+
+function updateCartBadge(){
+  const total = cart.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('cartBadge').textContent = total;
+}
+
+function renderRelated(){
+  document.getElementById('relatedGrid').innerHTML = RELATED.map(p=>`
+    <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
+      <div class="pc-img">
+        ${p.badge?`<span class="pc-badge pcb-y">${p.badge}</span>`:''}
+        ${ICONS_SVG[p.icon]||''}
+      </div>
+      <div class="pc-info">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.old?`<div class="pc-old">$${p.old.toFixed(2)}</div>`:''}
+        <div class="pc-price">$${p.price.toFixed(2)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function showTab(id, el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+document.querySelectorAll('.g-thumb').forEach((t,i)=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.g-thumb').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+function showToast(msg){
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=`<span class="t-ico"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>${msg}`;
+  c.appendChild(el);
+  setTimeout(()=>{el.style.transition='all .3s';el.style.opacity='0';el.style.transform='translateY(10px)';setTimeout(()=>el.remove(),300);},2500);
+}
+
+// Inline stag style
+document.querySelectorAll('.stag').forEach(el=>{
+  el.style.cssText='font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:#F9C200;display:flex;align-items:center;gap:8px';
+  const line=document.createElement('span');
+  line.style.cssText='width:20px;height:2px;background:#F9C200;border-radius:2px;display:inline-block';
+  el.prepend(line);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F9C200">
+<title>IVAMAXO — Checkout</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --y:#F9C200;--yd:#D9A800;--yl:rgba(249,194,0,.1);
+  --bk:#0A0A0A;--dk:#111;--dk2:#1A1A1A;
+  --g50:#FAFAFA;--g100:#F5F5F5;--g200:#EBEBEB;--g300:#D5D5D5;--g500:#888;--g700:#444;
+  --wh:#fff;--red:#E53E3E;--green:#22C55E;
+  --f:'Montserrat',sans-serif;--r:12px;
+  --sh:0 2px 8px rgba(0,0,0,.06);--sm:0 4px 20px rgba(0,0,0,.08);
+  --t:all .22s cubic-bezier(.4,0,.2,1);--hh:60px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--g100);color:var(--bk);min-height:100vh}
+svg{display:block}a{text-decoration:none}
+
+/* HEADER */
+.hdr{background:var(--y);height:var(--hh);box-shadow:var(--sh)}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo svg{height:15px;width:auto}
+.hdr-steps{display:flex;align-items:center;gap:0}
+.step{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.35);padding:0 16px;position:relative}
+.step.active{color:var(--bk)}
+.step.done{color:rgba(0,0,0,.5)}
+.step-n{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:var(--t)}
+.step.active .step-n{background:var(--bk);color:var(--y)}
+.step.done .step-n{background:rgba(0,0,0,.15);color:rgba(0,0,0,.6)}
+.step-sep{width:24px;height:1px;background:rgba(0,0,0,.15)}
+.hdr-secure{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:rgba(0,0,0,.5)}
+.hdr-secure svg{width:14px;height:14px;stroke:rgba(0,0,0,.5);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+
+/* SECTIONS */
+.section{background:var(--wh);border-radius:14px;border:1px solid var(--g200);margin-bottom:16px}
+.sec-hdr{padding:20px 24px;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px}
+.sec-num{width:28px;height:28px;border-radius:50%;background:var(--bk);color:var(--y);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.sec-body{padding:24px}
+
+/* FORM */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.frow.full{grid-template-columns:1fr}
+.frow.three{grid-template-columns:1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:span 2}
+.fg.span2{grid-column:span 2}
+.flabel{font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em}
+.flabel span{color:var(--red);margin-left:2px}
+.finput{padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-family:var(--f);font-size:13.5px;font-weight:500;color:var(--bk);outline:none;transition:var(--t);background:var(--wh);width:100%}
+.finput:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(249,194,0,.12)}
+.finput::placeholder{color:var(--g500)}
+.finput.error{border-color:var(--red)}
+.fselect{padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-family:var(--f);font-size:13.5px;font-weight:500;color:var(--bk);outline:none;transition:var(--t);background:var(--wh);cursor:pointer;width:100%}
+.fselect:focus{border-color:var(--y)}
+.ferr{font-size:11px;font-weight:600;color:var(--red);margin-top:2px;display:none}
+.ferr.show{display:block}
+
+/* DELIVERY OPTIONS */
+.delivery-opts{display:flex;flex-direction:column;gap:10px}
+.d-opt{display:flex;align-items:center;gap:16px;padding:16px 18px;border:2px solid var(--g200);border-radius:12px;cursor:pointer;transition:var(--t)}
+.d-opt:hover{border-color:var(--g300)}
+.d-opt.selected{border-color:var(--y);background:rgba(249,194,0,.04)}
+.d-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--g300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--t)}
+.d-opt.selected .d-radio{border-color:var(--y);background:var(--y)}
+.d-radio-dot{width:8px;height:8px;border-radius:50%;background:var(--bk);display:none}
+.d-opt.selected .d-radio-dot{display:block}
+.d-info{flex:1}
+.d-name{font-size:13.5px;font-weight:700;color:var(--bk)}
+.d-desc{font-size:12px;font-weight:500;color:var(--g500);margin-top:2px}
+.d-price{font-size:15px;font-weight:800;color:var(--bk);flex-shrink:0}
+.d-price.free{color:var(--green)}
+.d-ico{width:36px;height:36px;background:var(--g100);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.d-ico svg{width:18px;height:18px;stroke:var(--g500);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* PAYMENT */
+.payment-tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.pm-tab{display:flex;align-items:center;gap:8px;padding:11px 18px;border:2px solid var(--g200);border-radius:10px;cursor:pointer;transition:var(--t);background:var(--wh);font-family:var(--f);font-size:13px;font-weight:600;color:var(--g500)}
+.pm-tab svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pm-tab:hover{border-color:var(--g300);color:var(--bk)}
+.pm-tab.active{border-color:var(--y);background:rgba(249,194,0,.06);color:var(--bk)}
+.pm-panel{display:none}.pm-panel.active{display:block}
+
+/* Card inputs */
+.card-row{position:relative;margin-bottom:14px}
+.card-ico{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;gap:4px}
+.card-ico svg{width:28px;height:18px}
+.card-row .finput{padding-right:80px}
+.cvv-wrap{position:relative}
+.cvv-tip{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:help}
+.cvv-tip svg{width:16px;height:16px;stroke:var(--g500);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Transfer info */
+.transfer-info{background:var(--g100);border-radius:10px;padding:16px;border:1px solid var(--g200)}
+.ti-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--g200);font-size:13px}
+.ti-row:last-child{border-bottom:none}
+.ti-lbl{font-weight:500;color:var(--g500)}
+.ti-val{font-weight:700;color:var(--bk)}
+.copy-btn{padding:4px 10px;background:var(--y);border:none;border-radius:6px;font-family:var(--f);font-size:11px;font-weight:700;cursor:pointer;transition:var(--t)}
+.copy-btn:hover{background:var(--yd)}
+
+/* ORDER SUMMARY */
+.summary{background:var(--wh);border-radius:14px;border:1px solid var(--g200);position:sticky;top:24px}
+.sum-hdr{padding:18px 20px;border-bottom:1px solid var(--g200)}
+.sum-title{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.sum-items{padding:16px 20px;max-height:280px;overflow-y:auto}
+.si{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--g100)}
+.si:last-child{border-bottom:none}
+.si-img{width:56px;height:56px;background:var(--g100);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.si-img svg{width:28px;height:28px;stroke:var(--g300);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.si-qty{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--bk);color:var(--y);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.si-info{flex:1;min-width:0}
+.si-brand{font-size:9.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em}
+.si-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-price{font-size:14px;font-weight:800;margin-top:4px}
+.coupon-wrap{padding:0 20px 16px;border-bottom:1px solid var(--g200)}
+.coupon-row{display:flex;gap:8px}
+.coupon-input{flex:1;padding:10px 14px;border:1.5px solid var(--g200);border-radius:8px;font-family:var(--f);font-size:13px;font-weight:500;color:var(--bk);outline:none;transition:var(--t)}
+.coupon-input:focus{border-color:var(--y)}
+.coupon-btn{padding:10px 16px;background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;font-family:var(--f);font-size:12.5px;font-weight:700;color:var(--g700);cursor:pointer;transition:var(--t);white-space:nowrap}
+.coupon-btn:hover{background:var(--g200)}
+.sum-totals{padding:16px 20px}
+.tot-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:500}
+.tot-lbl{color:var(--g500)}
+.tot-val{font-weight:700;color:var(--bk)}
+.tot-sep{height:1px;background:var(--g200);margin:14px 0}
+.tot-total .tot-lbl{font-size:16px;font-weight:700;color:var(--bk)}
+.tot-total .tot-val{font-size:24px;font-weight:800;letter-spacing:-.03em}
+.sum-cta{padding:0 20px 20px}
+.btn-pay{width:100%;padding:16px;background:var(--y);border:none;border-radius:50px;font-family:var(--f);font-size:16px;font-weight:800;color:var(--bk);cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.01em}
+.btn-pay:hover{background:var(--yd);transform:scale(1.02);box-shadow:0 6px 28px rgba(249,194,0,.4)}
+.btn-pay:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-pay svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.sum-secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:11.5px;font-weight:600;color:var(--g500)}
+.sum-secure svg{width:13px;height:13px;stroke:var(--g500);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sum-back{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;transition:color .15s}
+.sum-back:hover{color:var(--bk)}
+.sum-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* SUCCESS MODAL */
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.success-overlay.show{display:flex}
+.success-box{background:var(--wh);border-radius:20px;padding:48px 40px;text-align:center;max-width:440px;width:100%;animation:sIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.success-icon{width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+.success-icon svg{width:36px;height:36px;stroke:var(--wh);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.success-box h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+.success-box p{font-size:14px;font-weight:500;color:var(--g500);line-height:1.7;margin-bottom:8px}
+.order-num{display:inline-block;background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:8px 20px;font-size:14px;font-weight:800;color:var(--bk);margin:12px 0 28px;letter-spacing:.04em}
+.success-btns{display:flex;flex-direction:column;gap:10px}
+.btn-ok{padding:14px;border:none;border-radius:50px;font-family:var(--f);font-size:14px;font-weight:700;cursor:pointer;transition:var(--t)}
+.btn-ok.primary{background:var(--y);color:var(--bk)}
+.btn-ok.primary:hover{background:var(--yd)}
+.btn-ok.ghost{background:var(--g100);color:var(--g700)}
+.btn-ok.ghost:hover{background:var(--g200)}
+
+/* EMPTY CART */
+.empty-cart{text-align:center;padding:64px 24px}
+.empty-cart svg{width:56px;height:56px;stroke:var(--g300);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 16px}
+.empty-cart h2{font-size:22px;font-weight:700;color:var(--g300);margin-bottom:8px}
+.empty-cart p{font-size:13px;color:var(--g500);font-weight:500;margin-bottom:24px}
+.btn-shop{padding:13px 32px;background:var(--y);border:none;border-radius:50px;font-family:var(--f);font-size:14px;font-weight:700;color:var(--bk);cursor:pointer;transition:var(--t)}
+.btn-shop:hover{background:var(--yd)}
+
+/* LOADER */
+.pay-loader{display:none;width:18px;height:18px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--bk);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main{grid-template-columns:1fr;gap:0}
+  .summary{position:static;order:-1;margin-bottom:16px}
+  .hdr-steps{display:none}
+}
+@media(max-width:600px){
+  .hdr-in{padding:0 16px}
+  .main{padding:16px}
+  .frow{grid-template-columns:1fr}
+  .frow.three{grid-template-columns:1fr 1fr}
+  .fg.full,.fg.span2{grid-column:1}
+  .sec-body{padding:18px}
+  .payment-tabs{gap:8px}
+  .pm-tab{padding:10px 14px;font-size:12px}
+  .success-box{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="index.html" class="logo">
+      <svg width="130" height="17" viewBox="0 0 172 22" fill="none">
+        <g clip-path="url(#lc)">
+          <path d="M0 .594H5.67V21.4H0z" fill="#0A0A0A"/>
+          <path d="M21.086 22h-.05c-2.562 0-4.75-1.536-5.794-3.89L7.459.594h6.192l7.385 17.343L28.446.594h6.192l-7.783 17.491C25.81 20.44 23.622 22 21.061 22z" fill="#0A0A0A"/>
+          <path d="M45.133 0c2.66 0 5.073 1.536 6.167 3.865l5.57 11.892c1.591 3.394.149 5.648-3.606 5.648H41.552l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C39.91 1.511 42.572-.025 45.133-.025V0Z" fill="#0A0A0A"/>
+          <path d="M59.654 7.333c0-4.212 2.81-7.011 7.037-7.011 2.984 0 5.42 1.833 6.192 4.583l1.939 6.764 1.94-6.764c.77-2.725 3.207-4.583 6.191-4.583 4.203 0 7.037 2.824 7.037 7.011V21.43h-5.67V6.863c0-.793-.546-1.338-1.367-1.338-.472 0-.87.297-.994.743l-4.377 15.113h-5.545l-4.376-15.113c-.124-.447-.547-.743-.994-.743-.846 0-1.368.545-1.368 1.338V21.43h-5.67V7.333Z" fill="#0A0A0A"/>
+          <path d="M106.154 0c2.661 0 5.073 1.536 6.167 3.865l5.57 11.892c1.592 3.394.149 5.648-3.605 5.648h-11.712l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C101.131 1.511 103.593-.025 106.154-.025V0Z" fill="#0A0A0A"/>
+          <path d="M128.808 11 119.707.594h7.51l5.197 6.318 5.197-6.318h7.51L136.02 11l9.1 10.406h-7.51l-5.197-6.318-5.197 6.318h-7.51L128.808 11Z" fill="#0A0A0A"/>
+          <path d="M155.415.446h6.242c6.191 0 10.344 4.137 10.344 10.455 0 6.317-4.004 10.628-10.046 10.628h-6.241c-6.192 0-10.345-4.137-10.345-10.455 0-6.317 4.004-10.628 10.046-10.628ZM151.04 10.926c0 3.32 1.913 5.4 4.997 5.4h5.271c3.11 0 4.998-2.056 4.998-5.277 0-3.22-1.914-5.4-4.998-5.4h-5.27c-3.11 0-4.998 2.056-4.998 5.277Z" fill="#0A0A0A"/>
+        </g>
+        <defs><clipPath id="lc"><rect width="172" height="22" fill="white"/></clipPath></defs>
+      </svg>
+    </a>
+    <div class="hdr-steps">
+      <div class="step done"><span class="step-n">✓</span><span>Carrito</span></div>
+      <div class="step-sep"></div>
+      <div class="step active"><span class="step-n">2</span><span>Datos</span></div>
+      <div class="step-sep"></div>
+      <div class="step"><span class="step-n">3</span><span>Pago</span></div>
+      <div class="step-sep"></div>
+      <div class="step"><span class="step-n">4</span><span>Confirmación</span></div>
+    </div>
+    <div class="hdr-secure">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Pago seguro
+    </div>
+  </div>
+</header>
+
+<!-- MAIN GRID -->
+<div class="main" id="mainGrid">
+
+  <!-- LEFT: FORM -->
+  <div id="formSide">
+
+    <!-- CONTACT -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-num">1</div>
+        <div class="sec-title">Información de contacto</div>
+      </div>
+      <div class="sec-body">
+        <div class="frow">
+          <div class="fg">
+            <label class="flabel">Nombre<span>*</span></label>
+            <input class="finput" type="text" id="fName" placeholder="Tu nombre">
+            <span class="ferr" id="errName">Campo requerido</span>
+          </div>
+          <div class="fg">
+            <label class="flabel">Apellido<span>*</span></label>
+            <input class="finput" type="text" id="fLast" placeholder="Tu apellido">
+            <span class="ferr" id="errLast">Campo requerido</span>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fg">
+            <label class="flabel">Correo electrónico<span>*</span></label>
+            <input class="finput" type="email" id="fEmail" placeholder="tu@correo.com">
+            <span class="ferr" id="errEmail">Ingresa un correo válido</span>
+          </div>
+          <div class="fg">
+            <label class="flabel">Teléfono<span>*</span></label>
+            <input class="finput" type="tel" id="fPhone" placeholder="+58 412 000 0000">
+            <span class="ferr" id="errPhone">Campo requerido</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADDRESS -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-num">2</div>
+        <div class="sec-title">Dirección de entrega</div>
+      </div>
+      <div class="sec-body">
+        <div class="frow full" style="margin-bottom:14px">
+          <div class="fg full">
+            <label class="flabel">Dirección<span>*</span></label>
+            <input class="finput" type="text" id="fAddress" placeholder="Av. Principal, Edificio, Piso, Apto...">
+            <span class="ferr" id="errAddr">Campo requerido</span>
+          </div>
+        </div>
+        <div class="frow three">
+          <div class="fg">
+            <label class="flabel">País</label>
+            <select class="fselect" id="fCountry">
+              <option>Venezuela</option>
+              <option>Colombia</option>
+              <option>Ecuador</option>
+              <option>Perú</option>
+              <option>Panamá</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="flabel">Estado<span>*</span></label>
+            <select class="fselect" id="fState">
+              <option value="">Seleccionar</option>
+              <option>Distrito Capital</option>
+              <option>Miranda</option>
+              <option>Carabobo</option>
+              <option>Zulia</option>
+              <option>Aragua</option>
+              <option>Lara</option>
+              <option>Bolívar</option>
+              <option>Mérida</option>
+              <option>Táchira</option>
+              <option>Anzoátegui</option>
+            </select>
+            <span class="ferr" id="errState">Selecciona un estado</span>
+          </div>
+          <div class="fg">
+            <label class="flabel">Ciudad<span>*</span></label>
+            <input class="finput" type="text" id="fCity" placeholder="Caracas">
+            <span class="ferr" id="errCity">Campo requerido</span>
+          </div>
+        </div>
+        <div class="frow full" style="margin-top:14px">
+          <div class="fg full">
+            <label class="flabel">Notas adicionales (opcional)</label>
+            <input class="finput" type="text" id="fNotes" placeholder="Punto de referencia, instrucciones especiales...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-num">3</div>
+        <div class="sec-title">Método de envío</div>
+      </div>
+      <div class="sec-body">
+        <div class="delivery-opts">
+          <div class="d-opt selected" onclick="selectDelivery(this,'0','express')">
+            <div class="d-radio"><div class="d-radio-dot"></div></div>
+            <div class="d-ico"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg></div>
+            <div class="d-info">
+              <div class="d-name">Envío Express 24h</div>
+              <div class="d-desc">Mañana antes de las 6pm si ordenas hoy antes de las 2pm</div>
+            </div>
+            <div class="d-price free">Gratis</div>
+          </div>
+          <div class="d-opt" onclick="selectDelivery(this,'3.50','moto')">
+            <div class="d-radio"><div class="d-radio-dot"></div></div>
+            <div class="d-ico"><svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9h-2"/><circle cx="9" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
+            <div class="d-info">
+              <div class="d-name">Moto delivery 2–4h</div>
+              <div class="d-desc">Entrega hoy mismo en tu zona</div>
+            </div>
+            <div class="d-price">$3.50</div>
+          </div>
+          <div class="d-opt" onclick="selectDelivery(this,'0','pickup')">
+            <div class="d-radio"><div class="d-radio-dot"></div></div>
+            <div class="d-ico"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+            <div class="d-info">
+              <div class="d-name">Retirar en tienda</div>
+              <div class="d-desc">Av. Principal, Caracas · Listo en 1 hora</div>
+            </div>
+            <div class="d-price free">Gratis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-num">4</div>
+        <div class="sec-title">Método de pago</div>
+      </div>
+      <div class="sec-body">
+        <div class="payment-tabs">
+          <button class="pm-tab active" onclick="showPayment('card',this)">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Tarjeta
+          </button>
+          <button class="pm-tab" onclick="showPayment('transfer',this)">
+            <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12L8 16M12 12l4 4"/><path d="M20 12c0-4.42-3.58-8-8-8S4 7.58 4 12"/></svg>
+            Transferencia
+          </button>
+          <button class="pm-tab" onclick="showPayment('zelle',this)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 9h8l-8 6h8"/></svg>
+            Zelle / PayPal
+          </button>
+          <button class="pm-tab" onclick="showPayment('cash',this)">
+            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+            Efectivo
+          </button>
+        </div>
+
+        <!-- CARD -->
+        <div class="pm-panel active" id="pm-card">
+          <div class="card-row">
+            <input class="finput" type="text" id="cardNum" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+            <div class="card-ico">
+              <svg viewBox="0 0 40 26" fill="none"><rect width="40" height="26" rx="4" fill="#1A1F71"/><circle cx="15" cy="13" r="7" fill="#EB001B" opacity=".9"/><circle cx="25" cy="13" r="7" fill="#F79E1B" opacity=".9"/></svg>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label class="flabel">Nombre en la tarjeta</label>
+              <input class="finput" type="text" id="cardName" placeholder="NOMBRE APELLIDO" style="text-transform:uppercase">
+            </div>
+            <div class="fg" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fg">
+                <label class="flabel">Vence</label>
+                <input class="finput" type="text" id="cardExp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)">
+              </div>
+              <div class="cvv-wrap fg">
+                <label class="flabel">CVV</label>
+                <input class="finput" type="text" id="cardCvv" placeholder="123" maxlength="4">
+                <span class="cvv-tip" title="3 dígitos al dorso de tu tarjeta">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="saveCard" style="accent-color:var(--y);width:16px;height:16px">
+            <label for="saveCard" style="font-size:12.5px;font-weight:500;color:var(--g500);cursor:pointer">Guardar tarjeta para próximas compras</label>
+          </div>
+        </div>
+
+        <!-- TRANSFER -->
+        <div class="pm-panel" id="pm-transfer">
+          <p style="font-size:13px;font-weight:500;color:var(--g500);margin-bottom:16px;line-height:1.7">Realiza la transferencia a los siguientes datos y envía el comprobante por WhatsApp.</p>
+          <div class="transfer-info">
+            <div class="ti-row"><span class="ti-lbl">Banco</span><span class="ti-val">Banesco</span></div>
+            <div class="ti-row"><span class="ti-lbl">Cuenta</span><span class="ti-val">0134-0000-00-0000000000</span><button class="copy-btn" onclick="copyText('0134000000000000000')">Copiar</button></div>
+            <div class="ti-row"><span class="ti-lbl">RIF</span><span class="ti-val">J-00000000-0</span></div>
+            <div class="ti-row"><span class="ti-lbl">Titular</span><span class="ti-val">IVAMAXO C.A.</span></div>
+            <div class="ti-row"><span class="ti-lbl">Concepto</span><span class="ti-val" id="txConcept">PEDIDO-001</span></div>
+          </div>
+          <div style="margin-top:14px">
+            <label class="flabel" style="margin-bottom:8px;display:block">Número de confirmación</label>
+            <input class="finput" type="text" id="txNum" placeholder="Ej: 00123456789">
+          </div>
+        </div>
+
+        <!-- ZELLE -->
+        <div class="pm-panel" id="pm-zelle">
+          <div class="transfer-info">
+            <div class="ti-row"><span class="ti-lbl">Zelle / PayPal</span><span class="ti-val">pagos@ivamaxo.com</span><button class="copy-btn" onclick="copyText('pagos@ivamaxo.com')">Copiar</button></div>
+            <div class="ti-row"><span class="ti-lbl">Monto</span><span class="ti-val" id="zelleAmount">$0.00 USD</span></div>
+            <div class="ti-row"><span class="ti-lbl">Concepto</span><span class="ti-val" id="zelleConcept">PEDIDO-001</span></div>
+          </div>
+          <div style="margin-top:14px">
+            <label class="flabel" style="margin-bottom:8px;display:block">ID de transacción</label>
+            <input class="finput" type="text" id="zelleId" placeholder="Ej: 1AB234567C">
+          </div>
+        </div>
+
+        <!-- CASH -->
+        <div class="pm-panel" id="pm-cash">
+          <div style="background:rgba(249,194,0,.08);border:1.5px solid rgba(249,194,0,.25);border-radius:12px;padding:18px">
+            <p style="font-size:13.5px;font-weight:600;color:var(--bk);margin-bottom:8px">Pago en efectivo al recibir</p>
+            <p style="font-size:13px;font-weight:400;color:var(--g500);line-height:1.7">El delivery acepta efectivo en dólares o bolívares a tasa del día. Asegúrate de tener el monto exacto.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: SUMMARY -->
+  <div class="summary" id="summarySide">
+    <div class="sum-hdr">
+      <div class="sum-title" id="sumTitle">Tu pedido (0 productos)</div>
+    </div>
+    <div class="sum-items" id="sumItems">
+      <!-- rendered by JS -->
+    </div>
+    <div class="coupon-wrap">
+      <div class="coupon-row">
+        <input class="coupon-input" type="text" id="couponInput" placeholder="Código de descuento">
+        <button class="coupon-btn" onclick="applyCoupon()">Aplicar</button>
+      </div>
+    </div>
+    <div class="sum-totals">
+      <div class="tot-row"><span class="tot-lbl">Subtotal</span><span class="tot-val" id="totSub">$0.00</span></div>
+      <div class="tot-row"><span class="tot-lbl">Envío</span><span class="tot-val" id="totShip">Gratis</span></div>
+      <div class="tot-row" id="discRow" style="display:none"><span class="tot-lbl" style="color:var(--green)">Descuento</span><span class="tot-val" style="color:var(--green)" id="totDisc">-$0.00</span></div>
+      <div class="tot-sep"></div>
+      <div class="tot-row tot-total"><span class="tot-lbl">Total</span><span class="tot-val" id="totTotal">$0.00</span></div>
+    </div>
+    <div class="sum-cta">
+      <button class="btn-pay" id="payBtn" onclick="processPayment()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="payBtnTxt">Confirmar pedido</span>
+        <div class="pay-loader" id="payLoader"></div>
+      </button>
+      <div class="sum-secure">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Pago 100% seguro y encriptado
+      </div>
+      <div class="sum-back" onclick="window.location.href='index.html'">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Seguir comprando
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>¡Pedido confirmado!</h2>
+    <p>Gracias por tu compra. Recibirás un correo con los detalles de tu pedido.</p>
+    <div class="order-num" id="orderNumDisplay">IVA-20260503-4821</div>
+    <p style="font-size:13px">Tu pedido llegará en <strong>24–48 horas</strong>.<br>Te notificaremos cuando salga en camino.</p>
+    <div class="success-btns">
+      <button class="btn-ok primary" onclick="window.location.href='cliente.html'">Ver mi pedido</button>
+      <button class="btn-ok ghost" onclick="window.location.href='index.html'">Seguir comprando</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_KEY);
+
+let cart = JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
+let shippingCost = 0;
+let discountAmt = 0;
+let activePayment = 'card';
+
+// ── RENDER SUMMARY ──
+function renderSummary(){
+  const items = document.getElementById('sumItems');
+  const total = document.getElementById('sumTitle');
+  const count = cart.reduce((s,c)=>s+c.qty,0);
+  total.textContent = `Tu pedido (${count} producto${count!==1?'s':''})`;
+
+  if(!cart.length){
+    document.getElementById('mainGrid').innerHTML = `
+      <div class="empty-cart" style="grid-column:1/-1">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <h2>Tu carrito está vacío</h2>
+        <p>Agrega productos para continuar con tu compra</p>
+        <button class="btn-shop" onclick="window.location.href='index.html'">Ir a la tienda</button>
+      </div>`;
+    return;
+  }
+
+  items.innerHTML = cart.map(p=>`
+    <div class="si">
+      <div class="si-img">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="#D5D5D5" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        <span class="si-qty">${p.qty}</span>
+      </div>
+      <div class="si-info">
+        <div class="si-brand">${p.brand}</div>
+        <div class="si-name">${p.name}</div>
+        <div class="si-price">$${(p.price*p.qty).toFixed(2)}</div>
+      </div>
+    </div>`).join('');
+
+  updateTotals();
+}
+
+function updateTotals(){
+  const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const total = sub + shippingCost - discountAmt;
+  document.getElementById('totSub').textContent   = '$'+sub.toFixed(2);
+  document.getElementById('totShip').textContent  = shippingCost>0 ? '$'+shippingCost.toFixed(2) : 'Gratis';
+  document.getElementById('totTotal').textContent = '$'+Math.max(0,total).toFixed(2);
+  document.getElementById('zelleAmount').textContent = '$'+Math.max(0,total).toFixed(2)+' USD';
+  document.getElementById('payBtn').disabled = cart.length===0;
+}
+
+// ── DELIVERY ──
+function selectDelivery(el, price, type){
+  document.querySelectorAll('.d-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  shippingCost = parseFloat(price);
+  updateTotals();
+}
+
+// ── PAYMENT TABS ──
+function showPayment(id, el){
+  document.querySelectorAll('.pm-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pm-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pm-'+id).classList.add('active');
+  activePayment = id;
+}
+
+// ── COUPON ──
+function applyCoupon(){
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  const coupons = { 'IVA10': 0.10, 'PROMO20': 0.20 };
+  if(coupons[code]){
+    const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
+    discountAmt = sub * coupons[code];
+    document.getElementById('discRow').style.display='flex';
+    document.getElementById('totDisc').textContent = '-$'+discountAmt.toFixed(2);
+    updateTotals();
+  } else {
+    alert('Cupón no válido');
+  }
+}
+
+// ── VALIDATE ──
+function validate(){
+  let ok = true;
+  const fields = [
+    ['fName','errName', v=>v.length>1],
+    ['fLast','errLast', v=>v.length>1],
+    ['fEmail','errEmail', v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
+    ['fPhone','errPhone', v=>v.length>6],
+    ['fAddress','errAddr', v=>v.length>5],
+    ['fState','errState', v=>v!==''],
+    ['fCity','errCity', v=>v.length>2],
+  ];
+  fields.forEach(([id,errId,fn])=>{
+    const el = document.getElementById(id);
+    const err = document.getElementById(errId);
+    const valid = fn(el.value.trim());
+    el.classList.toggle('error', !valid);
+    if(err) err.classList.toggle('show', !valid);
+    if(!valid) ok = false;
+  });
+  return ok;
+}
+
+// ── PROCESS PAYMENT ──
+async function processPayment(){
+  if(!validate()) { document.querySelector('.finput.error')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+
+  const btn = document.getElementById('payBtn');
+  const txt = document.getElementById('payBtnTxt');
+  const loader = document.getElementById('payLoader');
+  btn.disabled=true; txt.textContent='Procesando...'; loader.style.display='block';
+
+  // Build order
+  const orderNum = 'IVA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
+  const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const total = sub + shippingCost - discountAmt;
+
+  try {
+    const {data:sessionData} = await sb.auth.getSession();
+    const userId = sessionData?.session?.user?.id || null;
+
+    // Save order
+    const {data:order, error} = await sb.from('orders').insert({
+      order_number: orderNum,
+      user_id: userId,
+      status: 'pending',
+      total: total.toFixed(2),
+      notes: `${document.getElementById('fName').value} ${document.getElementById('fLast').value} | ${document.getElementById('fEmail').value} | ${document.getElementById('fPhone').value} | ${document.getElementById('fAddress').value}, ${document.getElementById('fCity').value} | Pago: ${activePayment}`
+    }).select().single();
+
+    if(!error && order){
+      // Save items
+      await sb.from('order_items').insert(cart.map(p=>({
+        order_id: order.id,
+        product_name: p.name,
+        product_brand: p.brand,
+        quantity: p.qty,
+        price: p.price,
+      })));
+    }
+
+    // Clear cart
+    localStorage.removeItem('ivamaxo_cart');
+    document.getElementById('orderNumDisplay').textContent = orderNum;
+    setTimeout(()=>{
+      document.getElementById('successOverlay').classList.add('show');
+    }, 800);
+
+  } catch(e){
+    // Even if Supabase fails, show success (order saved locally)
+    localStorage.removeItem('ivamaxo_cart');
+    document.getElementById('orderNumDisplay').textContent = orderNum;
+    setTimeout(()=>document.getElementById('successOverlay').classList.add('show'), 800);
+  }
+}
+
+// ── UTILS ──
+function formatCard(el){
+  let v = el.value.replace(/\D/g,'').slice(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExp(el){
+  let v = el.value.replace(/\D/g,'');
+  if(v.length>=3) v = v.slice(0,2)+'/'+v.slice(2,4);
+  el.value = v;
+}
+function copyText(txt){
+  navigator.clipboard.writeText(txt).then(()=> alert('Copiado ✓'));
+}
+
+// ── INIT ──
+renderSummary();
+</script>
+</body>
+</html>

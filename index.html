@@ -943,7 +943,7 @@ function renderProducts(overrideList){
   const list=overrideList||(currentFilter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentFilter));
   if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g500);font-weight:600">Sin productos en esta categoría</div>';return;}
   grid.innerHTML=list.map(p=>`
-    <div class="pcard">
+    <div class="pcard" onclick="window.location.href='producto.html?id='+p.id" style="cursor:pointer">
       <div class="pimg">
         ${p.badge?`<span class="pbadge ${p.badge}">${p.badgeTxt}</span>`:''}
         <div class="pico">
