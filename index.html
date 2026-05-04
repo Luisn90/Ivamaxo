@@ -500,7 +500,7 @@ a{text-decoration:none}
 .hero-sub{font-size:16px;font-weight:400;color:var(--g500);line-height:1.7;margin-bottom:40px}
 /* Search */
 .hero-search{margin-bottom:36px}
-.hs-wrap{display:flex;align-items:center;background:var(--white);border-radius:50px;padding:5px 5px 5px 22px;box-shadow:0 4px 32px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06);border:1.5px solid var(--g200);transition:var(--t);max-width:640px;margin:0 auto 16px}
+.hs-wrap{display:flex;align-items:center;background:#FBFBFB;border-radius:50px;padding:5px 5px 5px 8px;box-shadow:0 4px 32px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06);border:1.5px solid var(--g200);transition:var(--t);max-width:640px;margin:0 auto 16px}
 .hs-wrap:focus-within{box-shadow:0 4px 32px rgba(0,0,0,.12),0 0 0 3px rgba(249,194,0,.3);border-color:var(--yellow)}
 .hs-ico{width:18px;height:18px;stroke:var(--g500);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:12px}
 .hs-wrap input{flex:1;border:none;outline:none;font-family:var(--f);font-size:14.5px;font-weight:500;color:var(--black);background:transparent;min-width:0}
@@ -518,6 +518,26 @@ a{text-decoration:none}
 .hstat-n{font-size:28px;font-weight:700;color:var(--black);letter-spacing:-.03em;line-height:1}
 .hstat-l{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
 .hstat-div{width:1px;height:40px;background:var(--g300)}
+
+/* Live search dropdown */
+.hs-dropdown{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--white);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);border:1px solid var(--g200);overflow:hidden;display:none;z-index:100;max-height:380px;overflow-y:auto}
+.hs-dropdown.open{display:block}
+.hsd-header{padding:10px 16px 8px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--g500);border-bottom:1px solid var(--g100)}
+.hsd-item{display:flex;align-items:center;gap:14px;padding:11px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--g100)}
+.hsd-item:last-child{border-bottom:none}
+.hsd-item:hover{background:var(--g100)}
+.hsd-thumb{width:44px;height:44px;background:var(--g100);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.hsd-thumb img{width:100%;height:100%;object-fit:contain;padding:4px}
+.hsd-thumb svg{width:22px;height:22px;stroke:var(--g500);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hsd-info{flex:1;min-width:0}
+.hsd-brand{font-size:10px;font-weight:800;color:var(--g500);text-transform:uppercase;letter-spacing:.1em}
+.hsd-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.hsd-cat{font-size:11px;font-weight:500;color:var(--g500);margin-top:1px}
+.hsd-price{font-size:15px;font-weight:800;letter-spacing:-.02em;flex-shrink:0;color:var(--black)}
+.hsd-empty{padding:28px 16px;text-align:center;color:var(--g500);font-size:13px;font-weight:600}
+.hsd-footer{padding:10px 16px;border-top:1px solid var(--g100);text-align:center;font-size:12.5px;font-weight:700;color:var(--g500);cursor:pointer;transition:color .15s}
+.hsd-footer:hover{color:var(--black)}
+.hs-wrap-outer{position:relative;flex:1;max-width:640px;margin:0 auto}
 
 /* Responsive hero */
 @media(max-width:768px){
@@ -629,14 +649,17 @@ a{text-decoration:none}
       <p class="hero-sub">Repuestos originales y accesorios de las mejores marcas del mundo.<br>Entrega en 24–48h en todo el país.</p>
 
       <div class="hero-search">
+        <div class="hs-wrap-outer">
         <div class="hs-wrap">
-        <video src="search-icon.mp4" autoplay loop muted playsinline style="width:30px;height:30px;object-fit:contain;flex-shrink:0;border-radius:4px"></video>
+        <video src="search-icon.mp4" autoplay loop muted playsinline style="width:60px;height:60px;object-fit:contain;flex-shrink:0;border-radius:6px"></video>
           <input type="text" id="heroSearch" placeholder="Busca por pieza, marca o modelo..." autocomplete="off">
           <button class="hs-btn" onclick="doHeroSearch()">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <span>Buscar</span>
           </button>
         </div>
+        <div id="hsDropdown" class="hs-dropdown"></div>
+        </div><!-- /hs-wrap-outer -->
         <div class="hs-suggestions">
           <span class="hs-label">Búsquedas frecuentes:</span>
           <button class="hs-chip" onclick="setSearch('Bujías NGK')">Bujías NGK</button>
@@ -1133,34 +1156,99 @@ async function loadCategories(){
 function goToProduct(id){ window.location.href='producto.html?id='+id; }
 
 // ── HERO SEARCH ──
+const CAT_ICONS_SEARCH = {
+  'encendido':`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+  'filtros':`<svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+  'lubricantes':`<svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 9 5 12s3 7 7 10c4-3 7-7 7-10S16 2 12 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+  'frenos':`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`,
+  'default':`<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+};
+
+let searchDebounce;
+const heroInput = document.getElementById('heroSearch');
+const hsDropdown = document.getElementById('hsDropdown');
+
+heroInput.addEventListener('input', ()=>{
+  clearTimeout(searchDebounce);
+  const q = heroInput.value.trim();
+  if(!q){ hsDropdown.classList.remove('open'); return; }
+  searchDebounce = setTimeout(()=> liveSearch(q), 220);
+});
+
+heroInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter') doHeroSearch();
+  if(e.key==='Escape'){ hsDropdown.classList.remove('open'); heroInput.blur(); }
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.hs-wrap-outer')) hsDropdown.classList.remove('open');
+});
+
+function liveSearch(q){
+  if(!PRODUCTS.length) return;
+  const ql = q.toLowerCase();
+  const results = PRODUCTS.filter(p=>
+    p.name.toLowerCase().includes(ql) ||
+    p.brand.toLowerCase().includes(ql) ||
+    (p.sku&&p.sku.toLowerCase().includes(ql)) ||
+    (p.catName&&p.catName.toLowerCase().includes(ql))
+  ).slice(0,6);
+
+  if(!results.length){
+    hsDropdown.innerHTML = `<div class="hsd-empty">Sin resultados para "<strong>${q}</strong>"</div>`;
+    hsDropdown.classList.add('open');
+    return;
+  }
+
+  const thumbs = results.map(p=>{
+    const thumb = p.image_url
+      ? `<img src="${p.image_url}" alt="${p.name}">`
+      : (CAT_ICONS_SEARCH[p.icon]||CAT_ICONS_SEARCH['default']);
+    return `<div class="hsd-item" onclick="goToProduct('${p.id}')">
+      <div class="hsd-thumb">${thumb}</div>
+      <div class="hsd-info">
+        <div class="hsd-brand">${p.brand}</div>
+        <div class="hsd-name">${highlightMatch(p.name,q)}</div>
+        <div class="hsd-cat">${p.catName||''}</div>
+      </div>
+      <div class="hsd-price">$${p.price.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  const total = PRODUCTS.filter(p=>p.name.toLowerCase().includes(ql)||p.brand.toLowerCase().includes(ql)).length;
+  const footer = total > 6
+    ? `<div class="hsd-footer" onclick="doHeroSearch()">Ver los ${total} resultados →</div>`
+    : '';
+
+  hsDropdown.innerHTML = `<div class="hsd-header">Resultados para "${q}"</div>${thumbs}${footer}`;
+  hsDropdown.classList.add('open');
+}
+
+function highlightMatch(text, q){
+  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'gi');
+  return text.replace(re, '<mark style="background:rgba(249,194,0,.4);border-radius:2px;padding:0 1px">$1</mark>');
+}
+
 function doHeroSearch(){
-  const q = document.getElementById('heroSearch').value.trim();
+  const q = heroInput.value.trim();
   if(!q) return;
+  hsDropdown.classList.remove('open');
   currentFilter='todos';
   document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
   document.querySelector('.ftab').classList.add('active');
-  const grid = document.getElementById('productsGrid');
   const filtered = PRODUCTS.filter(p=>
     p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.brand.toLowerCase().includes(q.toLowerCase())
+    p.brand.toLowerCase().includes(q.toLowerCase()) ||
+    (p.sku&&p.sku.toLowerCase().includes(q.toLowerCase()))
   );
-  if(!filtered.length){
-    grid.innerHTML='<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--g500);font-weight:600">Sin resultados para "'+q+'"</div>';
-  } else {
-    const orig = currentFilter;
-    currentFilter='todos';
-    renderProducts(filtered);
-  }
-  // Scroll to products
-  document.querySelector('.sec').scrollIntoView({behavior:'smooth', block:'start'});
+  renderProducts(filtered.length ? filtered : []);
+  document.querySelector('.sec').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
 function setSearch(val){
-  document.getElementById('heroSearch').value=val;
-  doHeroSearch();
+  heroInput.value = val;
+  liveSearch(val);
 }
-document.getElementById('heroSearch').addEventListener('keydown',e=>{
-  if(e.key==='Enter') doHeroSearch();
-});
 
 
 
