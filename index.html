@@ -656,7 +656,10 @@ a{text-decoration:none}
       <div class="hero-search">
         <div class="hs-wrap-outer">
         <div class="hs-wrap">
-        <video src="search-icon.mp4" autoplay loop muted playsinline style="width:60px;height:60px;object-fit:contain;flex-shrink:0;border-radius:50%;margin-right:4px"></video>
+        <video autoplay loop muted playsinline style="width:60px;height:60px;object-fit:contain;flex-shrink:0;border-radius:50%;margin-right:4px">
+          <source src="search-icon.webm" type="video/webm">
+          <source src="search-icon.mp4" type="video/mp4">
+        </video>
           <input type="text" id="heroSearch" placeholder="Pieza, marca o referencia..." autocomplete="off">
           <button class="hs-btn" onclick="doHeroSearch()">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
