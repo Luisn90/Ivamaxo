@@ -44,7 +44,7 @@ a{text-decoration:none}
 .cnav{background:var(--black);height:var(--nh);position:sticky;top:var(--hh);z-index:99}
 .cnav-in{width:100%;padding:0 48px;height:100%;display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none}
 .cnav-in::-webkit-scrollbar{display:none}
-.clink{padding:5px 15px;border-radius:6px;color:rgba(255,255,255,.6);font-family:var(--f);font-weight:600;font-size:11.5px;letter-spacing:.01em;white-space:nowrap;transition:var(--t);position:relative;cursor:pointer}
+.clink{padding:5px 15px;border-radius:6px;color:rgba(255,255,255,.6);font-family:var(--f);font-weight:600;font-size:11.5px;letter-spacing:.01em;white-space:nowrap;transition:var(--t);position:relative;cursor:pointer;text-decoration:none;display:inline-block}
 .clink:hover,.clink.active{color:var(--yellow);background:rgba(249,194,0,.1)}
 .clink.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:18px;height:2px;background:var(--yellow);border-radius:2px}
 
@@ -627,12 +627,17 @@ a{text-decoration:none}
 <!-- CATEGORY NAV -->
 <nav class="cnav">
   <div class="cnav-in">
-    <span class="clink active">Todos</span><span class="clink">Encendido</span>
-    <span class="clink">Filtros</span><span class="clink">Lubricantes</span>
-    <span class="clink">Frenos</span><span class="clink">Suspensión</span>
-    <span class="clink">Eléctrico</span><span class="clink">Carrocería</span>
-    <span class="clink">Herramientas</span><span class="clink">Accesorios</span>
-    <span class="clink">Neumáticos</span>
+    <a href="tienda.html" class="clink active">Todos</a>
+    <a href="tienda.html?cat=encendido" class="clink">Encendido</a>
+    <a href="tienda.html?cat=filtros" class="clink">Filtros</a>
+    <a href="tienda.html?cat=lubricantes" class="clink">Lubricantes</a>
+    <a href="tienda.html?cat=frenos" class="clink">Frenos</a>
+    <a href="tienda.html?cat=suspension" class="clink">Suspensión</a>
+    <a href="tienda.html?cat=electrico" class="clink">Eléctrico</a>
+    <a href="tienda.html?cat=carroceria" class="clink">Carrocería</a>
+    <a href="tienda.html?cat=herramientas" class="clink">Herramientas</a>
+    <a href="tienda.html?cat=accesorios" class="clink">Accesorios</a>
+    <a href="tienda.html?cat=neumaticos" class="clink">Neumáticos</a>
   </div>
 </nav>
 
