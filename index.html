@@ -111,12 +111,12 @@ a{text-decoration:none}
 .mbar::before,.mbar::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:2}
 .mbar::before{left:0;background:linear-gradient(to right,var(--white),transparent)}
 .mbar::after{right:0;background:linear-gradient(to left,var(--white),transparent)}
-.mtrack{display:flex;gap:52px;align-items:center;animation:mq 24s linear infinite;width:max-content}
+.mtrack{display:flex;gap:40px;align-items:center;animation:mq 35s linear infinite;width:max-content}
 .mtrack:hover{animation-play-state:paused}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.mname{font-size:18px;font-weight:800;color:var(--g300);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transition:color .2s;cursor:default}
-.mname:hover{color:var(--yellow)}
-.mdot{width:5px;height:5px;border-radius:50%;background:var(--yellow);opacity:.4}
+.mlogo-item{display:flex;align-items:center;justify-content:center;width:120px;height:48px;flex-shrink:0;opacity:.55;transition:opacity .25s,filter .25s;filter:grayscale(100%)}
+.mlogo-item:hover{opacity:1;filter:grayscale(0%)}
+.mlogo-item img{max-width:100%;max-height:100%;object-fit:contain}
 
 /* SECTION HEADER */
 .sec{margin-bottom:52px}
@@ -662,10 +662,10 @@ a{text-decoration:none}
         </div><!-- /hs-wrap-outer -->
         <div class="hs-suggestions">
           <span class="hs-label">Búsquedas frecuentes:</span>
-          <button class="hs-chip" onclick="setSearch('Bujías NGK')">Bujías NGK</button>
-          <button class="hs-chip" onclick="setSearch('Filtro aceite')">Filtro aceite</button>
-          <button class="hs-chip" onclick="setSearch('Pastillas Brembo')">Pastillas Brembo</button>
-          <button class="hs-chip" onclick="setSearch('Aceite Castrol')">Aceite Castrol</button>
+          <button class="hs-chip" onclick="setSearch('Denso')">Denso</button>
+          <button class="hs-chip" onclick="setSearch('Bando')">Bando</button>
+          <button class="hs-chip" onclick="setSearch('Aisin')">Aisin</button>
+          <button class="hs-chip" onclick="setSearch('Natsuki')">Natsuki</button>
         </div>
       </div>
 
@@ -684,8 +684,46 @@ a{text-decoration:none}
   <!-- MARQUEE -->
   <div class="mbar rev">
     <div class="mtrack">
-      <span class="mname">Bosch</span><span class="mdot"></span><span class="mname">NGK</span><span class="mdot"></span><span class="mname">Brembo</span><span class="mdot"></span><span class="mname">Monroe</span><span class="mdot"></span><span class="mname">Castrol</span><span class="mdot"></span><span class="mname">Gates</span><span class="mdot"></span><span class="mname">Moog</span><span class="mdot"></span><span class="mname">3M</span><span class="mdot"></span><span class="mname">ACDelco</span><span class="mdot"></span><span class="mname">Denso</span><span class="mdot"></span><span class="mname">Mobil</span><span class="mdot"></span><span class="mname">Mahle</span><span class="mdot"></span>
-      <span class="mname">Bosch</span><span class="mdot"></span><span class="mname">NGK</span><span class="mdot"></span><span class="mname">Brembo</span><span class="mdot"></span><span class="mname">Monroe</span><span class="mdot"></span><span class="mname">Castrol</span><span class="mdot"></span><span class="mname">Gates</span><span class="mdot"></span><span class="mname">Moog</span><span class="mdot"></span><span class="mname">3M</span><span class="mdot"></span><span class="mname">ACDelco</span><span class="mdot"></span><span class="mname">Denso</span><span class="mdot"></span><span class="mname">Mobil</span><span class="mdot"></span><span class="mname">Mahle</span><span class="mdot"></span>
+      <div class="mlogo-item"><img src="brands/555.png" alt="555" title="555"></div>
+      <div class="mlogo-item"><img src="brands/a1filters.png" alt="A1 Filters" title="A1 Filters"></div>
+      <div class="mlogo-item"><img src="brands/aisin.png" alt="Aisin" title="Aisin"></div>
+      <div class="mlogo-item"><img src="brands/ashimori.png" alt="Ashimori" title="Ashimori"></div>
+      <div class="mlogo-item"><img src="brands/bando.png" alt="Bando" title="Bando"></div>
+      <div class="mlogo-item"><img src="brands/century.png" alt="Century" title="Century"></div>
+      <div class="mlogo-item"><img src="brands/clipse.png" alt="Clipse" title="Clipse"></div>
+      <div class="mlogo-item"><img src="brands/denso.png" alt="Denso" title="Denso"></div>
+      <div class="mlogo-item"><img src="brands/fic.png" alt="FIC" title="FIC"></div>
+      <div class="mlogo-item"><img src="brands/gmb.png" alt="GMB" title="GMB"></div>
+      <div class="mlogo-item"><img src="brands/hibari.png" alt="Hibari" title="Hibari"></div>
+      <div class="mlogo-item"><img src="brands/ichimax.png" alt="Ichimax" title="Ichimax"></div>
+      <div class="mlogo-item"><img src="brands/musashi.png" alt="Musashi" title="Musashi"></div>
+      <div class="mlogo-item"><img src="brands/natsuki.png" alt="Natsuki" title="Natsuki"></div>
+      <div class="mlogo-item"><img src="brands/npc.png" alt="NPC" title="NPC"></div>
+      <div class="mlogo-item"><img src="brands/perfect.png" alt="Perfect" title="Perfect"></div>
+      <div class="mlogo-item"><img src="brands/shibumi.png" alt="Shibumi" title="Shibumi"></div>
+      <div class="mlogo-item"><img src="brands/sun.png" alt="SUN" title="SUN"></div>
+      <div class="mlogo-item"><img src="brands/tsa.png" alt="TSA" title="TSA"></div>
+      <div class="mlogo-item"><img src="brands/yukkazo.png" alt="Yukkazo" title="Yukkazo"></div>
+      <div class="mlogo-item"><img src="brands/555.png" alt="555" title="555"></div>
+      <div class="mlogo-item"><img src="brands/a1filters.png" alt="A1 Filters" title="A1 Filters"></div>
+      <div class="mlogo-item"><img src="brands/aisin.png" alt="Aisin" title="Aisin"></div>
+      <div class="mlogo-item"><img src="brands/ashimori.png" alt="Ashimori" title="Ashimori"></div>
+      <div class="mlogo-item"><img src="brands/bando.png" alt="Bando" title="Bando"></div>
+      <div class="mlogo-item"><img src="brands/century.png" alt="Century" title="Century"></div>
+      <div class="mlogo-item"><img src="brands/clipse.png" alt="Clipse" title="Clipse"></div>
+      <div class="mlogo-item"><img src="brands/denso.png" alt="Denso" title="Denso"></div>
+      <div class="mlogo-item"><img src="brands/fic.png" alt="FIC" title="FIC"></div>
+      <div class="mlogo-item"><img src="brands/gmb.png" alt="GMB" title="GMB"></div>
+      <div class="mlogo-item"><img src="brands/hibari.png" alt="Hibari" title="Hibari"></div>
+      <div class="mlogo-item"><img src="brands/ichimax.png" alt="Ichimax" title="Ichimax"></div>
+      <div class="mlogo-item"><img src="brands/musashi.png" alt="Musashi" title="Musashi"></div>
+      <div class="mlogo-item"><img src="brands/natsuki.png" alt="Natsuki" title="Natsuki"></div>
+      <div class="mlogo-item"><img src="brands/npc.png" alt="NPC" title="NPC"></div>
+      <div class="mlogo-item"><img src="brands/perfect.png" alt="Perfect" title="Perfect"></div>
+      <div class="mlogo-item"><img src="brands/shibumi.png" alt="Shibumi" title="Shibumi"></div>
+      <div class="mlogo-item"><img src="brands/sun.png" alt="SUN" title="SUN"></div>
+      <div class="mlogo-item"><img src="brands/tsa.png" alt="TSA" title="TSA"></div>
+      <div class="mlogo-item"><img src="brands/yukkazo.png" alt="Yukkazo" title="Yukkazo"></div>
     </div>
   </div>
 
