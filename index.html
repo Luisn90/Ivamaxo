@@ -569,6 +569,11 @@ a{text-decoration:none}
 
 @keyframes shimmer{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
 
+.hdr-nav{display:flex;align-items:center;gap:4px}
+.nav-link{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;color:rgba(0,0,0,.55);transition:var(--t);cursor:pointer;border:none;background:none;text-decoration:none}
+.nav-link:hover{background:rgba(0,0,0,.08);color:var(--bk)}
+.nav-link.active{background:rgba(0,0,0,.1);color:var(--bk)}
+@media(max-width:640px){.hdr-nav{display:none}}
 </style>
 </head>
 <body>
