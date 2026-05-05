@@ -1344,7 +1344,7 @@ function renderTable(){
   `).join('');
 }
 
-function filterTable(){ renderTable(); }
+function filterTable(){ prodPage=1; fetchProducts(); }
 
 // ── DRAWER ──
 function openDrawer(id=null){
@@ -1531,7 +1531,7 @@ function showToast(msg, type='ok'){
 }
 
 // ── INIT ──
-renderTable();
+// renderTable called via fetchProducts
 buildChart();
 
 
@@ -2841,7 +2841,7 @@ async function fetchProducts(){
 
   // Update header stats
   document.getElementById('pageSub').textContent = `${prodTotal.toLocaleString()} productos`;
-  const statVal = document.querySelector('.stat-val');
+  const statVal = document.getElementById('statTotalProducts');
   if(statVal) statVal.textContent = prodTotal.toLocaleString();
   document.querySelectorAll('.sb-badge')[0].textContent = prodTotal > 999 ? Math.round(prodTotal/1000)+'k' : prodTotal;
 }
