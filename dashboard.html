@@ -251,6 +251,17 @@ input,textarea,select,button{font-family:var(--f)}
   .ptable th:nth-child(4),.ptable td:nth-child(4),
   .ptable th:nth-child(5),.ptable td:nth-child(5){display:none}
 }
+
+.cd-tab{padding:12px 18px;border:none;background:none;font-family:var(--f);font-size:13px;font-weight:600;color:var(--g500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:var(--t)}
+.cd-tab:hover{color:var(--bk)}
+.cd-tab.active{color:var(--bk);border-bottom-color:var(--y)}
+.cdi-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g100);font-size:13px}
+.cdi-row:last-child{border-bottom:none}
+.cdi-lbl{font-weight:600;color:var(--g500);width:90px;flex-shrink:0;font-size:12px}
+.cdi-val{font-weight:600;color:var(--bk)}
+.order-card{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s}
+.order-card:hover{border-color:var(--g300)}
+
 </style>
 </head>
 <body>
@@ -792,6 +803,183 @@ input,textarea,select,button{font-family:var(--f)}
 </div>
 
 
+<!-- CLIENTS CONTENT -->
+<div id="clientsContent" style="display:none">
+  <div class="content">
+
+    <!-- Stats bar -->
+    <div class="stats" style="margin-bottom:20px" id="clientStats">
+      <div class="stat">
+        <div class="stat-top"><div class="stat-ico" style="background:rgba(59,130,246,.1)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563EB;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><span class="stat-trend up">Total</span></div>
+        <div class="stat-n" id="cStatTotal">0</div><div class="stat-lbl">Clientes registrados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top"><div class="stat-ico"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--y);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><span class="stat-trend up">Verificados</span></div>
+        <div class="stat-n" id="cStatVerified">0</div><div class="stat-lbl">Email confirmado</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top"><div class="stat-ico" style="background:rgba(34,197,94,.1)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#22C55E;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><span class="stat-trend up">Este mes</span></div>
+        <div class="stat-n" id="cStatMonth">0</div><div class="stat-lbl">Nuevos este mes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top"><div class="stat-ico" style="background:rgba(249,194,0,.1)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--y);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><span class="stat-trend">Promedio</span></div>
+        <div class="stat-n" id="cStatOrders">0</div><div class="stat-lbl">Pedidos por cliente</div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="search-field" style="flex:1;max-width:300px">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="clientSearch" placeholder="Buscar por nombre o email..." oninput="filterClients()">
+      </div>
+      <select class="filter-select" id="clientStatusFilter" onchange="filterClients()">
+        <option value="">Todos</option>
+        <option value="confirmed">Email confirmado</option>
+        <option value="pending">Sin confirmar</option>
+      </select>
+      <select class="filter-select" id="clientSortFilter" onchange="filterClients()">
+        <option value="newest">Más recientes</option>
+        <option value="oldest">Más antiguos</option>
+        <option value="orders">Más pedidos</option>
+        <option value="name">Nombre A-Z</option>
+      </select>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Clientes registrados</div>
+          <div class="card-sub" id="clientsSubtitle">Cargando...</div>
+        </div>
+        <div class="card-act">
+          <button class="ca-btn" onclick="exportClients()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+      <div class="ptable-wrap">
+        <table class="ptable">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Registro</th>
+              <th>Pedidos</th>
+              <th>Total gastado</th>
+              <th>Estado</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--g500)">Cargando clientes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT DETAIL DRAWER -->
+<div class="modal-overlay" id="clientOverlay" onclick="closeClientDrawer()"></div>
+<div class="drawer" id="clientDrawer" style="width:540px">
+  <div class="drawer-hdr">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div id="clientAvatar" style="width:46px;height:46px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--bk);flex-shrink:0"></div>
+      <div>
+        <h3 id="clientDrawerName" style="margin:0">Cliente</h3>
+        <div id="clientDrawerEmail" style="font-size:12px;color:var(--g500);margin-top:2px"></div>
+      </div>
+    </div>
+    <button class="drawer-close" onclick="closeClientDrawer()">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div style="overflow-y:auto;flex:1">
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:1px solid var(--g200);padding:0 24px">
+      <button class="cd-tab active" onclick="switchClientTab('info',this)">Información</button>
+      <button class="cd-tab" onclick="switchClientTab('orders',this)">Pedidos</button>
+      <button class="cd-tab" onclick="switchClientTab('notes',this)">Notas</button>
+    </div>
+
+    <!-- INFO TAB -->
+    <div id="cTab-info" class="c-tab-panel" style="padding:20px 24px">
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+        <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px;text-align:center">
+          <div id="cdi-orders" style="font-size:24px;font-weight:800;color:var(--bk)">0</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Pedidos</div>
+        </div>
+        <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px;text-align:center">
+          <div id="cdi-spent" style="font-size:24px;font-weight:800;color:var(--bk)">$0</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Total gastado</div>
+        </div>
+        <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px;text-align:center">
+          <div id="cdi-avg" style="font-size:24px;font-weight:800;color:var(--bk)">$0</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Ticket promedio</div>
+        </div>
+      </div>
+
+      <!-- Contact info -->
+      <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Datos de contacto</div>
+        <div id="cdi-contact"></div>
+      </div>
+
+      <!-- Address -->
+      <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Dirección guardada</div>
+        <div id="cdi-address" style="font-size:13px;color:var(--g700);font-weight:500">Sin dirección registrada</div>
+      </div>
+
+      <!-- Account status -->
+      <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:16px">
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Estado de cuenta</div>
+        <div id="cdi-status"></div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div id="cTab-orders" class="c-tab-panel" style="display:none;padding:20px 24px">
+      <div id="cdi-orders-list" style="display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;padding:32px;color:var(--g500);font-weight:600">Cargando pedidos...</div>
+      </div>
+    </div>
+
+    <!-- NOTES TAB -->
+    <div id="cTab-notes" class="c-tab-panel" style="display:none;padding:20px 24px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Nota interna del cliente</label>
+        <textarea id="clientNoteInput" rows="5" style="width:100%;padding:12px;border:1.5px solid var(--g200);border-radius:10px;font-family:var(--f);font-size:13px;resize:vertical;outline:none;transition:border-color .2s" placeholder="Añade notas internas sobre este cliente..."></textarea>
+        <button onclick="saveClientNote()" style="margin-top:10px;padding:10px 24px;background:var(--bk);color:var(--wh);border:none;border-radius:50px;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:var(--t)">Guardar nota</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer actions -->
+  <div class="drawer-foot" style="flex-direction:column;gap:10px">
+    <div style="display:flex;gap:8px">
+      <button class="ca-btn" style="flex:1;justify-content:center" onclick="closeClientDrawer()">Cerrar</button>
+      <button class="ca-btn primary" id="clientWaBtn" style="flex:1.5;justify-content:center;gap:8px;background:#25D366;border-color:#25D366;color:#fff">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </button>
+      <button class="ca-btn" id="clientEmailBtn" style="flex:1.5;justify-content:center;gap:8px">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Enviar email
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
@@ -984,6 +1172,7 @@ function setPage(page, el){
     document.getElementById('mainContent').style.display='block';
     document.getElementById('catContent').style.display='none';
     document.getElementById('ordersContent').style.display='none';
+    document.getElementById('clientsContent').style.display='none';
     document.getElementById('payBtn').style.display='flex';
     updateTopBtn('Nuevo producto', openDrawer);
     loadProducts();
@@ -991,6 +1180,7 @@ function setPage(page, el){
     document.getElementById('mainContent').style.display='none';
     document.getElementById('catContent').style.display='block';
     document.getElementById('ordersContent').style.display='none';
+    document.getElementById('clientsContent').style.display='none';
     document.getElementById('payBtn').style.display='flex';
     updateTopBtn('Nueva categoría', openCatDrawer);
     loadCategories();
@@ -999,9 +1189,17 @@ function setPage(page, el){
       document.getElementById('mainContent').style.display='none';
       document.getElementById('catContent').style.display='none';
       document.getElementById('ordersContent').style.display='block';
+      document.getElementById('clientsContent').style.display='none';
       updateTopBtn('', ()=>{});
       document.getElementById('payBtn').style.display='none';
       loadOrders();
+    } else if(page==='clientes'){
+      document.getElementById('mainContent').style.display='none';
+      document.getElementById('catContent').style.display='none';
+      document.getElementById('ordersContent').style.display='none';
+      document.getElementById('clientsContent').style.display='block';
+      document.getElementById('payBtn').style.display='none';
+      loadClients();
     } else {
       document.getElementById('mainContent').style.display='block';
       document.getElementById('catContent').style.display='none';
@@ -1391,6 +1589,265 @@ function openWaAdmin(id){
 📝 ${o.notes||''}`
   );
   window.open(`https://wa.me/${ADMIN_PHONE}?text=${msg}`,'_blank');
+}
+
+
+// ── CLIENTS ──
+let ALL_CLIENTS = [], currentClientId = null, clientOrders = [];
+
+async function loadClients(){
+  document.getElementById('clientsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--g500)">Cargando...</td></tr>';
+
+  // Get auth users via profiles table
+  const {data:profiles, error} = await sb.from('profiles').select('*').order('created_at',{ascending:false});
+  if(error){ showToast('Error cargando clientes','err'); return; }
+
+  // Get orders to calculate stats per client
+  const {data:orders} = await sb.from('orders').select('user_id,total,created_at,status');
+
+  ALL_CLIENTS = (profiles||[]).map(p=>{
+    const userOrders = (orders||[]).filter(o=>o.user_id===p.id);
+    const totalSpent = userOrders.reduce((s,o)=>s+parseFloat(o.total||0),0);
+    return {...p, orderCount:userOrders.length, totalSpent, lastOrder:userOrders[0]?.created_at||null};
+  });
+
+  // Stats
+  const now = new Date();
+  const thisMonth = ALL_CLIENTS.filter(c=>{
+    const d = new Date(c.created_at);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).length;
+  const totalOrders = ALL_CLIENTS.reduce((s,c)=>s+c.orderCount,0);
+
+  document.getElementById('cStatTotal').textContent = ALL_CLIENTS.length;
+  document.getElementById('cStatVerified').textContent = ALL_CLIENTS.filter(c=>c.email_confirmed_at||c.id).length;
+  document.getElementById('cStatMonth').textContent = thisMonth;
+  document.getElementById('cStatOrders').textContent = ALL_CLIENTS.length ? (totalOrders/ALL_CLIENTS.length).toFixed(1) : '0';
+  document.getElementById('clientsSubtitle').textContent = ALL_CLIENTS.length + ' clientes registrados';
+
+  filterClients();
+}
+
+function filterClients(){
+  const q = document.getElementById('clientSearch').value.toLowerCase();
+  const st = document.getElementById('clientStatusFilter').value;
+  const sort = document.getElementById('clientSortFilter').value;
+
+  let list = ALL_CLIENTS.filter(c=>{
+    const name = ((c.full_name||'')+'').toLowerCase();
+    const email = ((c.email||c.id||'')).toLowerCase();
+    const matchQ = !q || name.includes(q) || email.includes(q);
+    const matchSt = !st || (st==='confirmed' && c.email_confirmed_at) || (st==='pending' && !c.email_confirmed_at);
+    return matchQ && matchSt;
+  });
+
+  if(sort==='oldest') list.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  else if(sort==='orders') list.sort((a,b)=>b.orderCount-a.orderCount);
+  else if(sort==='name') list.sort((a,b)=>(a.full_name||'').localeCompare(b.full_name||''));
+  else list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+
+  renderClientsTable(list);
+}
+
+function renderClientsTable(clients){
+  const body = document.getElementById('clientsTableBody');
+  if(!clients.length){
+    body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--g500);font-weight:600">No hay clientes</td></tr>';
+    return;
+  }
+
+  body.innerHTML = clients.map(c=>{
+    const name = c.full_name || c.email?.split('@')[0] || 'Sin nombre';
+    const initials = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const date = new Date(c.created_at).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric'});
+    const confirmed = c.email_confirmed_at || c.id;
+    const colors = ['#F9C200','#22C55E','#3B82F6','#8B5CF6','#EF4444','#F97316'];
+    const color = colors[name.charCodeAt(0)%colors.length];
+
+    return `<tr style="cursor:pointer" onclick="openClientDrawer('${c.id}')">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0A0A0A;flex-shrink:0">${initials||'?'}</div>
+          <div>
+            <div style="font-size:13.5px;font-weight:700">${name}</div>
+            ${c.phone?`<div style="font-size:11px;color:var(--g500)">${c.phone}</div>`:''}
+          </div>
+        </div>
+      </td>
+      <td style="font-size:12.5px;color:var(--g500)">${c.email||'—'}</td>
+      <td style="font-size:12.5px;color:var(--g700)">${c.phone||'—'}</td>
+      <td style="font-size:12px;color:var(--g500)">${date}</td>
+      <td><span style="font-size:14px;font-weight:800">${c.orderCount}</span></td>
+      <td style="font-size:14px;font-weight:800">$${c.totalSpent.toFixed(2)}</td>
+      <td>
+        <span style="padding:3px 10px;border-radius:50px;font-size:10.5px;font-weight:800;${confirmed?'color:#16A34A;background:rgba(34,197,94,.1)':'color:#B88A00;background:rgba(249,194,0,.15)'}">
+          ${confirmed?'✓ Verificado':'⏳ Pendiente'}
+        </span>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="row-btn" onclick="event.stopPropagation();quickWaClient('${c.id}')" title="WhatsApp" style="background:#25D366;border-color:#25D366">
+            <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </button>
+          <button class="row-btn" onclick="event.stopPropagation();openClientDrawer('${c.id}')" title="Ver detalle">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function openClientDrawer(id){
+  const c = ALL_CLIENTS.find(x=>x.id===id);
+  if(!c) return;
+  currentClientId = id;
+
+  const name = c.full_name || c.email?.split('@')[0] || 'Sin nombre';
+  const initials = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  const colors = ['#F9C200','#22C55E','#3B82F6','#8B5CF6','#EF4444','#F97316'];
+  const color = colors[name.charCodeAt(0)%colors.length];
+
+  document.getElementById('clientAvatar').textContent = initials||'?';
+  document.getElementById('clientAvatar').style.background = color;
+  document.getElementById('clientDrawerName').textContent = name;
+  document.getElementById('clientDrawerEmail').textContent = c.email||'—';
+
+  // Stats
+  document.getElementById('cdi-orders').textContent = c.orderCount;
+  document.getElementById('cdi-spent').textContent = '$'+c.totalSpent.toFixed(2);
+  document.getElementById('cdi-avg').textContent = c.orderCount ? '$'+(c.totalSpent/c.orderCount).toFixed(2) : '$0';
+
+  // Contact info
+  const reg = new Date(c.created_at).toLocaleDateString('es-VE',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('cdi-contact').innerHTML = `
+    <div class="cdi-row"><span class="cdi-lbl">Nombre</span><span class="cdi-val">${name}</span></div>
+    <div class="cdi-row"><span class="cdi-lbl">Email</span><span class="cdi-val">${c.email||'—'}</span></div>
+    <div class="cdi-row"><span class="cdi-lbl">Teléfono</span><span class="cdi-val">${c.phone||'No registrado'}</span></div>
+    <div class="cdi-row"><span class="cdi-lbl">Registro</span><span class="cdi-val">${reg}</span></div>
+    <div class="cdi-row"><span class="cdi-lbl">Último pedido</span><span class="cdi-val">${c.lastOrder?new Date(c.lastOrder).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric'}):'Nunca'}</span></div>
+  `;
+
+  // Address
+  if(c.address || c.city){
+    document.getElementById('cdi-address').innerHTML = `
+      <div class="cdi-row"><span class="cdi-lbl">Dirección</span><span class="cdi-val">${c.address||'—'}</span></div>
+      <div class="cdi-row"><span class="cdi-lbl">Ciudad</span><span class="cdi-val">${c.city||'—'}</span></div>
+      <div class="cdi-row"><span class="cdi-lbl">Estado</span><span class="cdi-val">${c.state||'—'}</span></div>
+    `;
+  } else {
+    document.getElementById('cdi-address').innerHTML = '<span style="font-size:13px;color:var(--g500);font-weight:500">Sin dirección registrada</span>';
+  }
+
+  // Status
+  const confirmed = c.email_confirmed_at || c.id;
+  document.getElementById('cdi-status').innerHTML = `
+    <div class="cdi-row"><span class="cdi-lbl">Email</span><span class="cdi-val" style="color:${confirmed?'#16A34A':'#B88A00'}">${confirmed?'✓ Confirmado':'⏳ Sin confirmar'}</span></div>
+    <div class="cdi-row"><span class="cdi-lbl">ID cuenta</span><span class="cdi-val" style="font-size:11px;font-family:monospace">${c.id.slice(0,20)}...</span></div>
+  `;
+
+  // Notes
+  document.getElementById('clientNoteInput').value = c.notes||'';
+
+  // WhatsApp & email buttons
+  const phone = (c.phone||'').replace(/\D/g,'');
+  const waMsg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Auto Repuestos. 😊`);
+  document.getElementById('clientWaBtn').onclick = phone.length>=10
+    ? ()=>window.open(`https://wa.me/${phone}?text=${waMsg}`,'_blank')
+    : ()=>showToast('Sin número de teléfono','err');
+  document.getElementById('clientWaBtn').style.opacity = phone.length>=10 ? '1' : '.5';
+
+  document.getElementById('clientEmailBtn').onclick = c.email
+    ? ()=>window.open(`mailto:${c.email}?subject=IVAMAXO - Información de tu pedido`,'_blank')
+    : ()=>showToast('Sin email registrado','err');
+
+  // Load orders tab
+  loadClientOrders(id);
+
+  // Show drawer
+  switchClientTab('info', document.querySelector('.cd-tab'));
+  document.getElementById('clientDrawer').classList.add('open');
+  document.getElementById('clientOverlay').classList.add('open');
+}
+
+async function loadClientOrders(userId){
+  const {data:orders} = await sb.from('orders').select('*').eq('user_id',userId).order('created_at',{ascending:false});
+  clientOrders = orders||[];
+
+  const ORDER_STATUS_LABEL = {pending:'⏳ Pendiente',processing:'⚙️ Procesando',shipped:'🚚 Enviado',delivered:'✅ Entregado',cancelled:'❌ Cancelado'};
+  const ORDER_STATUS_COLOR = {pending:'#B88A00',processing:'#2563EB',shipped:'#7C3AED',delivered:'#16A34A',cancelled:'#E53E3E'};
+
+  const container = document.getElementById('cdi-orders-list');
+  if(!clientOrders.length){
+    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--g500);font-weight:600">Este cliente no tiene pedidos aún</div>';
+    return;
+  }
+
+  container.innerHTML = clientOrders.map(o=>{
+    const date = new Date(o.created_at).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric'});
+    const st = o.status||'pending';
+    return `<div class="order-card" onclick="setPage('pedidos',document.querySelector('[onclick*=pedidos]'))">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:800">${o.order_number}</span>
+        <span style="font-size:12px;font-weight:800;color:${ORDER_STATUS_COLOR[st]||'#888'}">${ORDER_STATUS_LABEL[st]||st}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11.5px;color:var(--g500)">${date}</span>
+        <span style="font-size:16px;font-weight:800">$${parseFloat(o.total).toFixed(2)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function closeClientDrawer(){
+  document.getElementById('clientDrawer').classList.remove('open');
+  document.getElementById('clientOverlay').classList.remove('open');
+  currentClientId = null;
+}
+
+function switchClientTab(tab, el){
+  document.querySelectorAll('.cd-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.c-tab-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('cTab-'+tab).style.display='block';
+}
+
+async function saveClientNote(){
+  if(!currentClientId) return;
+  const note = document.getElementById('clientNoteInput').value.trim();
+  const {error} = await sb.from('profiles').update({notes:note}).eq('id',currentClientId);
+  if(error){ showToast('Error guardando nota','err'); return; }
+  const c = ALL_CLIENTS.find(x=>x.id===currentClientId);
+  if(c) c.notes = note;
+  showToast('Nota guardada','ok');
+}
+
+function quickWaClient(id){
+  const c = ALL_CLIENTS.find(x=>x.id===id);
+  if(!c) return;
+  const phone = (c.phone||'').replace(/\D/g,'');
+  if(!phone){ showToast('Sin número de teléfono','err'); return; }
+  const name = c.full_name || c.email?.split('@')[0] || 'cliente';
+  const msg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Auto Repuestos. 😊`);
+  window.open(`https://wa.me/${phone}?text=${msg}`,'_blank');
+}
+
+function exportClients(){
+  const headers = ['Nombre','Email','Teléfono','Registro','Pedidos','Total gastado'];
+  const rows = ALL_CLIENTS.map(c=>[
+    c.full_name||'',
+    c.email||'',
+    c.phone||'',
+    new Date(c.created_at).toLocaleDateString('es-VE'),
+    c.orderCount,
+    '$'+c.totalSpent.toFixed(2)
+  ]);
+  const csv = [headers,...rows].map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'clientes_ivamaxo_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('CSV exportado','ok');
 }
 
 </script>
