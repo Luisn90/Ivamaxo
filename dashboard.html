@@ -263,6 +263,7 @@ input,textarea,select,button{font-family:var(--f)}
 .order-card:hover{border-color:var(--g300)}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -309,6 +310,14 @@ input,textarea,select,button{font-family:var(--f)}
       </button>
       <div class="sb-divider"></div>
       <div class="sb-label" style="padding-left:12px;margin-top:4px">Configuración</div>
+      <button class="sb-item" onclick="setPage('precios',this)">
+        <svg viewBox="0 0 24 24" class="sb-ico"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Precios / Márgenes
+      </button>
+      <button class="sb-item" onclick="setPage('importar',this)">
+        <svg viewBox="0 0 24 24" class="sb-ico"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar lista
+      </button>
       <button class="sb-item" onclick="setPage('tienda',this)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41"/><path d="M4.93 4.93l1.41 1.41"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M19.07 19.07l-1.41-1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
         Tienda
@@ -980,6 +989,279 @@ input,textarea,select,button{font-family:var(--f)}
   </div>
 </div>
 
+<!-- PRICING CONTENT -->
+<div id="pricingContent" style="display:none">
+  <div class="content">
+
+    <!-- Global markup card -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Margen global de ganancia</div>
+          <div class="card-sub">Se aplica a todos los productos que no tienen margen individual</div>
+        </div>
+        <div class="card-act">
+          <button class="ca-btn primary" onclick="saveGlobalMarkup()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6L9 17l-5-5"/></svg>
+            Guardar margen
+          </button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:end">
+          
+          <div>
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:10px">Porcentaje de ganancia</label>
+            <div style="display:flex;align-items:center;gap:12px">
+              <input type="range" id="markupSlider" min="0" max="200" value="30" step="5" 
+                oninput="updateMarkupPreview(this.value)"
+                style="flex:1;accent-color:var(--y);height:6px;cursor:pointer">
+              <div style="display:flex;align-items:center;background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;overflow:hidden;width:80px">
+                <input type="number" id="markupInput" value="30" min="0" max="500" 
+                  oninput="updateMarkupPreview(this.value)"
+                  style="width:52px;padding:8px 8px;border:none;background:transparent;font-family:var(--f);font-size:15px;font-weight:700;color:var(--bk);outline:none;text-align:center">
+                <span style="font-size:14px;font-weight:700;color:var(--g500);padding-right:8px">%</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--g500);font-weight:500;margin-top:4px">
+              <span>0%</span><span>50%</span><span>100%</span><span>150%</span><span>200%</span>
+            </div>
+          </div>
+
+          <div style="background:var(--g50);border:1px solid var(--g200);border-radius:12px;padding:18px">
+            <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Ejemplo de precio</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;font-size:13px">
+                <span style="color:var(--g500);font-weight:500">Costo (MAREA)</span>
+                <span style="font-weight:700">$10.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px">
+                <span style="color:var(--g500);font-weight:500">Ganancia (<span id="pvMarkupPct">30</span>%)</span>
+                <span style="font-weight:700;color:var(--green)" id="pvGanancia">+$3.00</span>
+              </div>
+              <div style="height:1px;background:var(--g200)"></div>
+              <div style="display:flex;justify-content:space-between;font-size:16px">
+                <span style="font-weight:700">Precio venta</span>
+                <span style="font-weight:800;color:var(--bk)" id="pvFinal">$13.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(249,194,0,.06);border:1.5px solid rgba(249,194,0,.25);border-radius:12px;padding:18px">
+            <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);margin-bottom:12px">Resumen inventario</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--g500)">Total productos</span>
+                <span style="font-weight:800" id="pmTotalProducts">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--g500)">Con costo cargado</span>
+                <span style="font-weight:800;color:var(--green)" id="pmWithCost">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--g500)">Margen actual</span>
+                <span style="font-weight:800;color:var(--y)" id="pmCurrentMarkup">—</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bulk actions -->
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--g200);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:12px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.08em">Acciones masivas:</span>
+          <button class="ca-btn" onclick="applyMarkupToAll()" style="font-size:12.5px">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            Aplicar margen a TODOS los productos
+          </button>
+          <button class="ca-btn" onclick="applyMarkupByBrand()" style="font-size:12.5px">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            Por marca específica
+          </button>
+          <button class="ca-btn" onclick="applyMarkupByCategory()" style="font-size:12.5px">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="10" width="6" height="6"/><rect x="9" y="10" width="6" height="6"/></svg>
+            Por categoría
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product price adjustment table -->
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Ajuste de precios por producto</div>
+          <div class="card-sub">Busca un producto y ajusta su margen individual (sobreescribe el margen global)</div>
+        </div>
+        <div class="card-act" style="gap:10px">
+          <div class="search-field" style="width:280px">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="priceSearch" placeholder="Buscar producto..." oninput="searchPriceProducts()">
+          </div>
+          <select class="filter-select" id="priceMarkupFilter" onchange="searchPriceProducts()">
+            <option value="">Todos</option>
+            <option value="overridden">Con margen individual</option>
+            <option value="global">Usando margen global</option>
+          </select>
+        </div>
+      </div>
+      <div class="ptable-wrap" style="max-height:60vh;overflow-y:auto">
+        <table class="ptable">
+          <thead style="position:sticky;top:0;background:var(--wh);z-index:1">
+            <tr>
+              <th>Producto</th>
+              <th>Marca</th>
+              <th>Costo MAREA</th>
+              <th>Margen</th>
+              <th>Precio venta</th>
+              <th>Ganancia</th>
+              <th style="text-align:right">Ajustar</th>
+            </tr>
+          </thead>
+          <tbody id="priceTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--g500)">Cargando productos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center">
+        <span id="priceTableCount" style="font-size:12px;color:var(--g500);font-weight:600"></span>
+        <div style="display:flex;gap:8px">
+          <button class="ca-btn" id="pricePrevBtn" onclick="changePricePage(-1)" style="padding:6px 14px;font-size:12px">← Anterior</button>
+          <span id="pricePageInfo" style="font-size:12px;font-weight:700;color:var(--g500);padding:6px 10px"></span>
+          <button class="ca-btn" id="priceNextBtn" onclick="changePricePage(1)" style="padding:6px 14px;font-size:12px">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BULK MARKUP MODAL -->
+<div class="modal-overlay" id="bulkMarkupOverlay" onclick="closeBulkModal()"></div>
+<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:480px;background:var(--wh);border-radius:16px;z-index:400;box-shadow:var(--sl);display:none" id="bulkMarkupModal">
+  <div style="padding:24px;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center">
+    <h3 id="bulkModalTitle" style="font-size:17px;font-weight:700">Aplicar margen</h3>
+    <button onclick="closeBulkModal()" style="border:none;background:var(--g100);width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--bk);fill:none;stroke-width:2.5;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div style="padding:24px">
+    <div id="bulkModalBody"></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="ca-btn" onclick="closeBulkModal()" style="flex:1;justify-content:center">Cancelar</button>
+      <button class="ca-btn primary" onclick="executeBulkMarkup()" style="flex:2;justify-content:center">Aplicar margen</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT CONTENT -->
+<div id="importContent" style="display:none">
+  <div class="content">
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Importar lista de proveedor</div>
+          <div class="card-sub">Sube el archivo Excel de MAREA y los productos se importan automáticamente</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:24px">
+
+        <!-- Drop zone -->
+        <div id="importZone" onclick="document.getElementById('importFileInput').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--y)'"
+          ondragleave="this.style.borderColor='var(--g300)'"
+          ondrop="handleImportDrop(event)"
+          style="border:2px dashed var(--g300);border-radius:12px;padding:48px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:20px">
+          <div id="importZonePlaceholder">
+            <svg viewBox="0 0 24 24" style="width:48px;height:48px;stroke:var(--g300);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 16px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <p style="font-size:16px;font-weight:700;color:var(--g500);margin-bottom:6px">Arrastra el archivo Excel aquí</p>
+            <p style="font-size:13px;color:var(--g500)">o haz clic para seleccionarlo · Formato: .xlsx</p>
+            <p style="font-size:11px;color:var(--g300);margin-top:8px">Compatible con lista LISTA_MAREA_XX-XX-XXXX.xlsx</p>
+          </div>
+          <div id="importFileReady" style="display:none">
+            <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--green);fill:none;stroke-width:1.5;stroke-linecap:round;margin:0 auto 12px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M20 6L9 17l-5-5"/></svg>
+            <p style="font-size:15px;font-weight:700;color:var(--green)" id="importFileName"></p>
+            <p style="font-size:12px;color:var(--g500)" id="importFileRows"></p>
+          </div>
+        </div>
+        <input type="file" id="importFileInput" accept=".xlsx" style="display:none" onchange="handleImportFile(this)">
+
+        <!-- Options -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+          <div>
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Margen inicial</label>
+            <div style="display:flex;align-items:center;background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;overflow:hidden">
+              <input type="number" id="importMarkup" value="30" min="0" max="500"
+                style="flex:1;padding:10px 12px;border:none;background:transparent;font-family:var(--f);font-size:14px;font-weight:700;outline:none">
+              <span style="padding-right:12px;font-size:13px;font-weight:700;color:var(--g500)">%</span>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Estado de productos</label>
+            <select id="importStatus" class="fselect" style="width:100%;padding:11px 14px">
+              <option value="active">Activo (visible en tienda)</option>
+              <option value="draft">Borrador (oculto)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Si el producto ya existe</label>
+            <select id="importDuplicates" class="fselect" style="width:100%;padding:11px 14px">
+              <option value="skip">Omitir duplicados</option>
+              <option value="update">Actualizar precio</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="importProgressWrap" style="display:none;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:700" id="importProgressLabel">Procesando...</span>
+            <span style="font-size:13px;font-weight:700;color:var(--y)" id="importProgressPct">0%</span>
+          </div>
+          <div style="background:var(--g200);border-radius:4px;height:8px;overflow:hidden">
+            <div id="importProgressBar" style="background:var(--y);height:100%;width:0%;transition:width .3s;border-radius:4px"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">
+            <div style="text-align:center;padding:12px;background:var(--g50);border-radius:8px;border:1px solid var(--g200)">
+              <div style="font-size:20px;font-weight:800" id="imp-total">0</div>
+              <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Total</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:rgba(34,197,94,.05);border-radius:8px;border:1px solid rgba(34,197,94,.15)">
+              <div style="font-size:20px;font-weight:800;color:var(--green)" id="imp-done">0</div>
+              <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Importados</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:rgba(249,194,0,.05);border-radius:8px;border:1px solid rgba(249,194,0,.15)">
+              <div style="font-size:20px;font-weight:800;color:var(--y)" id="imp-skip">0</div>
+              <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Omitidos</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:rgba(229,62,62,.05);border-radius:8px;border:1px solid rgba(229,62,62,.15)">
+              <div style="font-size:20px;font-weight:800;color:var(--red)" id="imp-err">0</div>
+              <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Errores</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px">
+          <button class="ca-btn primary" id="importStartBtn" onclick="startImport()" style="flex:1;justify-content:center;padding:14px;font-size:14px" disabled>
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Iniciar importación
+          </button>
+          <button class="ca-btn" onclick="resetImport()" style="padding:14px 20px">Resetear</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="card" id="importLogCard" style="display:none">
+      <div class="card-hdr"><div class="card-title">Log de importación</div></div>
+      <div style="padding:16px;font-family:monospace;font-size:12px;background:var(--bk);border-radius:0 0 12px 12px;max-height:300px;overflow-y:auto" id="importLog"></div>
+    </div>
+
+  </div>
+</div>
+
 
 <!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
@@ -1197,9 +1479,19 @@ function setPage(page, el){
       document.getElementById('mainContent').style.display='none';
       document.getElementById('catContent').style.display='none';
       document.getElementById('ordersContent').style.display='none';
-      document.getElementById('clientsContent').style.display='block';
+      document.getElementById('clientsContent').style.display='none';
+      document.getElementById('pricingContent').style.display='none';
       document.getElementById('payBtn').style.display='none';
       loadClients();
+      document.getElementById('clientsContent').style.display='block';
+    } else if(page==='precios'){
+      document.getElementById('mainContent').style.display='none';
+      document.getElementById('catContent').style.display='none';
+      document.getElementById('ordersContent').style.display='none';
+      document.getElementById('clientsContent').style.display='none';
+      document.getElementById('pricingContent').style.display='block';
+      document.getElementById('payBtn').style.display='none';
+      loadPricingPage();
     } else {
       document.getElementById('mainContent').style.display='block';
       document.getElementById('catContent').style.display='none';
@@ -1848,6 +2140,551 @@ function exportClients(){
   a.download = 'clientes_ivamaxo_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
   showToast('CSV exportado','ok');
+}
+
+
+// ── PRICING / MÁRGENES ──
+let PRICE_PRODUCTS = [], pricePageCurrent = 1;
+const PRICE_PER_PAGE = 50;
+let currentGlobalMarkup = 30;
+let bulkMarkupMode = null;
+
+async function loadPricingPage(){
+  // Load global markup from settings
+  const {data:settings} = await sb.from('settings').select('value').eq('key','global_markup').single();
+  if(settings) {
+    currentGlobalMarkup = parseFloat(settings.value)||30;
+    document.getElementById('markupSlider').value = currentGlobalMarkup;
+    document.getElementById('markupInput').value = currentGlobalMarkup;
+    updateMarkupPreview(currentGlobalMarkup);
+  }
+
+  // Load products with cost_price
+  const {data:products} = await sb.from('products')
+    .select('id,name,brand,cost_price,price,markup_override,category_id,sku')
+    .order('brand');
+
+  PRICE_PRODUCTS = (products||[]);
+
+  // Stats
+  const withCost = PRICE_PRODUCTS.filter(p=>p.cost_price>0).length;
+  document.getElementById('pmTotalProducts').textContent = PRICE_PRODUCTS.length;
+  document.getElementById('pmWithCost').textContent = withCost.toLocaleString();
+  document.getElementById('pmCurrentMarkup').textContent = currentGlobalMarkup+'%';
+
+  searchPriceProducts();
+}
+
+function updateMarkupPreview(val){
+  val = parseFloat(val)||0;
+  document.getElementById('markupSlider').value = Math.min(200, val);
+  document.getElementById('markupInput').value = val;
+  document.getElementById('pvMarkupPct').textContent = val;
+  const ganancia = (10 * val/100);
+  const final = 10 + ganancia;
+  document.getElementById('pvGanancia').textContent = '+$'+ganancia.toFixed(2);
+  document.getElementById('pvFinal').textContent = '$'+final.toFixed(2);
+}
+
+async function saveGlobalMarkup(){
+  const val = parseFloat(document.getElementById('markupInput').value)||30;
+  const {error} = await sb.from('settings').upsert({key:'global_markup', value: String(val), updated_at: new Date()});
+  if(error){ showToast('Error guardando margen','err'); return; }
+  currentGlobalMarkup = val;
+  document.getElementById('pmCurrentMarkup').textContent = val+'%';
+  showToast('Margen global guardado: '+val+'%','ok');
+}
+
+function searchPriceProducts(){
+  const q = document.getElementById('priceSearch').value.toLowerCase();
+  const filter = document.getElementById('priceMarkupFilter').value;
+
+  let list = PRICE_PRODUCTS.filter(p=>{
+    const matchQ = !q || p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q);
+    const matchF = !filter || 
+      (filter==='overridden' && p.markup_override!=null) ||
+      (filter==='global' && p.markup_override==null);
+    return matchQ && matchF;
+  });
+
+  pricePageCurrent = 1;
+  renderPriceTable(list);
+}
+
+function renderPriceTable(list){
+  const total = list.length;
+  const pages = Math.ceil(total/PRICE_PER_PAGE);
+  const start = (pricePageCurrent-1)*PRICE_PER_PAGE;
+  const page = list.slice(start, start+PRICE_PER_PAGE);
+
+  document.getElementById('priceTableCount').textContent = total.toLocaleString()+' productos';
+  document.getElementById('pricePageInfo').textContent = `Pág ${pricePageCurrent} / ${pages||1}`;
+  document.getElementById('pricePrevBtn').disabled = pricePageCurrent<=1;
+  document.getElementById('priceNextBtn').disabled = pricePageCurrent>=pages;
+
+  const body = document.getElementById('priceTableBody');
+  if(!page.length){
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--g500);font-weight:600">Sin resultados</td></tr>';
+    return;
+  }
+
+  // Store filtered list for pagination
+  window._currentPriceList = list;
+
+  body.innerHTML = page.map(p=>{
+    const cost = parseFloat(p.cost_price)||0;
+    const markup = p.markup_override!=null ? p.markup_override : currentGlobalMarkup;
+    const salePrice = cost > 0 ? cost*(1+markup/100) : parseFloat(p.price)||0;
+    const ganancia = salePrice - cost;
+    const hasOverride = p.markup_override!=null;
+
+    return `<tr>
+      <td>
+        <div style="font-size:13px;font-weight:600;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:10px;color:var(--g500)">${p.sku||'—'}</div>
+      </td>
+      <td style="font-size:12px;font-weight:700;color:var(--g500)">${p.brand||'—'}</td>
+      <td style="font-size:14px;font-weight:700">${cost>0?'$'+cost.toFixed(2):'<span style="color:var(--g500)">—</span>'}</td>
+      <td>
+        <span style="padding:3px 10px;border-radius:50px;font-size:11px;font-weight:800;${hasOverride?'background:rgba(59,130,246,.1);color:#2563EB':'background:var(--g100);color:var(--g700)'}">
+          ${markup}%${hasOverride?' ✏️':' (global)'}
+        </span>
+      </td>
+      <td style="font-size:15px;font-weight:800">$${salePrice.toFixed(2)}</td>
+      <td style="font-size:13px;font-weight:700;color:${ganancia>0?'var(--green)':'var(--g500)'}">
+        ${cost>0?'+$'+ganancia.toFixed(2):'—'}
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="row-btn" onclick="editProductMarkup('${p.id}','${(p.name||'').replace(/'/g,"\'")}',${cost},${markup},${hasOverride})" title="Ajustar margen">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function changePricePage(dir){
+  const list = window._currentPriceList || PRICE_PRODUCTS;
+  const pages = Math.ceil(list.length/PRICE_PER_PAGE);
+  pricePageCurrent = Math.max(1, Math.min(pages, pricePageCurrent+dir));
+  renderPriceTable(list);
+}
+
+function editProductMarkup(id, name, cost, currentMarkup, hasOverride){
+  const modal = document.getElementById('bulkMarkupModal');
+  const overlay = document.getElementById('bulkMarkupOverlay');
+  document.getElementById('bulkModalTitle').textContent = 'Ajustar margen: '+name.slice(0,40);
+  bulkMarkupMode = {type:'product', id};
+
+  const salePrice = cost*(1+currentMarkup/100);
+  document.getElementById('bulkModalBody').innerHTML = `
+    <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span style="color:var(--g500)">Costo MAREA</span><span style="font-weight:700">$${cost.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span style="color:var(--g500)">Precio actual</span><span style="font-weight:700">$${salePrice.toFixed(2)}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <button onclick="setBulkType('pct')" class="ca-btn${true?' active':''}" id="bmt-pct" style="flex:1;justify-content:center;font-size:12.5px">% Porcentaje</button>
+      <button onclick="setBulkType('fixed')" class="ca-btn" id="bmt-fixed" style="flex:1;justify-content:center;font-size:12.5px">$ Precio fijo</button>
+    </div>
+    <div id="bmt-pct-panel">
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Margen de ganancia (%)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="range" id="indMarkupSlider" min="0" max="300" value="${currentMarkup}" step="5" oninput="updateIndPreview(${cost})" style="flex:1;accent-color:var(--y)">
+        <div style="display:flex;align-items:center;background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;overflow:hidden;width:80px">
+          <input type="number" id="indMarkupInput" value="${currentMarkup}" min="0" oninput="updateIndPreview(${cost})" style="width:52px;padding:8px;border:none;background:transparent;font-family:var(--f);font-size:15px;font-weight:700;outline:none;text-align:center">
+          <span style="font-size:13px;font-weight:700;color:var(--g500);padding-right:6px">%</span>
+        </div>
+      </div>
+    </div>
+    <div id="bmt-fixed-panel" style="display:none">
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Precio de venta fijo (USD)</label>
+      <div style="display:flex;align-items:center;background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;overflow:hidden">
+        <span style="padding:0 10px;font-size:14px;font-weight:700;color:var(--g500)">$</span>
+        <input type="number" id="indFixedPrice" value="${salePrice.toFixed(2)}" min="${cost}" step="0.01" style="flex:1;padding:10px 8px;border:none;background:transparent;font-family:var(--f);font-size:15px;font-weight:700;outline:none">
+      </div>
+    </div>
+    <div style="background:rgba(249,194,0,.06);border:1px solid rgba(249,194,0,.2);border-radius:8px;padding:12px;margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:600;color:var(--g700)">Precio de venta resultante</span>
+      <span style="font-size:18px;font-weight:800;color:var(--bk)" id="indPreviewPrice">$${salePrice.toFixed(2)}</span>
+    </div>
+    ${hasOverride?'<button onclick="resetProductMarkup(\''+id+'\');" style="margin-top:10px;font-size:12px;color:var(--g500);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:var(--f)">Volver al margen global</button>':''}
+  `;
+
+  modal.style.display='block';
+  overlay.style.display='block';
+  updateIndPreview(cost);
+}
+
+function setBulkType(type){
+  document.getElementById('bmt-pct').classList.toggle('active', type==='pct');
+  document.getElementById('bmt-fixed').classList.toggle('active', type==='fixed');
+  document.getElementById('bmt-pct-panel').style.display = type==='pct'?'block':'none';
+  document.getElementById('bmt-fixed-panel').style.display = type==='fixed'?'block':'none';
+  bulkMarkupMode.inputType = type;
+}
+
+function updateIndPreview(cost){
+  const pct = parseFloat(document.getElementById('indMarkupInput')?.value)||0;
+  document.getElementById('indMarkupSlider').value = Math.min(300,pct);
+  const salePrice = cost*(1+pct/100);
+  if(document.getElementById('indPreviewPrice'))
+    document.getElementById('indPreviewPrice').textContent = '$'+salePrice.toFixed(2);
+}
+
+async function executeBulkMarkup(){
+  if(!bulkMarkupMode) return;
+  const mode = bulkMarkupMode;
+
+  if(mode.type==='product'){
+    const inputType = mode.inputType||'pct';
+    let markup, newPrice;
+
+    if(inputType==='fixed'){
+      const fixedPrice = parseFloat(document.getElementById('indFixedPrice').value)||0;
+      newPrice = fixedPrice;
+      // Calculate equivalent markup for reference (we store price directly)
+      markup = null;
+    } else {
+      markup = parseFloat(document.getElementById('indMarkupInput').value)||0;
+      newPrice = null;
+    }
+
+    const updateData = {updated_at: new Date()};
+    if(markup!=null){ updateData.markup_override = markup; }
+    if(newPrice!=null){ updateData.price = newPrice; }
+
+    const {error} = await sb.from('products').update(updateData).eq('id', mode.id);
+    if(error){ showToast('Error: '+error.message,'err'); return; }
+    showToast('Margen actualizado','ok');
+    closeBulkModal();
+    loadPricingPage();
+    return;
+  }
+
+  closeBulkModal();
+}
+
+async function resetProductMarkup(id){
+  const {error} = await sb.from('products').update({markup_override: null, updated_at: new Date()}).eq('id', id);
+  if(error){ showToast('Error','err'); return; }
+  showToast('Vuelto al margen global','ok');
+  closeBulkModal();
+  loadPricingPage();
+}
+
+function closeBulkModal(){
+  document.getElementById('bulkMarkupModal').style.display='none';
+  document.getElementById('bulkMarkupOverlay').style.display='none';
+  bulkMarkupMode=null;
+}
+
+async function applyMarkupToAll(){
+  const markup = parseFloat(document.getElementById('markupInput').value)||30;
+  if(!confirm(`¿Aplicar ${markup}% de margen a TODOS los ${PRICE_PRODUCTS.filter(p=>p.cost_price>0).length.toLocaleString()} productos con costo cargado? Esto sobreescribe márgenes individuales.`)) return;
+  
+  showToast('Aplicando margen...','ok');
+
+  // Update all products with cost_price
+  const productsWithCost = PRICE_PRODUCTS.filter(p=>p.cost_price>0);
+  let done = 0;
+
+  for(let i=0; i<productsWithCost.length; i+=100){
+    const batch = productsWithCost.slice(i,i+100);
+    for(const p of batch){
+      const newPrice = parseFloat(p.cost_price)*(1+markup/100);
+      await sb.from('products').update({price: parseFloat(newPrice.toFixed(2)), markup_override: markup}).eq('id',p.id);
+      done++;
+    }
+    showToast(`Aplicando... ${Math.round(done/productsWithCost.length*100)}%`,'ok');
+  }
+
+  showToast('✅ Margen aplicado a todos los productos','ok');
+  loadPricingPage();
+}
+
+async function applyMarkupByBrand(){
+  const brands = [...new Set(PRICE_PRODUCTS.map(p=>p.brand).filter(Boolean))].sort();
+  const markup = parseFloat(document.getElementById('markupInput').value)||30;
+  bulkMarkupMode = {type:'brand'};
+
+  document.getElementById('bulkModalTitle').textContent = 'Aplicar margen por marca';
+  document.getElementById('bulkModalBody').innerHTML = `
+    <div style="margin-bottom:14px">
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Marca</label>
+      <select id="bulkBrand" class="fselect" style="width:100%">
+        ${brands.map(b=>`<option value="${b}">${b}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Margen (%)</label>
+      <input type="number" id="bulkBrandMarkup" value="${markup}" min="0" class="finput" style="width:100%">
+    </div>
+  `;
+  document.getElementById('bulkMarkupModal').style.display='block';
+  document.getElementById('bulkMarkupOverlay').style.display='block';
+
+  // Override execute for brand mode
+  document.querySelector('#bulkMarkupModal .ca-btn.primary').onclick = async function(){
+    const brand = document.getElementById('bulkBrand').value;
+    const m = parseFloat(document.getElementById('bulkBrandMarkup').value)||30;
+    const brandProds = PRICE_PRODUCTS.filter(p=>p.brand===brand&&p.cost_price>0);
+    for(const p of brandProds){
+      await sb.from('products').update({price:parseFloat((p.cost_price*(1+m/100)).toFixed(2)),markup_override:m}).eq('id',p.id);
+    }
+    showToast(`Margen ${m}% aplicado a ${brandProds.length} productos de ${brand}`,'ok');
+    closeBulkModal();
+    loadPricingPage();
+  };
+}
+
+async function applyMarkupByCategory(){
+  const {data:cats} = await sb.from('categories').select('id,name').order('name');
+  const markup = parseFloat(document.getElementById('markupInput').value)||30;
+  bulkMarkupMode = {type:'category'};
+
+  document.getElementById('bulkModalTitle').textContent = 'Aplicar margen por categoría';
+  document.getElementById('bulkModalBody').innerHTML = `
+    <div style="margin-bottom:14px">
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Categoría</label>
+      <select id="bulkCat" class="fselect" style="width:100%">
+        ${(cats||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:8px">Margen (%)</label>
+      <input type="number" id="bulkCatMarkup" value="${markup}" min="0" class="finput" style="width:100%">
+    </div>
+  `;
+  document.getElementById('bulkMarkupModal').style.display='block';
+  document.getElementById('bulkMarkupOverlay').style.display='block';
+
+  document.querySelector('#bulkMarkupModal .ca-btn.primary').onclick = async function(){
+    const catId = document.getElementById('bulkCat').value;
+    const m = parseFloat(document.getElementById('bulkCatMarkup').value)||30;
+    const catProds = PRICE_PRODUCTS.filter(p=>p.category_id===catId&&p.cost_price>0);
+    for(const p of catProds){
+      await sb.from('products').update({price:parseFloat((p.cost_price*(1+m/100)).toFixed(2)),markup_override:m}).eq('id',p.id);
+    }
+    showToast(`Margen ${m}% aplicado a ${catProds.length} productos`,'ok');
+    closeBulkModal();
+    loadPricingPage();
+  };
+}
+
+
+// ── IMPORT MAREA ──
+let importData = [], importFile = null;
+
+const CAT_KW = {
+  encendido:   ['BUJIA','BOBINA','DISTRIBUIDOR','CABLE BUJIA','PLATINO','CONDENSADOR','ROTOR','TAPA DIST'],
+  filtros:     ['FILTRO','FILTER'],
+  lubricantes: ['ACEITE','LUBRICANTE','GRASA','SELLADOR','SILICONA'],
+  frenos:      ['FRENO','PASTILLA','ZAPATA','DISCO','CILINDRO RUEDA','CILINDRO MAESTRO','MORDAZA'],
+  suspension:  ['AMORTIGUADOR','RESORTE','BUJE','ROTULA','TERMINAL','CREMALLERA','BOCINA','HORQUILLA'],
+  electrico:   ['BATERIA','ALTERNADOR','ARRANQUE','FARO','FOCO','RELAY','FUSIBLE','SENSOR','BOMBA COMBUSTIBLE'],
+  correas:     ['CORREA','BANDA','CADENA'],
+  juntas:      ['JUNTA','EMPAQUE','SELLO','RETEN'],
+  enfriamiento:['RADIADOR','TERMOSTATO','MANGUERA','BOMBA AGUA','VENTILADOR','REFRIGERANTE'],
+  neumaticos:  ['NEUMATICO','LLANTA'],
+  carroceria:  ['PARABRISAS','ESPEJO','MOLDURA'],
+};
+
+function getCatSlug(desc){
+  const d = String(desc).toUpperCase();
+  for(const [slug, kws] of Object.entries(CAT_KW)){
+    if(kws.some(k=>d.includes(k))) return slug;
+  }
+  return 'accesorios';
+}
+
+function handleImportDrop(e){
+  e.preventDefault();
+  document.getElementById('importZone').style.borderColor='var(--g300)';
+  const file = e.dataTransfer.files[0];
+  if(file) processImportFile(file);
+}
+
+function handleImportFile(input){
+  const file = input.files[0];
+  if(file) processImportFile(file);
+}
+
+function processImportFile(file){
+  if(!file.name.endsWith('.xlsx')){ showToast('Solo archivos .xlsx','err'); return; }
+  importFile = file;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+
+    // Find header row (row with "Código")
+    let headerRow = -1;
+    for(let i=0;i<rows.length;i++){
+      if(rows[i].some(c=>String(c||'').includes('Código')||String(c||'').includes('Codigo'))){
+        headerRow=i; break;
+      }
+    }
+    if(headerRow<0){ showToast('No se encontró la fila de encabezados','err'); return; }
+
+    const headers = rows[headerRow].map(h=>String(h||'').toLowerCase().trim());
+    const codigoIdx = headers.findIndex(h=>h.includes('digo'));
+    const oemIdx = headers.findIndex(h=>h==='oem');
+    const marcaIdx = headers.findIndex(h=>h==='marca');
+    const origenIdx = headers.findIndex(h=>h==='origen');
+    const descIdx = headers.findIndex(h=>h.includes('descrip'));
+    const precioIdx = headers.findIndex(h=>h.includes('pvp')||h.includes('precio'));
+
+    importData = [];
+    for(let i=headerRow+1;i<rows.length;i++){
+      const row = rows[i];
+      const codigo = String(row[codigoIdx]||'').trim().replace(/\.0$/,'');
+      const precio = parseFloat(String(row[precioIdx]||'').replace(',','.'));
+      if(!codigo||isNaN(precio)||precio<=0) continue;
+      const desc = String(row[descIdx]||'').trim();
+      importData.push({
+        sku: codigo,
+        name: desc.slice(0,200)||'Producto '+codigo,
+        brand: String(row[marcaIdx]||'Sin marca').trim().slice(0,50),
+        oem: String(row[oemIdx]||'').trim().slice(0,100)||null,
+        origen: String(row[origenIdx]||'').trim(),
+        description: desc,
+        cost_price: precio,
+        cat_slug: getCatSlug(desc),
+        supplier: 'MAREA',
+      });
+    }
+
+    if(!importData.length){ showToast('No se encontraron productos válidos','err'); return; }
+
+    document.getElementById('importZonePlaceholder').style.display='none';
+    document.getElementById('importFileReady').style.display='block';
+    document.getElementById('importFileName').textContent = file.name;
+    document.getElementById('importFileRows').textContent = importData.length.toLocaleString()+' productos encontrados';
+    document.getElementById('importStartBtn').disabled = false;
+    logImport('✅ Archivo leído: '+importData.length.toLocaleString()+' productos válidos', 'green');
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function resetImport(){
+  importData=[];importFile=null;
+  document.getElementById('importZonePlaceholder').style.display='block';
+  document.getElementById('importFileReady').style.display='none';
+  document.getElementById('importStartBtn').disabled=true;
+  document.getElementById('importProgressWrap').style.display='none';
+  document.getElementById('importLogCard').style.display='none';
+  document.getElementById('importFileInput').value='';
+}
+
+async function startImport(){
+  if(!importData.length){ showToast('Sube un archivo primero','err'); return; }
+
+  const markup = parseFloat(document.getElementById('importMarkup').value)||30;
+  const status = document.getElementById('importStatus').value;
+  const dupMode = document.getElementById('importDuplicates').value;
+
+  // Load categories
+  const {data:cats} = await sb.from('categories').select('id,slug');
+  const catMap = {};
+  (cats||[]).forEach(c=>catMap[c.slug]=c.id);
+
+  // Load existing SKUs if skip/update mode
+  let existingSkus = new Set();
+  if(dupMode==='skip'){
+    const {data:existing} = await sb.from('products').select('sku').eq('supplier','MAREA');
+    (existing||[]).forEach(p=>existingSkus.add(p.sku));
+    logImport(`📋 ${existingSkus.size} productos MAREA ya existen en la BD`, 'gray');
+  }
+
+  document.getElementById('importProgressWrap').style.display='block';
+  document.getElementById('importLogCard').style.display='block';
+  document.getElementById('importStartBtn').disabled=true;
+
+  const total = importData.length;
+  let done=0, skipped=0, errors=0;
+
+  document.getElementById('imp-total').textContent=total.toLocaleString();
+
+  const BATCH = 50;
+
+  for(let i=0;i<total;i+=BATCH){
+    const batch = importData.slice(i,i+BATCH);
+    const toInsert = [];
+
+    for(const p of batch){
+      if(dupMode==='skip' && existingSkus.has(p.sku)){ skipped++; continue; }
+
+      const catId = catMap[p.cat_slug]||catMap['accesorios'];
+      const salePrice = parseFloat((p.cost_price*(1+markup/100)).toFixed(2));
+
+      toInsert.push({
+        sku: p.sku,
+        name: p.name,
+        brand: p.brand,
+        description: p.description,
+        cost_price: p.cost_price,
+        price: salePrice,
+        markup_override: markup,
+        category_id: catId,
+        stock: 10,
+        status: status,
+        supplier: 'MAREA',
+        oem: p.oem,
+        origen: p.origen,
+      });
+    }
+
+    if(toInsert.length){
+      if(dupMode==='update'){
+        const {error} = await sb.from('products').upsert(toInsert, {onConflict:'sku'});
+        if(error){ errors+=toInsert.length; logImport('❌ Error en lote: '+error.message,'red'); }
+        else done+=toInsert.length;
+      } else {
+        const {error} = await sb.from('products').insert(toInsert);
+        if(error){ errors+=toInsert.length; logImport('❌ Error lote '+Math.ceil(i/BATCH)+': '+error.message,'red'); }
+        else done+=toInsert.length;
+      }
+    }
+
+    const pct = Math.round((i+batch.length)/total*100);
+    document.getElementById('importProgressBar').style.width=pct+'%';
+    document.getElementById('importProgressPct').textContent=pct+'%';
+    document.getElementById('importProgressLabel').textContent='Importando... ('+i.toLocaleString()+' / '+total.toLocaleString()+')';
+    document.getElementById('imp-done').textContent=done.toLocaleString();
+    document.getElementById('imp-skip').textContent=skipped.toLocaleString();
+    document.getElementById('imp-err').textContent=errors.toLocaleString();
+
+    // Small delay to not overwhelm
+    await new Promise(r=>setTimeout(r,50));
+  }
+
+  document.getElementById('importProgressLabel').textContent='✅ Importación completada';
+  logImport('='.repeat(50),'gray');
+  logImport('✅ COMPLETADO: '+done.toLocaleString()+' importados · '+skipped.toLocaleString()+' omitidos · '+errors+' errores','green');
+  showToast('Importación completada: '+done.toLocaleString()+' productos','ok');
+  document.getElementById('importStartBtn').disabled=false;
+
+  // Reload products count in sidebar
+  loadProducts();
+}
+
+function logImport(msg, color='white'){
+  const log = document.getElementById('importLog');
+  if(!log) return;
+  document.getElementById('importLogCard').style.display='block';
+  const colors = {white:'#fff',green:'#22C55E',red:'#EF4444',gray:'#666'};
+  const time = new Date().toLocaleTimeString('es-VE');
+  log.innerHTML += '<div style="color:'+colors[color]+';margin-bottom:2px">['+time+'] '+msg+'</div>';
+  log.scrollTop = log.scrollHeight;
 }
 
 </script>

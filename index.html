@@ -1016,6 +1016,9 @@ const sbStore=createClient(SB_URL,SB_KEY);
 
 async function loadProductsFromDB(){
   showSkeleton();
+  // Load global markup
+  const {data:mkSetting}=await sbStore.from('settings').select('value').eq('key','global_markup').single();
+  window.GLOBAL_MARKUP = parseFloat(mkSetting?.value||'30');
   try {
     const {data,error}=await sbStore.from('products').select('*,categories(name,slug)').eq('status','active').order('created_at',{ascending:false});
     if(error||!data||data.length===0){ showEmptyState(); return; }
@@ -1025,12 +1028,18 @@ async function loadProductsFromDB(){
       brand: p.brand,
       cat: p.categories?.slug||'todos',
       catName: p.categories?.name||'',
-      price: parseFloat(p.price),
+      price:(()=>{
+        const markup=p.markup_override!=null?p.markup_override:(window.GLOBAL_MARKUP||30);
+        const cost=parseFloat(p.cost_price)||0;
+        if(cost>0) return parseFloat((cost*(1+markup/100)).toFixed(2));
+        return parseFloat(p.price)||0;
+      })(),
       old: p.old_price ? parseFloat(p.old_price) : null,
       badge: p.badge||null,
       badgeTxt: p.badge_text||null,
       icon: p.icon||'filter',
       image_url: p.image_url||null,
+      cost_price: parseFloat(p.cost_price)||0,
       stars: 5,
       reviews: Math.floor(Math.random()*200+10),
       discount: p.old_price ? Math.round((1-p.price/p.old_price)*100) : null,
