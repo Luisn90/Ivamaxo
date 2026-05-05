@@ -2781,21 +2781,43 @@ const sb = createClient(SB_URL, SB_KEY);
 })();
 
 // Load real products from Supabase
-async function loadProducts(){
-  // Show loading state
-  const tbody = document.querySelector('#prodTable tbody');
-  if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--g500);font-weight:600">Cargando productos...</td></tr>';
+// ── PRODUCT PAGINATION ──
+let prodPage = 1;
+const PROD_PER_PAGE = 50;
+let prodTotal = 0;
+let prodSearchTimer;
 
-  const q = document.getElementById('searchProd')?.value?.toLowerCase()||'';
+async function loadProducts(){
+  prodPage = 1;
+  await fetchProducts();
+}
+
+async function fetchProducts(){
+  // Show skeleton immediately
+  renderTableSkeleton();
+
+  const q = document.getElementById('searchProd')?.value?.trim()||'';
   const catFilter = document.getElementById('filterCat')?.value||'';
   const stockFilter = document.getElementById('filterStock')?.value||'';
 
-  let query = sb.from('products').select('*, categories(name)', {count:'exact'}).order('created_at',{ascending:false});
-  if(q){ query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%`); }
+  const from = (prodPage-1)*PROD_PER_PAGE;
+  const to = from + PROD_PER_PAGE - 1;
 
-  const {data,error,count} = await query;
-  if(error){ console.error(error); showToast('Error cargando productos','err'); return; }
+  let query = sb.from('products')
+    .select('id,name,brand,sku,price,old_price,cost_price,stock,status,badge,badge_text,icon,image_url,markup_override,supplier,categories(name)', {count:'exact'})
+    .order('created_at', {ascending:false})
+    .range(from, to);
 
+  if(q) query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%`);
+  if(catFilter) query = query.eq('categories.name', catFilter);
+  if(stockFilter === 'out') query = query.eq('stock', 0);
+  else if(stockFilter === 'low') query = query.gt('stock', 0).lt('stock', 10);
+  else if(stockFilter === 'ok') query = query.gte('stock', 10);
+
+  const {data, error, count} = await query;
+  if(error){ console.error(error); showToast('Error cargando productos','err'); renderTableSkeleton(true); return; }
+
+  prodTotal = count || 0;
   PRODUCTS = (data||[]).map(p=>({
     id: p.id,
     name: p.name || '',
@@ -2807,7 +2829,6 @@ async function loadProducts(){
     stock: parseInt(p.stock)||0,
     status: p.status || 'active',
     badge: p.badge || null,
-    badge_text: p.badge_text || null,
     sku: p.sku || '',
     icon: p.icon || 'default',
     image_url: p.image_url || null,
@@ -2816,14 +2837,60 @@ async function loadProducts(){
   }));
 
   renderTable();
-  const total = count || PRODUCTS.length;
-  const sinStock = PRODUCTS.filter(p=>p.stock===0).length;
-  document.getElementById('pageSub').textContent = `${total.toLocaleString()} productos · ${sinStock} sin stock`;
-  // Update stat card
+  renderProdPagination();
+
+  // Update header stats
+  document.getElementById('pageSub').textContent = `${prodTotal.toLocaleString()} productos`;
   const statVal = document.querySelector('.stat-val');
-  if(statVal) statVal.textContent = total.toLocaleString();
-  // Update sidebar badge
-  document.querySelectorAll('.sb-badge').forEach((b,i)=>{ if(i===0) b.textContent=total; });
+  if(statVal) statVal.textContent = prodTotal.toLocaleString();
+  document.querySelectorAll('.sb-badge')[0].textContent = prodTotal > 999 ? Math.round(prodTotal/1000)+'k' : prodTotal;
+}
+
+function renderTableSkeleton(empty=false){
+  const tbody = document.querySelector('#prodTable tbody');
+  if(!tbody) return;
+  if(empty){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:48px;color:var(--g500);font-weight:600">Sin resultados</td></tr>'; return; }
+  tbody.innerHTML = Array(8).fill(`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite"></div>
+        <div><div style="height:12px;width:160px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:4px;margin-bottom:6px"></div>
+        <div style="height:10px;width:100px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:4px"></div></div>
+      </div></td>
+      <td><div style="height:22px;width:80px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:50px"></div></td>
+      <td><div style="height:14px;width:60px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:4px"></div></td>
+      <td><div style="height:22px;width:90px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:50px"></div></td>
+      <td><div style="height:22px;width:70px;background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200%;animation:skel-anim 1.5s infinite;border-radius:50px"></div></td>
+      <td></td>
+    </tr>`).join('');
+}
+
+function renderProdPagination(){
+  const pages = Math.ceil(prodTotal / PROD_PER_PAGE);
+  let wrap = document.getElementById('prodPagination');
+  if(!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'prodPagination';
+    wrap.style.cssText = 'padding:14px 20px;border-top:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center';
+    document.querySelector('#prodTable')?.closest('.card')?.appendChild(wrap);
+  }
+  const from = (prodPage-1)*PROD_PER_PAGE+1;
+  const to = Math.min(prodPage*PROD_PER_PAGE, prodTotal);
+  wrap.innerHTML = `
+    <span style="font-size:12px;color:var(--g500);font-weight:600">Mostrando ${from.toLocaleString()}–${to.toLocaleString()} de ${prodTotal.toLocaleString()} productos</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button onclick="changeProdPage(${prodPage-1})" ${prodPage<=1?'disabled':''} style="padding:6px 14px;border:1.5px solid var(--g200);border-radius:8px;background:var(--wh);font-family:var(--f);font-size:12.5px;font-weight:700;color:${prodPage<=1?'var(--g300)':'var(--g700)'};cursor:${prodPage<=1?'default':'pointer'}">← Anterior</button>
+      <span style="font-size:12.5px;font-weight:700;color:var(--g500);padding:0 8px">Pág ${prodPage} / ${pages}</span>
+      <button onclick="changeProdPage(${prodPage+1})" ${prodPage>=pages?'disabled':''} style="padding:6px 14px;border:1.5px solid var(--g200);border-radius:8px;background:var(--wh);font-family:var(--f);font-size:12.5px;font-weight:700;color:${prodPage>=pages?'var(--g300)':'var(--g700)'};cursor:${prodPage>=pages?'default':'pointer'}">Siguiente →</button>
+    </div>`;
+}
+
+async function changeProdPage(page){
+  const pages = Math.ceil(prodTotal/PROD_PER_PAGE);
+  if(page<1||page>pages) return;
+  prodPage = page;
+  await fetchProducts();
+  document.querySelector('.content')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // Override saveProduct to use Supabase
