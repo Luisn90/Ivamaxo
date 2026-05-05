@@ -594,42 +594,133 @@ const CAT_ICONS={
 };
 
 // ── SUPABASE LOAD ──
+// ── SERVER-SIDE STATE ──
+let tiendaPage = 1;
+const TIENDA_PER_PAGE = 24;
+let tiendaTotal = 0;
+let tiendaSearchTimer;
+
 async function loadProducts(){
   showSkeletons();
-  // Load global markup setting
   const {data:setting}=await sb.from('settings').select('value').eq('key','global_markup').single();
   window.GLOBAL_MARKUP = parseFloat(setting?.value||'30');
-  // Load categories independently so empty ones show too
   const {data:catData}=await sb.from('categories').select('*').order('name');
   if(catData) window.ALL_CATS=catData;
-  try{
-    const {data,error}=await sb.from('products').select('*,categories(name,slug)').eq('status','active').order('created_at',{ascending:false});
-    if(error||!data?.length){ showEmpty('No hay productos disponibles aún'); return; }
-    ALL_PRODUCTS=data.map(p=>({
-      id:p.id, name:p.name, brand:p.brand,
-      cat:p.categories?.slug||'otros',
-      catName:p.categories?.name||'Otros',
-      price:(()=>{
-        const markup = p.markup_override!=null ? p.markup_override : (window.GLOBAL_MARKUP||30);
-        const cost = parseFloat(p.cost_price)||0;
-        if(cost>0) return parseFloat((cost*(1+markup/100)).toFixed(2));
-        return parseFloat(p.price)||0;
-      })(),
-      cost_price:parseFloat(p.cost_price)||0,
-      old:p.old_price?parseFloat(p.old_price):null,
-      badge:p.badge, badgeTxt:p.badge_text,
-      icon:p.icon||'default',
-      image_url:p.image_url||null,
-      cost_price:parseFloat(p.cost_price)||0,
-      markup_override:p.markup_override,
-      stock:parseInt(p.stock)||0,
-      featured:p.featured, sku:p.sku||'',
-      discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
-      stars:5, reviews:Math.floor(Math.random()*180+20),
-    }));
-    buildFilters();
-    applyFilters();
-  }catch(e){ showEmpty('Error cargando productos'); }
+  buildCategoryFilters(catData||[]);
+  await fetchTiendaProducts();
+}
+
+function buildCategoryFilters(cats){
+  const pills = document.getElementById('catPills');
+  if(!pills) return;
+  pills.innerHTML = `<button class="cat-pill${activeCategory==='todos'?' active':''}" onclick="setCategory('todos',this)">
+    <div class="cp-ico">${CAT_ICONS['default']}</div>
+    <span class="cp-name">Todos</span>
+  </button>`+cats.map(c=>`
+    <button class="cat-pill${activeCategory===c.slug?' active':''}" onclick="setCategory('${c.slug}',this)">
+      <div class="cp-ico">${CAT_ICONS[c.slug]||CAT_ICONS['default']}</div>
+      <span class="cp-name">${c.name}</span>
+    </button>`).join('');
+}
+
+async function fetchTiendaProducts(){
+  showSkeletons();
+  const q = document.getElementById('searchInput')?.value?.trim()||'';
+  const sortVal = document.getElementById('sortSelect')?.value||'default';
+  const inStock = document.getElementById('inStockOnly')?.checked;
+  const onSale = document.getElementById('onSaleOnly')?.checked;
+  const pMin = parseFloat(document.getElementById('priceMin')?.value)||0;
+  const pMax = parseFloat(document.getElementById('priceMax')?.value)||999999;
+
+  const from = (tiendaPage-1)*TIENDA_PER_PAGE;
+  const to = from + TIENDA_PER_PAGE - 1;
+
+  let query = sb.from('products')
+    .select('*,categories(name,slug)', {count:'exact'})
+    .eq('status','active')
+    .range(from, to);
+
+  if(activeCategory!=='todos') query = query.eq('categories.slug', activeCategory);
+  if(activeBrands.size>0) query = query.in('brand', [...activeBrands]);
+  if(q) query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%`);
+  if(inStock) query = query.gt('stock', 0);
+  if(onSale) query = query.not('old_price', 'is', null);
+  if(pMin>0) query = query.gte('price', pMin);
+  if(pMax<999999) query = query.lte('price', pMax);
+
+  if(sortVal==='price-asc') query = query.order('price',{ascending:true});
+  else if(sortVal==='price-desc') query = query.order('price',{ascending:false});
+  else if(sortVal==='name') query = query.order('name',{ascending:true});
+  else query = query.order('created_at',{ascending:false});
+
+  const {data,error,count} = await query;
+
+  if(error){ showEmpty('Error cargando productos'); return; }
+  tiendaTotal = count||0;
+
+  ALL_PRODUCTS = (data||[]).map(p=>({
+    id:p.id, name:p.name, brand:p.brand,
+    cat:p.categories?.slug||'otros',
+    catName:p.categories?.name||'Otros',
+    price:(()=>{
+      const markup=p.markup_override!=null?p.markup_override:(window.GLOBAL_MARKUP||30);
+      const cost=parseFloat(p.cost_price)||0;
+      if(cost>0) return parseFloat((cost*(1+markup/100)).toFixed(2));
+      return parseFloat(p.price)||0;
+    })(),
+    cost_price:parseFloat(p.cost_price)||0,
+    old:p.old_price?parseFloat(p.old_price):null,
+    badge:p.badge, badgeTxt:p.badge_text,
+    icon:p.icon||'default',
+    image_url:p.image_url||null,
+    markup_override:p.markup_override,
+    stock:parseInt(p.stock)||0,
+    featured:p.featured, sku:p.sku||'',
+    discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
+    stars:5, reviews:Math.floor(Math.random()*180+20),
+  }));
+
+  FILTERED = ALL_PRODUCTS;
+
+  if(!ALL_PRODUCTS.length){ showEmpty('Sin resultados con esos filtros'); renderTiendaPagination(); return; }
+  renderProducts();
+  renderTiendaPagination();
+  document.getElementById('sbCount').textContent = tiendaTotal.toLocaleString()+' producto'+(tiendaTotal!==1?'s':'');
+}
+
+function renderTiendaPagination(){
+  const pages = Math.ceil(tiendaTotal/TIENDA_PER_PAGE);
+  const wrap = document.getElementById('paginationWrap');
+  if(!wrap) return;
+  if(pages<=1){ wrap.innerHTML=''; return; }
+
+  const from = (tiendaPage-1)*TIENDA_PER_PAGE+1;
+  const to = Math.min(tiendaPage*TIENDA_PER_PAGE, tiendaTotal);
+
+  let btns = `<button class="pag-btn" onclick="goTiendaPage(${tiendaPage-1})" ${tiendaPage<=1?'disabled style="opacity:.4"':''}>
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>`;
+
+  const range = new Set([1, pages]);
+  for(let i=Math.max(1,tiendaPage-2); i<=Math.min(pages,tiendaPage+2); i++) range.add(i);
+  let prev=0;
+  [...range].sort((a,b)=>a-b).forEach(p=>{
+    if(prev&&p-prev>1) btns+=`<span class="pag-dots">…</span>`;
+    btns+=`<button class="pag-btn${p===tiendaPage?' active':''}" onclick="goTiendaPage(${p})">${p}</button>`;
+    prev=p;
+  });
+
+  btns+=`<button class="pag-btn" onclick="goTiendaPage(${tiendaPage+1})" ${tiendaPage>=pages?'disabled style="opacity:.4"':''}>
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+
+  wrap.innerHTML = btns;
+}
+
+async function goTiendaPage(p){
+  const pages = Math.ceil(tiendaTotal/TIENDA_PER_PAGE);
+  if(p<1||p>pages) return;
+  tiendaPage=p;
+  await fetchTiendaProducts();
+  document.querySelector('.shop-layout')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ── BUILD FILTERS ──
@@ -665,46 +756,26 @@ function buildFilters(){
 
 // ── FILTER LOGIC ──
 function applyFilters(){
-  const q=document.getElementById('searchInput').value.trim().toLowerCase();
-  const sort=document.getElementById('sortSelect').value;
-  const pMin=parseFloat(document.getElementById('priceMin').value)||0;
-  const pMax=parseFloat(document.getElementById('priceMax').value)||999999;
-  const inStockOnly=document.getElementById('inStockOnly').checked;
-  const onSaleOnly=document.getElementById('onSaleOnly').checked;
-
-  FILTERED=ALL_PRODUCTS.filter(p=>{
-    if(activeCategory!=='todos'&&p.cat!==activeCategory) return false;
-    if(activeBrands.size>0&&!activeBrands.has(p.brand)) return false;
-    if(p.price<pMin||p.price>pMax) return false;
-    if(inStockOnly&&p.stock<=0) return false;
-    if(onSaleOnly&&!p.old) return false;
-    if(q&&!p.name.toLowerCase().includes(q)&&!p.brand.toLowerCase().includes(q)&&!p.sku.toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  // Sort
-  if(sort==='price-asc') FILTERED.sort((a,b)=>a.price-b.price);
-  else if(sort==='price-desc') FILTERED.sort((a,b)=>b.price-a.price);
-  else if(sort==='name') FILTERED.sort((a,b)=>a.name.localeCompare(b.name));
-  else if(sort==='discount') FILTERED.sort((a,b)=>(b.discount||0)-(a.discount||0));
-
-  currentPage=1;
-  renderProducts();
+  tiendaPage=1;
   renderActiveFilters();
-  updateSearchClear(q);
-  document.getElementById('sbCount').textContent=FILTERED.length+' producto'+(FILTERED.length!==1?'s':'');
+  clearTimeout(tiendaSearchTimer);
+  tiendaSearchTimer = setTimeout(()=>fetchTiendaProducts(), 300);
 }
 
 function setCategory(slug,el){
   activeCategory=slug;
   document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
   el?.classList.add('active');
-  applyFilters();
+  tiendaPage=1;
+  fetchTiendaProducts();
+  renderActiveFilters();
 }
 
 function toggleBrand(brand,checked){
   if(checked) activeBrands.add(brand); else activeBrands.delete(brand);
-  applyFilters();
+  tiendaPage=1;
+  fetchTiendaProducts();
+  renderActiveFilters();
 }
 
 function filterByTag(tag){
@@ -1023,10 +1094,9 @@ buildDots();
 resetProgress();
 
 // ── SEARCH ──
-let searchTimer;
 document.getElementById('searchInput').addEventListener('input',()=>{
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(applyFilters, 300);
+  tiendaPage=1;
+  applyFilters();
 });
 
 // ── TOAST ──

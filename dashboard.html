@@ -465,15 +465,9 @@ input,textarea,select,button{font-family:var(--f)}
           </div>
         </div>
 
-        <div class="pagination">
-          <span class="pag-info" id="pagInfo">Mostrando 1–8 de 8 productos</span>
-          <div class="pag-btns">
-            <button class="pag-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-            <button class="pag-btn active">1</button>
-            <button class="pag-btn">2</button>
-            <button class="pag-btn">3</button>
-            <button class="pag-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-          </div>
+        <div class="pagination" id="prodPagination">
+          <span class="pag-info" id="pagInfo">Cargando...</span>
+          <div class="pag-btns" id="pagBtns"></div>
         </div>
       </div>
 
@@ -2888,22 +2882,33 @@ function renderTableSkeleton(empty=false){
 
 function renderProdPagination(){
   const pages = Math.ceil(prodTotal / PROD_PER_PAGE);
-  let wrap = document.getElementById('prodPagination');
-  if(!wrap){
-    wrap = document.createElement('div');
-    wrap.id = 'prodPagination';
-    wrap.style.cssText = 'padding:14px 20px;border-top:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center';
-    document.querySelector('#prodTable')?.closest('.card')?.appendChild(wrap);
-  }
   const from = (prodPage-1)*PROD_PER_PAGE+1;
   const to = Math.min(prodPage*PROD_PER_PAGE, prodTotal);
-  wrap.innerHTML = `
-    <span style="font-size:12px;color:var(--g500);font-weight:600">Mostrando ${from.toLocaleString()}–${to.toLocaleString()} de ${prodTotal.toLocaleString()} productos</span>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button onclick="changeProdPage(${prodPage-1})" ${prodPage<=1?'disabled':''} style="padding:6px 14px;border:1.5px solid var(--g200);border-radius:8px;background:var(--wh);font-family:var(--f);font-size:12.5px;font-weight:700;color:${prodPage<=1?'var(--g300)':'var(--g700)'};cursor:${prodPage<=1?'default':'pointer'}">← Anterior</button>
-      <span style="font-size:12.5px;font-weight:700;color:var(--g500);padding:0 8px">Pág ${prodPage} / ${pages}</span>
-      <button onclick="changeProdPage(${prodPage+1})" ${prodPage>=pages?'disabled':''} style="padding:6px 14px;border:1.5px solid var(--g200);border-radius:8px;background:var(--wh);font-family:var(--f);font-size:12.5px;font-weight:700;color:${prodPage>=pages?'var(--g300)':'var(--g700)'};cursor:${prodPage>=pages?'default':'pointer'}">Siguiente →</button>
-    </div>`;
+
+  document.getElementById('pagInfo').textContent =
+    `Mostrando ${from.toLocaleString()}–${to.toLocaleString()} de ${prodTotal.toLocaleString()} productos`;
+
+  // Build page buttons: prev, pages, next
+  let btns = '';
+  btns += `<button class="pag-btn" onclick="changeProdPage(${prodPage-1})" ${prodPage<=1?'disabled':''}>
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>`;
+
+  // Smart range: always show first, last, and 2 around current
+  const range = new Set([1, pages]);
+  for(let i=Math.max(1,prodPage-2); i<=Math.min(pages,prodPage+2); i++) range.add(i);
+  let prev = 0;
+  [...range].sort((a,b)=>a-b).forEach(p=>{
+    if(prev && p-prev>1) btns += `<span class="pag-btn" style="cursor:default;color:var(--g300)">…</span>`;
+    btns += `<button class="pag-btn${p===prodPage?' active':''}" onclick="changeProdPage(${p})">${p}</button>`;
+    prev = p;
+  });
+
+  btns += `<button class="pag-btn" onclick="changeProdPage(${prodPage+1})" ${prodPage>=pages?'disabled':''}>
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>`;
+
+  document.getElementById('pagBtns').innerHTML = btns;
 }
 
 async function changeProdPage(page){
