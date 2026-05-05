@@ -1490,12 +1490,23 @@ function setPage(page, el){
       document.getElementById('ordersContent').style.display='none';
       document.getElementById('clientsContent').style.display='none';
       document.getElementById('pricingContent').style.display='block';
+      document.getElementById('importContent').style.display='none';
       document.getElementById('payBtn').style.display='none';
       loadPricingPage();
+    } else if(page==='importar'){
+      document.getElementById('mainContent').style.display='none';
+      document.getElementById('catContent').style.display='none';
+      document.getElementById('ordersContent').style.display='none';
+      document.getElementById('clientsContent').style.display='none';
+      document.getElementById('pricingContent').style.display='none';
+      document.getElementById('importContent').style.display='block';
+      document.getElementById('payBtn').style.display='none';
     } else {
       document.getElementById('mainContent').style.display='block';
       document.getElementById('catContent').style.display='none';
       document.getElementById('ordersContent').style.display='none';
+      document.getElementById('pricingContent').style.display='none';
+      document.getElementById('importContent').style.display='none';
       document.getElementById('payBtn').style.display='flex';
       updateTopBtn('Nuevo producto', openDrawer);
       document.getElementById('pageSub').textContent = 'Vista en desarrollo';
