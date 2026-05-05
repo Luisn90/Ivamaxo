@@ -1012,17 +1012,46 @@ const sbStore=createClient(SB_URL,SB_KEY);
 
 async function loadProductsFromDB(){
   showSkeleton();
-  // Load global markup
   const {data:mkSetting}=await sbStore.from('settings').select('value').eq('key','global_markup').single();
   window.GLOBAL_MARKUP = parseFloat(mkSetting?.value||'30');
-  try {
-    const {data,error}=await sbStore.from('products').select('*,categories(name,slug)').eq('status','active').order('created_at',{ascending:false});
-    if(error||!data||data.length===0){ showEmptyState(); return; }
+
+  // Build category tabs from DB
+  const {data:cats}=await sbStore.from('categories').select('name,slug').order('name');
+  if(cats?.length){
+    const tabs = document.getElementById('catTabs');
+    if(tabs){
+      tabs.innerHTML = `<button class="ftab active" onclick="loadCatProducts('todos',this)">Todos</button>`
+        + cats.map(c=>`<button class="ftab" onclick="loadCatProducts('${c.slug}',this)">${c.name}</button>`).join('');
+    }
+  }
+  await loadCatProducts('todos');
+}
+
+async function loadCatProducts(slug, el){
+  showSkeleton();
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+
+  try{
+    let query = sbStore.from('products')
+      .select('id,name,brand,price,old_price,cost_price,markup_override,badge,badge_text,icon,image_url,stock,featured,categories(name,slug)')
+      .eq('status','active')
+      .order('featured',{ascending:false})
+      .order('created_at',{ascending:false})
+      .limit(12);
+
+    if(slug !== 'todos'){
+      // Filter by category slug via join
+      const {data:cat}=await sbStore.from('categories').select('id').eq('slug',slug).single();
+      if(cat) query = query.eq('category_id', cat.id);
+    }
+
+    const {data,error} = await query;
+    if(error||!data?.length){ showEmptyState(); return; }
+
     PRODUCTS = data.map(p=>({
-      id: p.id,
-      name: p.name,
-      brand: p.brand,
-      cat: p.categories?.slug||'todos',
+      id: p.id, name: p.name, brand: p.brand,
+      cat: p.categories?.slug||'otros',
       catName: p.categories?.name||'',
       price:(()=>{
         const markup=p.markup_override!=null?p.markup_override:(window.GLOBAL_MARKUP||30);
@@ -1030,20 +1059,18 @@ async function loadProductsFromDB(){
         if(cost>0) return parseFloat((cost*(1+markup/100)).toFixed(2));
         return parseFloat(p.price)||0;
       })(),
-      old: p.old_price ? parseFloat(p.old_price) : null,
-      badge: p.badge||null,
-      badgeTxt: p.badge_text||null,
-      icon: p.icon||'filter',
-      image_url: p.image_url||null,
-      cost_price: parseFloat(p.cost_price)||0,
-      stars: 5,
-      reviews: Math.floor(Math.random()*200+10),
-      discount: p.old_price ? Math.round((1-p.price/p.old_price)*100) : null,
-      featured: p.featured,
-      stock: p.stock,
+      cost_price:parseFloat(p.cost_price)||0,
+      old:p.old_price?parseFloat(p.old_price):null,
+      badge:p.badge||null, badgeTxt:p.badge_text||null,
+      icon:p.icon||'default',
+      image_url:p.image_url||null,
+      stars:5, reviews:Math.floor(Math.random()*180+20),
+      discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
+      featured:p.featured, stock:p.stock,
     }));
+
     renderProducts();
-  } catch(e){ showEmptyState(); }
+  }catch(e){ console.error(e); showEmptyState(); }
 }
 
 function showSkeleton(){
