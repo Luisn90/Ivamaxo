@@ -1268,16 +1268,7 @@ input,textarea,select,button{font-family:var(--f)}
 
 <script>
 // ── DATA ──
-let PRODUCTS = [
-  {id:1,name:'Bujía Iridium IX',  brand:'NGK',    cat:'Encendido',  price:18.99,old:24.99,stock:43,status:'active', badge:'bn',sku:'NGK-BKR6EIX'},
-  {id:2,name:'Filtro de Aceite',  brand:'Bosch',  cat:'Filtros',    price:8.50, old:null,  stock:28,status:'active', badge:null,sku:'BSH-F026'},
-  {id:3,name:'Aceite 5W-30 4L',   brand:'Castrol',cat:'Lubricantes',price:28.90,old:39.90, stock:15,status:'active', badge:'bs',sku:'CST-5W30-4L'},
-  {id:4,name:'Pastillas de Freno',brand:'Brembo', cat:'Frenos',     price:45.00,old:null,  stock:0, status:'active', badge:'bh',sku:'BRM-P85020'},
-  {id:5,name:'Amortiguador Eccel',brand:'Monroe', cat:'Suspensión', price:62.00,old:79.00, stock:6, status:'draft',  badge:'bn',sku:'MON-G8114'},
-  {id:6,name:'Filtro de Aire',    brand:'Mahle',  cat:'Filtros',    price:12.50,old:null,  stock:32,status:'active', badge:null,sku:'MHL-LX1920'},
-  {id:7,name:'Batería AGM 60Ah',  brand:'Bosch',  cat:'Eléctrico',  price:89.00,old:110.00,stock:0, status:'active', badge:'bs',sku:'BSH-S5A05'},
-  {id:8,name:'Correa Distribución',brand:'Gates', cat:'Encendido',  price:35.90,old:null,  stock:9, status:'active', badge:'bn',sku:'GTS-K015613XS'},
-];
+let PRODUCTS = []; // Cargado desde Supabase
 
 let editingId = null;
 
@@ -2791,25 +2782,48 @@ const sb = createClient(SB_URL, SB_KEY);
 
 // Load real products from Supabase
 async function loadProducts(){
-  const {data,error} = await sb.from('products').select('*, categories(name)').order('created_at',{ascending:false});
-  if(error){ console.error(error); return; }
-  PRODUCTS = data.map(p=>({
+  // Show loading state
+  const tbody = document.querySelector('#prodTable tbody');
+  if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--g500);font-weight:600">Cargando productos...</td></tr>';
+
+  const q = document.getElementById('searchProd')?.value?.toLowerCase()||'';
+  const catFilter = document.getElementById('filterCat')?.value||'';
+  const stockFilter = document.getElementById('filterStock')?.value||'';
+
+  let query = sb.from('products').select('*, categories(name)', {count:'exact'}).order('created_at',{ascending:false});
+  if(q){ query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%`); }
+
+  const {data,error,count} = await query;
+  if(error){ console.error(error); showToast('Error cargando productos','err'); return; }
+
+  PRODUCTS = (data||[]).map(p=>({
     id: p.id,
-    name: p.name,
-    brand: p.brand,
+    name: p.name || '',
+    brand: p.brand || '',
     cat: p.categories?.name || '',
-    price: parseFloat(p.price),
+    price: parseFloat(p.price)||0,
     old: p.old_price ? parseFloat(p.old_price) : null,
-    stock: p.stock,
-    status: p.status,
-    badge: p.badge,
+    cost_price: parseFloat(p.cost_price)||0,
+    stock: parseInt(p.stock)||0,
+    status: p.status || 'active',
+    badge: p.badge || null,
+    badge_text: p.badge_text || null,
     sku: p.sku || '',
-    icon: p.icon || 'filter',
-    image_url: p.image_url||null,
+    icon: p.icon || 'default',
+    image_url: p.image_url || null,
+    markup_override: p.markup_override,
+    supplier: p.supplier || '',
   }));
+
   renderTable();
-  document.getElementById('pageSub').textContent = `${PRODUCTS.length} productos · ${PRODUCTS.filter(p=>p.stock===0).length} sin stock`;
-  document.querySelector('.stat-val').textContent = PRODUCTS.length;
+  const total = count || PRODUCTS.length;
+  const sinStock = PRODUCTS.filter(p=>p.stock===0).length;
+  document.getElementById('pageSub').textContent = `${total.toLocaleString()} productos · ${sinStock} sin stock`;
+  // Update stat card
+  const statVal = document.querySelector('.stat-val');
+  if(statVal) statVal.textContent = total.toLocaleString();
+  // Update sidebar badge
+  document.querySelectorAll('.sb-badge').forEach((b,i)=>{ if(i===0) b.textContent=total; });
 }
 
 // Override saveProduct to use Supabase
