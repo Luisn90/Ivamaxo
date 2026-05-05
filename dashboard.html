@@ -314,6 +314,10 @@ input,textarea,select,button{font-family:var(--f)}
         <svg viewBox="0 0 24 24" class="sb-ico"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Precios / Márgenes
       </button>
+      <button class="sb-item" onclick="setPage('imagenes',this)">
+        <svg viewBox="0 0 24 24" class="sb-ico"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Imágenes
+      </button>
       <button class="sb-item" onclick="setPage('importar',this)">
         <svg viewBox="0 0 24 24" class="sb-ico"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Importar lista
@@ -1256,6 +1260,88 @@ input,textarea,select,button{font-family:var(--f)}
   </div>
 </div>
 
+<!-- IMAGES CONTENT -->
+<div id="imagesContent" style="display:none">
+  <div class="content">
+
+    <!-- Controls -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Buscador automático de imágenes</div>
+          <div class="card-sub">Busca imágenes para productos sin foto usando el código OEM o la descripción</div>
+        </div>
+        <div class="card-act" style="gap:10px">
+          <select id="imgSearchMode" class="filter-select" style="padding:9px 14px">
+            <option value="desc">Buscar por descripción</option>
+            <option value="oem">Buscar por código OEM</option>
+          </select>
+          <button class="ca-btn primary" onclick="startImageSearch()" id="imgStartBtn">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Buscar imágenes
+          </button>
+        </div>
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid var(--g200)">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:0" id="imgStats">
+          <div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800" id="imgStatTotal">—</div>
+            <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Total productos</div>
+          </div>
+          <div style="background:rgba(229,62,62,.05);border:1px solid rgba(229,62,62,.15);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:var(--red)" id="imgStatNoImg">—</div>
+            <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Sin imagen</div>
+          </div>
+          <div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:var(--green)" id="imgStatWithImg">—</div>
+            <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Con imagen</div>
+          </div>
+          <div style="background:rgba(249,194,0,.05);border:1px solid rgba(249,194,0,.25);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:var(--y)" id="imgStatFound">0</div>
+            <div style="font-size:10.5px;color:var(--g500);font-weight:700;text-transform:uppercase">Encontradas hoy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card" id="imgProgressCard" style="display:none;margin-bottom:20px">
+      <div style="padding:20px 24px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:700" id="imgProgressLabel">Buscando...</span>
+          <span style="font-size:13px;font-weight:700;color:var(--y)" id="imgProgressPct">0%</span>
+        </div>
+        <div style="background:var(--g200);border-radius:4px;height:8px;overflow:hidden;margin-bottom:12px">
+          <div id="imgProgressBar" style="background:var(--y);height:100%;width:0%;transition:width .5s;border-radius:4px"></div>
+        </div>
+        <button onclick="stopImageSearch()" style="padding:8px 20px;border:1.5px solid var(--red);border-radius:50px;background:none;font-family:var(--f);font-size:12.5px;font-weight:700;color:var(--red);cursor:pointer">⏹ Detener</button>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Productos sin imagen</div>
+          <div class="card-sub">Haz clic en "Usar esta imagen" para asignarla al producto</div>
+        </div>
+        <div class="card-act">
+          <select class="filter-select" id="imgCatFilter" onchange="loadImgProducts()" style="padding:9px 14px">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
+      </div>
+      <div id="imgProductsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--g500);font-weight:600">
+          Cargando productos sin imagen...
+        </div>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center" id="imgPagination"></div>
+    </div>
+
+  </div>
+</div>
+
 
 <!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
@@ -1486,12 +1572,18 @@ function setPage(page, el){
       document.getElementById('pricingContent').style.display='none';
       document.getElementById('importContent').style.display='block';
       document.getElementById('payBtn').style.display='none';
+    } else if(page==='imagenes'){
+      ['mainContent','catContent','ordersContent','clientsContent','pricingContent','importContent'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+      });
+      document.getElementById('imagesContent').style.display='block';
+      document.getElementById('payBtn').style.display='none';
+      loadImgProducts();
     } else {
       document.getElementById('mainContent').style.display='block';
-      document.getElementById('catContent').style.display='none';
-      document.getElementById('ordersContent').style.display='none';
-      document.getElementById('pricingContent').style.display='none';
-      document.getElementById('importContent').style.display='none';
+      ['catContent','ordersContent','clientsContent','pricingContent','importContent','imagesContent'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+      });
       document.getElementById('payBtn').style.display='flex';
       updateTopBtn('Nuevo producto', openDrawer);
       document.getElementById('pageSub').textContent = 'Vista en desarrollo';
@@ -2699,6 +2791,225 @@ async function loadDashboardStats(){
   // No stock - from full count
   const {count:noStockCount} = await sb.from('products').select('id', {count:'exact', head:true}).eq('stock', 0);
   document.getElementById('statNoStock').textContent = (noStockCount||0).toLocaleString();
+}
+
+
+// ── IMAGE MANAGER ──
+let imgProducts = [], imgPage = 1, imgStopFlag = false;
+const IMG_PER_PAGE = 20;
+
+async function loadImgProducts(){
+  document.getElementById('imgProductsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--g500)">Cargando...</div>';
+
+  const catFilter = document.getElementById('imgCatFilter')?.value||'';
+
+  // Load cats for filter
+  const {data:cats} = await sb.from('categories').select('id,name').order('name');
+  const catSel = document.getElementById('imgCatFilter');
+  if(cats && catSel.options.length<=1){
+    cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; catSel.appendChild(o); });
+  }
+
+  // Count stats
+  const {count:total} = await sb.from('products').select('id',{count:'exact',head:true});
+  const {count:noImg} = await sb.from('products').select('id',{count:'exact',head:true}).is('image_url',null);
+  const withImg = (total||0)-(noImg||0);
+  document.getElementById('imgStatTotal').textContent = (total||0).toLocaleString();
+  document.getElementById('imgStatNoImg').textContent = (noImg||0).toLocaleString();
+  document.getElementById('imgStatWithImg').textContent = withImg.toLocaleString();
+
+  // Load products without image
+  const from = (imgPage-1)*IMG_PER_PAGE;
+  const to = from+IMG_PER_PAGE-1;
+  let q = sb.from('products').select('id,name,brand,sku,oem,descripcion,categories(name)',{count:'exact'})
+    .is('image_url',null).eq('status','active').range(from,to);
+  if(catFilter) q = q.eq('category_id',catFilter);
+
+  const {data,count:filtCount} = await q;
+  imgProducts = data||[];
+
+  renderImgGrid();
+  renderImgPagination(filtCount||0);
+}
+
+function renderImgGrid(){
+  const grid = document.getElementById('imgProductsGrid');
+  if(!imgProducts.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:64px;color:var(--g500)"><p style="font-size:18px;font-weight:700;color:var(--g300)">✅ Todos los productos tienen imagen</p></div>';
+    return;
+  }
+  grid.innerHTML = imgProducts.map(p=>`
+    <div style="background:var(--g50);border:1px solid var(--g200);border-radius:12px;overflow:hidden" id="imgCard-${p.id}">
+      <!-- Image preview area -->
+      <div style="aspect-ratio:1;background:var(--g200);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden" id="imgPrev-${p.id}">
+        <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--g300);fill:none;stroke-width:1;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div style="padding:12px">
+        <div style="font-size:10px;color:var(--g500);font-weight:700;text-transform:uppercase;margin-bottom:3px">${p.brand||'—'}</div>
+        <div style="font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;height:36px;overflow:hidden">${p.name||''}</div>
+        <div style="font-size:10.5px;color:var(--g500);margin-bottom:10px">SKU: ${p.sku||'—'}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button onclick="searchGoogleImg('${p.id}','${encodeURIComponent(p.name||'')}','${encodeURIComponent(p.brand||'')}')"
+            style="width:100%;padding:8px;border:1.5px solid var(--y);border-radius:8px;background:var(--yl);font-family:var(--f);font-size:11.5px;font-weight:700;cursor:pointer;color:var(--bk)">
+            🔍 Buscar en Google
+          </button>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="imgUrl-${p.id}" placeholder="Pegar URL de imagen..."
+              style="flex:1;padding:7px 10px;border:1.5px solid var(--g200);border-radius:8px;font-family:var(--f);font-size:11px;outline:none;min-width:0"
+              onpaste="previewImgUrl('${p.id}',event)" oninput="previewImgUrl('${p.id}')">
+          </div>
+          <button onclick="saveImgUrl('${p.id}')"
+            style="width:100%;padding:8px;border:none;border-radius:8px;background:var(--bk);font-family:var(--f);font-size:11.5px;font-weight:700;cursor:pointer;color:var(--wh)">
+            ✓ Guardar imagen
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function searchGoogleImg(id, name, brand){
+  const query = decodeURIComponent(brand)+' '+decodeURIComponent(name)+' repuesto fondo blanco';
+  window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(query)+'&tbs=ic:specific,isc:white', '_blank');
+}
+
+function previewImgUrl(id, event){
+  const input = document.getElementById('imgUrl-'+id);
+  const url = (event?.clipboardData?.getData('text')||input.value).trim();
+  if(!url) return;
+  setTimeout(()=>{
+    const prev = document.getElementById('imgPrev-'+id);
+    prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:contain;padding:8px" onerror="this.style.display='none'">`;
+  }, 100);
+}
+
+async function saveImgUrl(id){
+  const url = document.getElementById('imgUrl-'+id).value.trim();
+  if(!url){ showToast('Pega una URL de imagen','err'); return; }
+
+  const {error} = await sb.from('products').update({image_url: url}).eq('id', id);
+  if(error){ showToast('Error guardando: '+error.message,'err'); return; }
+
+  // Mark card as done
+  const card = document.getElementById('imgCard-'+id);
+  card.style.opacity='0.4';
+  card.style.border='2px solid var(--green)';
+  card.querySelector('button:last-child').textContent='✅ Guardado';
+  card.querySelector('button:last-child').style.background='var(--green)';
+
+  const found = parseInt(document.getElementById('imgStatFound').textContent||'0')+1;
+  document.getElementById('imgStatFound').textContent = found;
+  document.getElementById('imgStatWithImg').textContent = (parseInt(document.getElementById('imgStatWithImg').textContent||'0')+1).toLocaleString();
+  document.getElementById('imgStatNoImg').textContent = (parseInt(document.getElementById('imgStatNoImg').textContent||'0')-1).toLocaleString();
+  showToast('Imagen guardada ✓','ok');
+}
+
+// ── AUTO SEARCH via Anthropic API ──
+let imgFoundCount = 0;
+let imgSearchRunning = false;
+
+async function startImageSearch(){
+  if(imgSearchRunning){ showToast('Ya hay una búsqueda en curso','err'); return; }
+
+  const {data:products} = await sb.from('products')
+    .select('id,name,brand,sku,description')
+    .is('image_url',null)
+    .eq('status','active')
+    .limit(200);
+
+  if(!products?.length){ showToast('Todos los productos tienen imagen','ok'); return; }
+
+  imgStopFlag = false;
+  imgSearchRunning = true;
+  imgFoundCount = 0;
+  document.getElementById('imgProgressCard').style.display='block';
+  document.getElementById('imgStartBtn').disabled=true;
+
+  for(let i=0; i<products.length; i++){
+    if(imgStopFlag) break;
+    const p = products[i];
+    const pct = Math.round((i+1)/products.length*100);
+    document.getElementById('imgProgressBar').style.width=pct+'%';
+    document.getElementById('imgProgressPct').textContent=pct+'%';
+    document.getElementById('imgProgressLabel').textContent=`Buscando imagen ${i+1}/${products.length}: ${(p.name||'').slice(0,40)}...`;
+
+    // Use Anthropic API to suggest image search URL
+    const imgUrl = await findImageUrl(p);
+    if(imgUrl){
+      await sb.from('products').update({image_url: imgUrl}).eq('id', p.id);
+      imgFoundCount++;
+      document.getElementById('imgStatFound').textContent = imgFoundCount;
+    }
+    await new Promise(r=>setTimeout(r,500));
+  }
+
+  imgSearchRunning = false;
+  document.getElementById('imgStartBtn').disabled=false;
+  document.getElementById('imgProgressLabel').textContent='✅ Búsqueda completada — '+imgFoundCount+' imágenes encontradas';
+  showToast('Búsqueda completada: '+imgFoundCount+' imágenes','ok');
+  loadImgProducts();
+}
+
+async function findImageUrl(product){
+  // Use Claude to find the best image URL for this auto part
+  try{
+    const prompt = `Find a real product image URL with white background for this auto part:
+Brand: ${product.brand}
+Name: ${product.name}
+SKU: ${product.sku||''}
+
+Respond with ONLY a valid direct image URL (.jpg/.png/.webp) from a reputable source like:
+- autodoc.es CDN
+- rockauto.com
+- amazon.com
+- partsgeek.com
+Or respond with "none" if you can't find one.
+
+URL only, nothing else.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await response.json();
+    const url = data.content?.[0]?.text?.trim()||'';
+    if(url && url!=='none' && url.startsWith('http') && (url.includes('.jpg')||url.includes('.png')||url.includes('.webp'))){
+      // Verify URL loads
+      return url;
+    }
+  }catch(e){}
+  return null;
+}
+
+function stopImageSearch(){
+  imgStopFlag=true;
+  imgSearchRunning=false;
+  document.getElementById('imgStartBtn').disabled=false;
+  showToast('Búsqueda detenida','err');
+}
+
+function renderImgPagination(total){
+  const pages = Math.ceil(total/IMG_PER_PAGE);
+  const wrap = document.getElementById('imgPagination');
+  if(!wrap||pages<=1){ if(wrap) wrap.innerHTML=''; return; }
+  const from=(imgPage-1)*IMG_PER_PAGE+1;
+  const to=Math.min(imgPage*IMG_PER_PAGE,total);
+  wrap.innerHTML=`
+    <span style="font-size:12px;color:var(--g500);font-weight:600">Mostrando ${from}–${to} de ${total.toLocaleString()} sin imagen</span>
+    <div style="display:flex;gap:6px">
+      <button onclick="changeImgPage(${imgPage-1})" ${imgPage<=1?'disabled style="opacity:.4"':''} class="ca-btn" style="padding:6px 12px;font-size:12px">← Ant</button>
+      <span style="padding:6px 10px;font-size:12.5px;font-weight:700;color:var(--g500)">${imgPage}/${pages}</span>
+      <button onclick="changeImgPage(${imgPage+1})" ${imgPage>=pages?'disabled style="opacity:.4"':''} class="ca-btn" style="padding:6px 12px;font-size:12px">Sig →</button>
+    </div>`;
+}
+
+async function changeImgPage(p){
+  imgPage=p; await loadImgProducts();
+  document.querySelector('.content')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 </script>
