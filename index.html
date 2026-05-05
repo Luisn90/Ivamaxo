@@ -768,12 +768,8 @@ a{text-decoration:none}
       <div><div class="stag">Selección curada</div><h2 class="stitle">Productos destacados</h2></div>
       <a href="tienda.html" class="see-all">Ver todos <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
     </div>
-    <div class="ftabs">
-      <button class="ftab active" data-filter="todos">Todos</button>
-      <button class="ftab" data-filter="mas-vendidos">Más vendidos</button>
-      <button class="ftab" data-filter="nuevos">Nuevos</button>
-      <button class="ftab" data-filter="ofertas">Ofertas</button>
-      <button class="ftab" data-filter="premium">Premium</button>
+    <div class="ftabs" id="catTabs">
+      <button class="ftab active" onclick="loadCatProducts('todos',this)">Todos</button>
     </div>
     <div class="pgrid" id="productsGrid"></div>
   </section>
@@ -1082,9 +1078,9 @@ function showEmptyState(){
 
 function starHTML(n){return Array.from({length:5},(_,i)=>`<span class="star${i>=n?' e':''}">★</span>`).join('');}
 
-function renderProducts(overrideList){
+function renderProducts(){
   const grid=document.getElementById('productsGrid');
-  const list=overrideList||(currentFilter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentFilter));
+  const list=PRODUCTS;
   if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g500);font-weight:600">Sin productos en esta categoría</div>';return;}
   grid.innerHTML=list.map(p=>`
     <div class="pcard" onclick="goToProduct('${p.id}')" style="cursor:pointer">
@@ -1301,16 +1297,7 @@ function doHeroSearch(){
   const q = heroInput.value.trim();
   if(!q) return;
   hsDropdown.classList.remove('open');
-  currentFilter='todos';
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.ftab').classList.add('active');
-  const filtered = PRODUCTS.filter(p=>
-    p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.brand.toLowerCase().includes(q.toLowerCase()) ||
-    (p.sku&&p.sku.toLowerCase().includes(q.toLowerCase()))
-  );
-  renderProducts(filtered.length ? filtered : []);
-  document.querySelector('.sec').scrollIntoView({behavior:'smooth',block:'start'});
+  window.location.href='tienda.html?q='+encodeURIComponent(q);
 }
 
 function setSearch(val){
