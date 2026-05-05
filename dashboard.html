@@ -293,7 +293,7 @@ input,textarea,select,button{font-family:var(--f)}
       <button class="sb-item active" onclick="setPage('productos',this)">
         <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         Productos
-        <span class="sb-badge">48</span>
+        <span class="sb-badge" id="sbBadgeProducts">—</span>
       </button>
       <button class="sb-item" onclick="setPage('categorias',this)">
         <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
@@ -353,7 +353,7 @@ input,textarea,select,button{font-family:var(--f)}
       </button>
       <div class="topbar-left">
         <div class="page-title" id="pageTitle">Productos</div>
-        <div class="page-sub" id="pageSub">48 productos · 3 sin stock</div>
+        <div class="page-sub" id="pageSub">Cargando...</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -383,7 +383,7 @@ input,textarea,select,button{font-family:var(--f)}
           <div class="stat-ico y"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
           <span class="stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+12%</span>
         </div>
-        <div class="stat-val">48</div>
+        <div class="stat-val" id="statProducts">—</div>
         <div class="stat-lbl">Total productos</div>
       </div>
       <div class="stat">
@@ -391,7 +391,7 @@ input,textarea,select,button{font-family:var(--f)}
           <div class="stat-ico g"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
           <span class="stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+8%</span>
         </div>
-        <div class="stat-val">$4,820</div>
+        <div class="stat-val" id="statSales">—</div>
         <div class="stat-lbl">Ventas del mes</div>
       </div>
       <div class="stat">
@@ -399,7 +399,7 @@ input,textarea,select,button{font-family:var(--f)}
           <div class="stat-ico b"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
           <span class="stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+23</span>
         </div>
-        <div class="stat-val">314</div>
+        <div class="stat-val" id="statClients">—</div>
         <div class="stat-lbl">Clientes activos</div>
       </div>
       <div class="stat">
@@ -407,7 +407,7 @@ input,textarea,select,button{font-family:var(--f)}
           <div class="stat-ico r"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
           <span class="stat-trend down"><svg viewBox="0 0 24 24"><polyline points="18 9 12 15 6 9"/></svg>3 items</span>
         </div>
-        <div class="stat-val">3</div>
+        <div class="stat-val" id="statNoStock">—</div>
         <div class="stat-lbl">Sin stock</div>
       </div>
     </div>
@@ -2689,6 +2689,24 @@ function logImport(msg, color='white'){
   log.scrollTop = log.scrollHeight;
 }
 
+
+async function loadDashboardStats(){
+  // Sales this month
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const {data:orders} = await sb.from('orders').select('total').gte('created_at', firstDay);
+  const sales = (orders||[]).reduce((s,o)=>s+parseFloat(o.total||0), 0);
+  document.getElementById('statSales').textContent = '$'+sales.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  // Clients
+  const {count:clientCount} = await sb.from('profiles').select('id', {count:'exact', head:true});
+  document.getElementById('statClients').textContent = (clientCount||0).toLocaleString();
+
+  // No stock - from full count
+  const {count:noStockCount} = await sb.from('products').select('id', {count:'exact', head:true}).eq('stock', 0);
+  document.getElementById('statNoStock').textContent = (noStockCount||0).toLocaleString();
+}
+
 </script>
 </body>
 </html>
@@ -2839,11 +2857,14 @@ async function fetchProducts(){
   renderTable();
   renderProdPagination();
 
-  // Update header stats
-  document.getElementById('pageSub').textContent = `${prodTotal.toLocaleString()} productos`;
-  const statVal = document.getElementById('statTotalProducts');
-  if(statVal) statVal.textContent = prodTotal.toLocaleString();
-  document.querySelectorAll('.sb-badge')[0].textContent = prodTotal > 999 ? Math.round(prodTotal/1000)+'k' : prodTotal;
+  // Update all stats from real data
+  const sinStock = PRODUCTS.filter(p=>p.stock===0).length;
+  document.getElementById('pageSub').textContent = prodTotal.toLocaleString()+' productos';
+  document.getElementById('statProducts').textContent = prodTotal.toLocaleString();
+  document.getElementById('statNoStock').textContent = sinStock;
+  document.getElementById('sbBadgeProducts').textContent = prodTotal > 9999 ? Math.round(prodTotal/1000)+'k' : prodTotal;
+  // Load sales and clients async
+  loadDashboardStats();
 }
 
 function renderTableSkeleton(empty=false){
