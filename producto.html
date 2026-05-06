@@ -354,20 +354,13 @@ img{display:block;width:100%}
         Comprar ahora
       </button>
 
-      <!-- Compatibility -->
-      <div class="pi-compat">
+      <!-- Compatibility - dynamic -->
+      <div class="pi-compat" id="piCompat" style="display:none">
         <div class="pi-compat-title">
           <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
           Compatibilidad verificada
         </div>
-        <div class="compat-tags">
-          <span class="ctag">Toyota Corolla 2010–2023</span>
-          <span class="ctag">Toyota Camry 2012–2023</span>
-          <span class="ctag">Honda Civic 2008–2021</span>
-          <span class="ctag">Honda Accord 2010–2022</span>
-          <span class="ctag">Nissan Sentra 2013–2023</span>
-          <span class="ctag">Ver más →</span>
-        </div>
+        <div class="compat-tags" id="compatTags"></div>
       </div>
 
       <!-- Trust -->
@@ -521,6 +514,10 @@ async function loadProduct(){
     stock:parseInt(p.stock)||0, sku:p.sku||'', badge:p.badge, badgeTxt:p.badge_text,
     icon:p.icon||'default', description:p.description||'',
     image_url:p.image_url||null,
+    vehicle_brand:p.vehicle_brand||null,
+    compatible_models:p.compatible_models||null,
+    compatible_years:p.compatible_years||null,
+    engine_codes:p.engine_codes||null,
     discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
   };
 
@@ -537,6 +534,23 @@ async function loadProduct(){
   const grid = document.getElementById('prodGrid');
   grid.classList.remove('prod-loading');
   grid.classList.add('prod-ready');
+
+  // Render compatibility
+  const compatBox = document.getElementById('piCompat');
+  const compatTags = document.getElementById('compatTags');
+  const tags = [];
+  if(PRODUCT.vehicle_brand) tags.push(`<span class="ctag">🚗 ${PRODUCT.vehicle_brand}</span>`);
+  if(PRODUCT.compatible_models){
+    PRODUCT.compatible_models.split(',').forEach(m=>{
+      const model = m.trim();
+      if(model) tags.push(`<span class="ctag">${PRODUCT.vehicle_brand||''} ${model}${PRODUCT.compatible_years?' '+PRODUCT.compatible_years:''}</span>`);
+    });
+  }
+  if(PRODUCT.engine_codes) tags.push(`<span class="ctag">⚙️ Motor: ${PRODUCT.engine_codes}</span>`);
+  if(tags.length){
+    compatTags.innerHTML = tags.join('');
+    compatBox.style.display = 'block';
+  }
 
   // Badge
   if(PRODUCT.badge){

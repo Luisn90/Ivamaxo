@@ -1248,6 +1248,28 @@ input,textarea,select,button{font-family:var(--f)}
           <button class="ca-btn" onclick="resetImport()" style="padding:14px 20px">Resetear</button>
         </div>
 
+        <!-- Compat import -->
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--g200)">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">📋 Importar compatibilidad de vehículos</div>
+          <div style="font-size:12.5px;color:var(--g500);margin-bottom:12px">
+            Carga los datos de compatibilidad (marca, modelo, año, motor) a todos los productos de la lista MAREA.
+            <strong style="color:var(--bk)">16,725 productos</strong> con datos de compatibilidad detectados.
+          </div>
+          <button class="ca-btn primary" onclick="importCompatData()" id="compatImportBtn" style="gap:8px">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            Importar compatibilidad (16,725 productos)
+          </button>
+          <div id="compatProgress" style="display:none;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;font-weight:700" id="compatLabel">Importando...</span>
+              <span style="font-size:12px;font-weight:700;color:var(--y)" id="compatPct">0%</span>
+            </div>
+            <div style="background:var(--g200);border-radius:4px;height:6px;overflow:hidden">
+              <div id="compatBar" style="background:var(--y);height:100%;width:0%;transition:width .3s;border-radius:4px"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -3060,6 +3082,57 @@ function renderImgPagination(total){
 async function changeImgPage(p){
   imgPage=p; await loadImgProducts();
   document.querySelector('.content')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+
+// ── COMPAT DATA IMPORT ──
+async function importCompatData(){
+  const btn = document.getElementById('compatImportBtn');
+  btn.disabled = true;
+  document.getElementById('compatProgress').style.display = 'block';
+
+  // Load compat_data.json from the repo
+  try{
+    const r = await fetch('compat_data.json?v='+Date.now());
+    if(!r.ok) throw new Error('No se pudo cargar compat_data.json');
+    const compatData = await r.json();
+
+    const total = compatData.length;
+    let done = 0;
+    document.getElementById('compatLabel').textContent = `Procesando ${total.toLocaleString()} registros...`;
+
+    // Process in batches of 100 - match by SKU
+    const BATCH = 100;
+    for(let i=0; i<total; i+=BATCH){
+      const batch = compatData.slice(i, i+BATCH);
+
+      // For each item, update by SKU
+      const updates = batch.map(item => sb.from('products').update({
+        vehicle_brand: item.vehicle_brand||null,
+        compatible_models: item.compatible_models||null,
+        compatible_years: item.compatible_years||null,
+        engine_codes: item.engine_codes||null,
+      }).eq('sku', item.sku));
+
+      await Promise.all(updates);
+      done += batch.length;
+
+      const pct = Math.round(done/total*100);
+      document.getElementById('compatBar').style.width = pct+'%';
+      document.getElementById('compatPct').textContent = pct+'%';
+      document.getElementById('compatLabel').textContent = `Importando... ${done.toLocaleString()} / ${total.toLocaleString()}`;
+      await new Promise(r=>setTimeout(r,50));
+    }
+
+    document.getElementById('compatLabel').textContent = `✅ Completado: ${total.toLocaleString()} productos actualizados`;
+    btn.disabled = false;
+    showToast('Compatibilidad importada: '+total.toLocaleString()+' productos','ok');
+
+  }catch(e){
+    showToast('Error: '+e.message,'err');
+    btn.disabled = false;
+    console.error(e);
+  }
 }
 
 </script>
