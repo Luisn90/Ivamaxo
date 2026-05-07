@@ -2923,14 +2923,26 @@ function renderImgGrid(){
               🔍 Buscar otra en Google
             </button>
           </div>
-          <!-- Paste URL fallback -->
+          <!-- Paste URL / Upload local fallback -->
           <div id="imgPasteSection-${p.id}" style="display:none">
-            <input type="text" id="imgUrl-${p.id}" placeholder="Pega aquí la URL de la imagen..."
-              style="width:100%;padding:8px 10px;border:1.5px solid var(--y);border-radius:8px;font-family:var(--f);font-size:11px;outline:none;margin-bottom:6px;box-sizing:border-box"
+            <!-- Google search button -->
+            <button onclick="searchGoogleImg('${p.id}','${encodeURIComponent(p.name||'')}','${encodeURIComponent(p.brand||'')}')"
+              style="width:100%;padding:9px;border:1.5px solid var(--y);border-radius:8px;background:var(--yl);font-family:var(--f);font-size:11.5px;font-weight:700;cursor:pointer;color:var(--bk);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box">
+              🔍 Buscar en Google Images
+            </button>
+            <!-- URL paste -->
+            <input type="text" id="imgUrl-${p.id}" placeholder="Pega la URL de la imagen aquí..."
+              style="width:100%;padding:8px 10px;border:1.5px solid var(--g200);border-radius:8px;font-family:var(--f);font-size:11px;outline:none;margin-bottom:6px;box-sizing:border-box"
               oninput="previewImgUrl('${p.id}')">
+            <!-- Upload local file -->
+            <label style="width:100%;padding:9px;border:1.5px dashed var(--g300);border-radius:8px;font-family:var(--f);font-size:11.5px;font-weight:600;cursor:pointer;color:var(--g700);display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px;box-sizing:border-box;background:var(--g50)">
+              📁 Subir desde mi PC
+              <input type="file" accept="image/*" style="display:none" onchange="uploadLocalImg('${p.id}',this)">
+            </label>
+            <!-- Save button -->
             <button onclick="saveImgUrl('${p.id}')"
-              style="width:100%;padding:9px;border:none;border-radius:8px;background:var(--bk);font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;color:var(--wh)">
-              💾 Guardar esta imagen
+              style="width:100%;padding:9px;border:none;border-radius:8px;background:var(--bk);font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;color:var(--wh);box-sizing:border-box">
+              💾 Guardar imagen
             </button>
           </div>
         </div>
@@ -3044,8 +3056,6 @@ async function acceptImg(id){
 }
 
 function rejectImg(id, encodedName, encodedBrand){
-  // Open Google Images and show paste section
-  searchGoogleImg(id, encodedName, encodedBrand);
   document.getElementById('imgFoundActions-'+id).style.display='none';
   document.getElementById('imgPasteSection-'+id).style.display='block';
 }
@@ -3356,6 +3366,50 @@ async function importCompatData(){
     btn.disabled = false;
     console.error(e);
   }
+}
+
+
+async function uploadLocalImg(id, input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Solo imágenes','err'); return; }
+
+  // Show preview immediately
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const prev = document.getElementById('imgPrev-'+id);
+    if(prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;padding:10px" id="imgPreviewEl-${id}">`;
+  };
+  reader.readAsDataURL(file);
+
+  // Upload to Supabase Storage
+  showToast('Subiendo imagen...','ok');
+  const p = imgProducts.find(x=>x.id===id)||{id,sku:id};
+  const ext = file.name.split('.').pop()||'jpg';
+  const filename = `products/${p.sku||id}_${Date.now()}.${ext}`;
+
+  const {data, error} = await sb.storage.from('products').upload(filename, file, {
+    contentType: file.type, upsert: true
+  });
+
+  if(error){ showToast('Error subiendo: '+error.message,'err'); return; }
+
+  const {data:{publicUrl}} = sb.storage.from('products').getPublicUrl(filename);
+  document.getElementById('imgUrl-'+id).value = publicUrl;
+
+  // Auto-save
+  const {error:saveErr} = await sb.from('products').update({image_url: publicUrl}).eq('id', id);
+  if(saveErr){ showToast('Error guardando','err'); return; }
+
+  const card = document.getElementById('imgCard-'+id);
+  if(card){ card.style.border='2px solid var(--green)'; card.style.opacity='0.65'; }
+  document.getElementById('imgPasteSection-'+id).innerHTML += '<div style="color:var(--green);font-weight:700;font-size:12px;margin-top:6px;text-align:center">✅ Guardada en tu Storage</div>';
+
+  const found = parseInt(document.getElementById('imgStatFound').textContent||'0')+1;
+  document.getElementById('imgStatFound').textContent=found;
+  document.getElementById('imgStatWithImg').textContent=(parseInt(document.getElementById('imgStatWithImg').textContent||'0')+1).toLocaleString();
+  document.getElementById('imgStatNoImg').textContent=(parseInt(document.getElementById('imgStatNoImg').textContent||'0')-1).toLocaleString();
+  showToast('✅ Imagen guardada en tu Storage','ok');
 }
 
 </script>
