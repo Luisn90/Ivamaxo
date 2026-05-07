@@ -2865,7 +2865,7 @@ async function loadImgProducts(){
 
   // Count stats
   const {count:total} = await sb.from('products').select('id',{count:'exact',head:true});
-  const {count:noImg} = await sb.from('products').select('id',{count:'exact',head:true}).is('image_url',null);
+  const {count:noImg} = await sb.from('products').select('id',{count:'exact',head:true}).or('image_url.is.null,image_url.eq.');
   const withImg = (total||0)-(noImg||0);
   document.getElementById('imgStatTotal').textContent = (total||0).toLocaleString();
   document.getElementById('imgStatNoImg').textContent = (noImg||0).toLocaleString();
@@ -2874,8 +2874,9 @@ async function loadImgProducts(){
   // Load products without image
   const from = (imgPage-1)*IMG_PER_PAGE;
   const to = from+IMG_PER_PAGE-1;
-  let q = sb.from('products').select('id,name,brand,sku,oem,descripcion,categories(name)',{count:'exact'})
-    .is('image_url',null).eq('status','active').range(from,to);
+  let q = sb.from('products').select('id,name,brand,sku,description,categories(name)',{count:'exact'})
+    .or('image_url.is.null,image_url.eq.')
+    .eq('status','active').range(from,to);
   if(catFilter) q = q.eq('category_id',catFilter);
 
   const {data,count:filtCount} = await q;
@@ -2973,8 +2974,9 @@ async function startImageSearch(){
 
   const {data:products} = await sb.from('products')
     .select('id,name,brand,sku,description')
-    .is('image_url',null)
+    .or('image_url.is.null,image_url.eq.')
     .eq('status','active')
+    .order('price',{ascending:false})
     .limit(batchSize||100);
 
   if(!products?.length){ showToast('Todos los productos tienen imagen','ok'); return; }
@@ -3023,9 +3025,8 @@ async function saveZenserpKey(){
   if(!key){ showToast('Ingresa tu API Key','err'); return; }
   showToast('Probando conexión...','ok');
   try{
-    const r = await fetch(`https://app.zenserp.com/api/v2/search?q=toyota+corolla+filtro&tbm=isch&num=1`, {
-      headers:{'apikey': key}
-    });
+    const testUrl = `https://app.zenserp.com/api/v2/search?apikey=${key}&q=toyota+corolla+filtro&tbm=isch&num=1`;
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(testUrl));
     const data = await r.json();
     if(data.image_results||data.organic){
       localStorage.setItem('zenserpKey', key);
@@ -3047,40 +3048,48 @@ async function findImageUrl(product){
   const key = localStorage.getItem('zenserpKey');
   if(!key) return null;
 
-  // Build smart search query
-  const name = (product.name||'').replace(/TOY|NIS|HON|MIT|HYU|KIA/g,'').trim();
+  const name = (product.name||'').replace(/\bTOY\b|\bNIS\b|\bHON\b|\bMIT\b|\bHYU\b|\bKIA\b/g,'').trim();
   const query = `${product.brand||''} ${name} auto part white background`.trim();
 
-  try{
-    const r = await fetch(`https://app.zenserp.com/api/v2/search?q=${encodeURIComponent(query)}&tbm=isch&num=5`, {
-      headers:{'apikey': key}
-    });
-    const data = await r.json();
+  // Use CORS proxy to bypass browser restrictions
+  const CORS_PROXIES = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+  ];
 
-    if(data.error){ 
-      if(data.error.includes('limit')||data.error.includes('quota')){
-        imgStopFlag=true; 
-        showToast('Límite de Zenserp alcanzado','err');
-      }
-      return null; 
-    }
+  const zenserpUrl = `https://app.zenserp.com/api/v2/search?apikey=${key}&q=${encodeURIComponent(query)}&tbm=isch&num=5`;
 
-    const images = data.image_results||[];
-    // Pick best image - prefer jpg/png, skip logos/icons
-    for(const img of images){
-      const src = img.sourceUrl||img.url||'';
-      if(src && (src.includes('.jpg')||src.includes('.png')||src.includes('.webp')||src.includes('.jpeg'))){
-        // Skip very small images (likely icons)
-        if(img.width && img.width < 100) continue;
-        return src;
+  for(const proxy of CORS_PROXIES){
+    try{
+      const r = await fetch(proxy + encodeURIComponent(zenserpUrl), {
+        headers:{'Accept':'application/json'}
+      });
+      if(!r.ok) continue;
+      const data = await r.json();
+
+      if(data.error){
+        if(String(data.error).toLowerCase().includes('limit')||String(data.error).toLowerCase().includes('quota')){
+          imgStopFlag=true;
+          showToast('Límite de Zenserp alcanzado','err');
+        }
+        return null;
       }
+
+      const images = data.image_results||data.results||[];
+      for(const img of images){
+        const src = img.sourceUrl||img.url||img.link||'';
+        if(src && src.startsWith('http') && (src.match(/\.(jpg|jpeg|png|webp)/i))){
+          if(img.width && img.width < 80) continue;
+          return src;
+        }
+      }
+      return images[0]?.sourceUrl||images[0]?.url||images[0]?.link||null;
+    }catch(e){
+      console.warn('Proxy failed:', proxy, e.message);
+      continue;
     }
-    // Fallback to first result
-    return images[0]?.sourceUrl||images[0]?.url||null;
-  }catch(e){ 
-    console.error('Zenserp error:', e);
-    return null; 
   }
+  return null;
 }
 
 function stopImageSearch(){
