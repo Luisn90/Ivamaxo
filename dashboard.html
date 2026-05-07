@@ -1301,27 +1301,37 @@ input,textarea,select,button{font-family:var(--f)}
           </button>
         </div>
       </div>
-      <!-- API Setup Panel -->
+      <!-- Zenserp Setup Panel -->
       <div id="apiSetupPanel" style="display:none;padding:20px 24px;border-top:1px solid var(--g200);background:var(--g50)">
-        <div style="font-size:13px;font-weight:700;margin-bottom:14px">🔑 Configuración de Google Custom Search API</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">🔑 Configuración Zenserp API</div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:6px">API Key de Zenserp</label>
+          <input type="text" id="zenserpApiKey" class="finput" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="font-size:13px;font-family:monospace">
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
           <div>
-            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:6px">API Key de Google</label>
-            <input type="text" id="googleApiKey" class="finput" placeholder="AIzaSy..." style="font-size:12px" value="${localStorage.getItem('gApiKey')||''}">
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:6px">Búsquedas por lote</label>
+            <select id="zenserpBatch" class="fselect" style="width:100%;padding:10px 14px">
+              <option value="50">50 por sesión (más seguro)</option>
+              <option value="100">100 por sesión</option>
+              <option value="200">200 por sesión</option>
+              <option value="500">500 por sesión</option>
+            </select>
           </div>
           <div>
-            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:6px">Search Engine ID (cx)</label>
-            <input type="text" id="googleCx" class="finput" placeholder="a1b2c3d4e5f6g7h8i" style="font-size:12px" value="${localStorage.getItem('gCx')||''}">
+            <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--g500);display:block;margin-bottom:6px">Delay entre búsquedas</label>
+            <select id="zenserpDelay" class="fselect" style="width:100%;padding:10px 14px">
+              <option value="800">800ms (normal)</option>
+              <option value="500">500ms (rápido)</option>
+              <option value="1200">1200ms (seguro)</option>
+            </select>
           </div>
         </div>
-        <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12.5px;line-height:1.7;color:var(--g700)">
-          <strong>Cómo obtener tu API Key gratis (2 min):</strong><br>
-          1. Ve a <a href="https://console.cloud.google.com/" target="_blank" style="color:#2563EB">console.cloud.google.com</a> → Crea proyecto → Activa <strong>Custom Search API</strong><br>
-          2. Ve a <a href="https://programmablesearchengine.google.com/" target="_blank" style="color:#2563EB">programmablesearchengine.google.com</a> → Crear motor → Buscar en toda la web → Copia el <strong>ID (cx)</strong><br>
-          3. En APIs & Services → Credentials → Create API Key → Cópiala aquí<br>
-          <strong style="color:var(--green)">✅ Gratis: 100 búsquedas/día · $5 por cada 1000 adicionales</strong>
+        <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12.5px;line-height:1.7">
+          <strong>✅ Zenserp conectado</strong> — Busca imágenes en Google Images con fondo blanco para cada producto automáticamente.
+          Revisa tu saldo en <a href="https://app.zenserp.com" target="_blank" style="color:#2563EB">app.zenserp.com</a> antes de iniciar.
         </div>
-        <button onclick="saveApiKeys()" class="ca-btn primary" style="margin-right:8px">Guardar y probar</button>
+        <button onclick="saveZenserpKey()" class="ca-btn primary" style="margin-right:8px">💾 Guardar y probar</button>
         <button onclick="toggleApiSetup()" class="ca-btn">Cerrar</button>
       </div>
 
@@ -2952,19 +2962,20 @@ let imgSearchRunning = false;
 
 async function startImageSearch(){
   if(imgSearchRunning){ showToast('Ya hay una búsqueda en curso','err'); return; }
-  const key = localStorage.getItem('gApiKey');
-  const cx = localStorage.getItem('gCx');
-  if(!key||!cx){
-    showToast('Configura primero tu API Key de Google','err');
+  const key = localStorage.getItem('zenserpKey');
+  if(!key){
+    showToast('Configura primero tu API Key de Zenserp','err');
     document.getElementById('apiSetupPanel').style.display='block';
     return;
   }
+  const batchSize = parseInt(document.getElementById('zenserpBatch')?.value||'100');
+  const delayMs = parseInt(document.getElementById('zenserpDelay')?.value||'800');
 
   const {data:products} = await sb.from('products')
     .select('id,name,brand,sku,description')
     .is('image_url',null)
     .eq('status','active')
-    .limit(200);
+    .limit(batchSize||100);
 
   if(!products?.length){ showToast('Todos los productos tienen imagen','ok'); return; }
 
@@ -2989,7 +3000,7 @@ async function startImageSearch(){
       imgFoundCount++;
       document.getElementById('imgStatFound').textContent = imgFoundCount;
     }
-    await new Promise(r=>setTimeout(r,500));
+    await new Promise(r=>setTimeout(r, delayMs||800));
   }
 
   imgSearchRunning = false;
@@ -2999,62 +3010,77 @@ async function startImageSearch(){
   loadImgProducts();
 }
 
-// ── API KEY SETUP ──
+// ── ZENSERP API SETUP ──
 function toggleApiSetup(){
   const panel = document.getElementById('apiSetupPanel');
   panel.style.display = panel.style.display==='none' ? 'block' : 'none';
-  // Pre-fill from localStorage
-  document.getElementById('googleApiKey').value = localStorage.getItem('gApiKey')||'';
-  document.getElementById('googleCx').value = localStorage.getItem('gCx')||'';
+  const saved = localStorage.getItem('zenserpKey')||'';
+  document.getElementById('zenserpApiKey').value = saved;
 }
 
-async function saveApiKeys(){
-  const key = document.getElementById('googleApiKey').value.trim();
-  const cx = document.getElementById('googleCx').value.trim();
-  if(!key||!cx){ showToast('Completa ambos campos','err'); return; }
-
-  // Test the API
+async function saveZenserpKey(){
+  const key = document.getElementById('zenserpApiKey').value.trim();
+  if(!key){ showToast('Ingresa tu API Key','err'); return; }
   showToast('Probando conexión...','ok');
-  const testUrl = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&searchType=image&q=toyota+corolla+filtro+aceite+repuesto&num=1`;
   try{
-    const r = await fetch(testUrl);
+    const r = await fetch(`https://app.zenserp.com/api/v2/search?q=toyota+corolla+filtro&tbm=isch&num=1`, {
+      headers:{'apikey': key}
+    });
     const data = await r.json();
-    if(data.items?.length){
-      localStorage.setItem('gApiKey', key);
-      localStorage.setItem('gCx', cx);
-      showToast('✅ API conectada correctamente','ok');
+    if(data.image_results||data.organic){
+      localStorage.setItem('zenserpKey', key);
+      showToast('✅ Zenserp conectado correctamente','ok');
       document.getElementById('apiSetupPanel').style.display='none';
     } else if(data.error){
-      showToast('Error: '+data.error.message,'err');
+      showToast('Error API: '+data.error,'err');
     } else {
-      showToast('Sin resultados en prueba, pero guardado','ok');
-      localStorage.setItem('gApiKey', key);
-      localStorage.setItem('gCx', cx);
+      localStorage.setItem('zenserpKey', key);
+      showToast('API guardada','ok');
+      document.getElementById('apiSetupPanel').style.display='none';
     }
   }catch(e){
-    showToast('Error de conexión: '+e.message,'err');
+    showToast('Error: '+e.message,'err');
   }
 }
 
 async function findImageUrl(product){
-  const key = localStorage.getItem('gApiKey');
-  const cx = localStorage.getItem('gCx');
-  if(!key||!cx) return null;
+  const key = localStorage.getItem('zenserpKey');
+  if(!key) return null;
 
-  const query = [product.brand, product.name].filter(Boolean).join(' ') + ' auto part white background';
+  // Build smart search query
+  const name = (product.name||'').replace(/TOY|NIS|HON|MIT|HYU|KIA/g,'').trim();
+  const query = `${product.brand||''} ${name} auto part white background`.trim();
 
   try{
-    const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&searchType=image&q=${encodeURIComponent(query)}&num=1&imgSize=medium&imgType=photo&imgColorType=color&rights=cc_publicdomain,cc_attribute,cc_sharealike`;
-    const r = await fetch(url);
+    const r = await fetch(`https://app.zenserp.com/api/v2/search?q=${encodeURIComponent(query)}&tbm=isch&num=5`, {
+      headers:{'apikey': key}
+    });
     const data = await r.json();
 
-    if(data.error?.code === 429){ imgStopFlag=true; showToast('Límite diario de API alcanzado (100/día)','err'); return null; }
-    if(data.error){ console.error('CSE error:', data.error.message); return null; }
+    if(data.error){ 
+      if(data.error.includes('limit')||data.error.includes('quota')){
+        imgStopFlag=true; 
+        showToast('Límite de Zenserp alcanzado','err');
+      }
+      return null; 
+    }
 
-    const img = data.items?.[0];
-    if(img?.link) return img.link;
-  }catch(e){ console.error('findImageUrl error:', e); }
-  return null;
+    const images = data.image_results||[];
+    // Pick best image - prefer jpg/png, skip logos/icons
+    for(const img of images){
+      const src = img.sourceUrl||img.url||'';
+      if(src && (src.includes('.jpg')||src.includes('.png')||src.includes('.webp')||src.includes('.jpeg'))){
+        // Skip very small images (likely icons)
+        if(img.width && img.width < 100) continue;
+        return src;
+      }
+    }
+    // Fallback to first result
+    return images[0]?.sourceUrl||images[0]?.url||null;
+  }catch(e){ 
+    console.error('Zenserp error:', e);
+    return null; 
+  }
 }
 
 function stopImageSearch(){
