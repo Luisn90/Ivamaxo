@@ -2892,33 +2892,162 @@ function renderImgGrid(){
     grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:64px;color:var(--g500)"><p style="font-size:18px;font-weight:700;color:var(--g300)">✅ Todos los productos tienen imagen</p></div>';
     return;
   }
+
   grid.innerHTML = imgProducts.map(p=>`
-    <div style="background:var(--g50);border:1px solid var(--g200);border-radius:12px;overflow:hidden" id="imgCard-${p.id}">
+    <div style="background:var(--wh);border:1.5px solid var(--g200);border-radius:14px;overflow:hidden;transition:all .2s" id="imgCard-${p.id}">
+      
       <!-- Image preview area -->
-      <div style="aspect-ratio:1;background:var(--g200);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden" id="imgPrev-${p.id}">
-        <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--g300);fill:none;stroke-width:1;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <div style="aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden" id="imgPrev-${p.id}">
+        <!-- Loading spinner -->
+        <div id="imgLoader-${p.id}" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border:3px solid var(--g200);border-top-color:var(--y);border-radius:50%;animation:spin .8s linear infinite"></div>
+          <span style="font-size:10px;color:var(--g500);font-weight:600">Buscando imagen...</span>
+        </div>
       </div>
-      <div style="padding:12px">
-        <div style="font-size:10px;color:var(--g500);font-weight:700;text-transform:uppercase;margin-bottom:3px">${p.brand||'—'}</div>
-        <div style="font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;height:36px;overflow:hidden">${p.name||''}</div>
-        <div style="font-size:10.5px;color:var(--g500);margin-bottom:10px">SKU: ${p.sku||'—'}</div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <button onclick="searchGoogleImg('${p.id}','${encodeURIComponent(p.name||'')}','${encodeURIComponent(p.brand||'')}')"
-            style="width:100%;padding:8px;border:1.5px solid var(--y);border-radius:8px;background:var(--yl);font-family:var(--f);font-size:11.5px;font-weight:700;cursor:pointer;color:var(--bk)">
-            🔍 Buscar en Google
-          </button>
-          <div style="display:flex;gap:6px">
-            <input type="text" id="imgUrl-${p.id}" placeholder="Pegar URL de imagen..."
-              style="flex:1;padding:7px 10px;border:1.5px solid var(--g200);border-radius:8px;font-family:var(--f);font-size:11px;outline:none;min-width:0"
-              onpaste="previewImgUrl('${p.id}',event)" oninput="previewImgUrl('${p.id}')">
+
+      <div style="padding:12px 14px">
+        <div style="font-size:9.5px;color:var(--g500);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">${p.brand||'—'}</div>
+        <div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:8px;height:32px;overflow:hidden;color:var(--bk)">${(p.name||'').slice(0,60)}</div>
+        <div style="font-size:10px;color:var(--g500);margin-bottom:10px;font-family:monospace">SKU: ${p.sku||'—'}</div>
+        
+        <!-- Action buttons -->
+        <div id="imgActions-${p.id}" style="display:flex;flex-direction:column;gap:6px">
+          <!-- Show after image found -->
+          <div id="imgFoundActions-${p.id}" style="display:none">
+            <button onclick="acceptImg('${p.id}')"
+              style="width:100%;padding:10px;border:none;border-radius:8px;background:var(--y);font-family:var(--f);font-size:12.5px;font-weight:800;cursor:pointer;color:var(--bk);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
+              ✓ Usar esta imagen
+            </button>
+            <button onclick="rejectImg('${p.id}','${encodeURIComponent(p.name||'')}','${encodeURIComponent(p.brand||'')}')"
+              style="width:100%;padding:8px;border:1.5px solid var(--g200);border-radius:8px;background:none;font-family:var(--f);font-size:11.5px;font-weight:600;cursor:pointer;color:var(--g700)">
+              🔍 Buscar otra en Google
+            </button>
           </div>
-          <button onclick="saveImgUrl('${p.id}')"
-            style="width:100%;padding:8px;border:none;border-radius:8px;background:var(--bk);font-family:var(--f);font-size:11.5px;font-weight:700;cursor:pointer;color:var(--wh)">
-            ✓ Guardar imagen
-          </button>
+          <!-- Paste URL fallback -->
+          <div id="imgPasteSection-${p.id}" style="display:none">
+            <input type="text" id="imgUrl-${p.id}" placeholder="Pega aquí la URL de la imagen..."
+              style="width:100%;padding:8px 10px;border:1.5px solid var(--y);border-radius:8px;font-family:var(--f);font-size:11px;outline:none;margin-bottom:6px;box-sizing:border-box"
+              oninput="previewImgUrl('${p.id}')">
+            <button onclick="saveImgUrl('${p.id}')"
+              style="width:100%;padding:9px;border:none;border-radius:8px;background:var(--bk);font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;color:var(--wh)">
+              💾 Guardar esta imagen
+            </button>
+          </div>
         </div>
       </div>
     </div>`).join('');
+
+  // Auto-search images for all visible products
+  const zenserpKey = localStorage.getItem('zenserpKey');
+  imgProducts.forEach(p => {
+    if(zenserpKey){
+      autoFetchProductImage(p);
+    } else {
+      // No API key - show paste section directly
+      document.getElementById('imgLoader-'+p.id).innerHTML = '<span style="font-size:10.5px;color:var(--g500);text-align:center;padding:8px">Configura la API<br>para búsqueda automática</span>';
+      document.getElementById('imgPasteSection-'+p.id).style.display='block';
+    }
+  });
+}
+
+// Auto-fetch image for a single product card
+async function autoFetchProductImage(product){
+  const loaderId = 'imgLoader-'+product.id;
+  const prevId = 'imgPrev-'+product.id;
+
+  try{
+    const candidates = await searchImageUrl(product);
+    if(!candidates?.length){
+      showNoImageFound(product.id);
+      return;
+    }
+
+    // Try to load first candidate as preview
+    let loaded = false;
+    for(const src of candidates){
+      const ok = await tryLoadPreview(product.id, src);
+      if(ok){ loaded=true; break; }
+    }
+
+    if(!loaded) showNoImageFound(product.id);
+    
+    // Store candidates for later download
+    window['_imgCandidates_'+product.id] = candidates;
+
+  }catch(e){
+    showNoImageFound(product.id);
+  }
+}
+
+async function tryLoadPreview(id, src){
+  return new Promise(resolve=>{
+    const prev = document.getElementById('imgPrev-'+id);
+    if(!prev){ resolve(false); return; }
+
+    const img = new Image();
+    img.crossOrigin='anonymous';
+    img.onload = ()=>{
+      if(img.width < 60 || img.height < 60){ resolve(false); return; }
+      prev.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:contain;padding:10px" id="imgPreviewEl-${id}">`;
+      document.getElementById('imgFoundActions-'+id).style.display='block';
+      resolve(true);
+    };
+    img.onerror = ()=> resolve(false);
+    // Try proxy version
+    img.src = 'https://corsproxy.io/?' + encodeURIComponent(src);
+    setTimeout(()=> resolve(false), 8000);
+  });
+}
+
+function showNoImageFound(id){
+  const loader = document.getElementById('imgLoader-'+id);
+  if(loader) loader.innerHTML = '<span style="font-size:10.5px;color:var(--g500);text-align:center;padding:8px">Sin resultado.<br>Busca manualmente.</span>';
+  const paste = document.getElementById('imgPasteSection-'+id);
+  if(paste) paste.style.display='block';
+}
+
+async function acceptImg(id){
+  const candidates = window['_imgCandidates_'+id]||[];
+  const previewImg = document.getElementById('imgPreviewEl-'+id);
+  
+  // Show uploading state
+  const card = document.getElementById('imgCard-'+id);
+  document.getElementById('imgFoundActions-'+id).innerHTML = '<div style="text-align:center;padding:8px;font-size:12px;color:var(--g500)">⬆️ Descargando y subiendo...</div>';
+
+  // Get the actual URL to download
+  let imgUrl = '';
+  if(previewImg){
+    // Remove corsproxy from URL to get original
+    const proxied = previewImg.src;
+    imgUrl = proxied.includes('corsproxy.io') ? decodeURIComponent(proxied.split('?')[1]) : proxied;
+  }
+  if(!imgUrl && candidates.length) imgUrl = candidates[0];
+  if(!imgUrl){ showToast('No hay imagen para guardar','err'); return; }
+
+  const p = imgProducts.find(x=>x.id===id)||{id,sku:id};
+  const storedUrl = await downloadAndUpload([imgUrl,...candidates.slice(1)], id, p.sku||id);
+  const finalUrl = storedUrl || imgUrl;
+
+  const {error} = await sb.from('products').update({image_url: finalUrl}).eq('id', id);
+  if(error){ showToast('Error: '+error.message,'err'); return; }
+
+  // Mark as done
+  card.style.border='2px solid var(--green)';
+  card.style.opacity='0.6';
+  card.querySelector('[id^=imgFoundActions]').innerHTML='<div style="text-align:center;color:var(--green);font-weight:700;font-size:13px;padding:8px">✅ Guardada '+(storedUrl?'en tu Storage':'como URL')+'</div>';
+  
+  const found = parseInt(document.getElementById('imgStatFound').textContent||'0')+1;
+  document.getElementById('imgStatFound').textContent=found;
+  document.getElementById('imgStatWithImg').textContent=(parseInt(document.getElementById('imgStatWithImg').textContent||'0')+1).toLocaleString();
+  document.getElementById('imgStatNoImg').textContent=(parseInt(document.getElementById('imgStatNoImg').textContent||'0')-1).toLocaleString();
+  showToast('Imagen guardada ✓','ok');
+}
+
+function rejectImg(id, encodedName, encodedBrand){
+  // Open Google Images and show paste section
+  searchGoogleImg(id, encodedName, encodedBrand);
+  document.getElementById('imgFoundActions-'+id).style.display='none';
+  document.getElementById('imgPasteSection-'+id).style.display='block';
 }
 
 function searchGoogleImg(id, name, brand){
