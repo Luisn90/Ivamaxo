@@ -2937,8 +2937,21 @@ function previewImgUrl(id, event){
 }
 
 async function saveImgUrl(id){
-  const url = document.getElementById('imgUrl-'+id).value.trim();
+  let url = document.getElementById('imgUrl-'+id).value.trim();
   if(!url){ showToast('Pega una URL de imagen','err'); return; }
+
+  // If external URL, download and upload to our Storage
+  if(!url.includes('supabase.co')){
+    showToast('Descargando imagen...','ok');
+    const p = imgProducts.find(x=>x.id===id)||{id,sku:id};
+    const storedUrl = await downloadAndUpload([url], id, p.sku||id);
+    if(storedUrl){
+      url = storedUrl;
+      showToast('Imagen subida a tu Storage ✓','ok');
+    } else {
+      showToast('No se pudo descargar, guardando URL externa','err');
+    }
+  }
 
   const {error} = await sb.from('products').update({image_url: url}).eq('id', id);
   if(error){ showToast('Error guardando: '+error.message,'err'); return; }
@@ -3044,52 +3057,98 @@ async function saveZenserpKey(){
   }
 }
 
-async function findImageUrl(product){
+// ── IMAGE SEARCH + DOWNLOAD + UPLOAD TO SUPABASE STORAGE ──
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+];
+
+async function fetchWithProxy(url, opts={}){
+  for(const proxy of CORS_PROXIES){
+    try{
+      const r = await fetch(proxy + encodeURIComponent(url), opts);
+      if(r.ok) return r;
+    }catch(e){ continue; }
+  }
+  return null;
+}
+
+async function searchImageUrl(product){
   const key = localStorage.getItem('zenserpKey');
   if(!key) return null;
 
   const name = (product.name||'').replace(/\bTOY\b|\bNIS\b|\bHON\b|\bMIT\b|\bHYU\b|\bKIA\b/g,'').trim();
   const query = `${product.brand||''} ${name} auto part white background`.trim();
+  const zenserpUrl = `https://app.zenserp.com/api/v2/search?apikey=${key}&q=${encodeURIComponent(query)}&tbm=isch&num=8`;
 
-  // Use CORS proxy to bypass browser restrictions
-  const CORS_PROXIES = [
-    'https://corsproxy.io/?',
-    'https://api.allorigins.win/raw?url=',
-  ];
+  try{
+    const r = await fetchWithProxy(zenserpUrl);
+    if(!r) return null;
+    const data = await r.json();
 
-  const zenserpUrl = `https://app.zenserp.com/api/v2/search?apikey=${key}&q=${encodeURIComponent(query)}&tbm=isch&num=5`;
+    if(data.error){
+      if(String(data.error).toLowerCase().match(/limit|quota|credit/)){
+        imgStopFlag=true;
+        showToast('Créditos Zenserp agotados','err');
+      }
+      return null;
+    }
 
-  for(const proxy of CORS_PROXIES){
+    const images = data.image_results||data.results||[];
+    // Return first few candidates for download attempt
+    return images
+      .map(img => img.sourceUrl||img.url||img.link||'')
+      .filter(src => src && src.startsWith('http'))
+      .slice(0, 5);
+  }catch(e){ return null; }
+}
+
+async function downloadAndUpload(imageUrls, productId, productSku){
+  // Try each candidate URL until one downloads successfully
+  for(const imgUrl of imageUrls){
     try{
-      const r = await fetch(proxy + encodeURIComponent(zenserpUrl), {
-        headers:{'Accept':'application/json'}
-      });
-      if(!r.ok) continue;
-      const data = await r.json();
+      // Download via proxy
+      const r = await fetchWithProxy(imgUrl);
+      if(!r) continue;
 
-      if(data.error){
-        if(String(data.error).toLowerCase().includes('limit')||String(data.error).toLowerCase().includes('quota')){
-          imgStopFlag=true;
-          showToast('Límite de Zenserp alcanzado','err');
-        }
-        return null;
+      const blob = await r.blob();
+      if(!blob || blob.size < 1000) continue; // Skip tiny files
+
+      // Determine extension
+      const type = blob.type||'image/jpeg';
+      const ext = type.includes('png')?'png':type.includes('webp')?'webp':'jpg';
+
+      // Upload to Supabase Storage
+      const filename = `products/${productSku||productId}_${Date.now()}.${ext}`;
+      const {data:uploadData, error:uploadError} = await sb.storage
+        .from('products')
+        .upload(filename, blob, {contentType: type, upsert: true});
+
+      if(uploadError){
+        console.warn('Upload error:', uploadError.message);
+        continue;
       }
 
-      const images = data.image_results||data.results||[];
-      for(const img of images){
-        const src = img.sourceUrl||img.url||img.link||'';
-        if(src && src.startsWith('http') && (src.match(/\.(jpg|jpeg|png|webp)/i))){
-          if(img.width && img.width < 80) continue;
-          return src;
-        }
-      }
-      return images[0]?.sourceUrl||images[0]?.url||images[0]?.link||null;
+      // Get public URL
+      const {data:{publicUrl}} = sb.storage.from('products').getPublicUrl(filename);
+      return publicUrl;
+
     }catch(e){
-      console.warn('Proxy failed:', proxy, e.message);
+      console.warn('Download failed for', imgUrl, e.message);
       continue;
     }
   }
   return null;
+}
+
+async function findImageUrl(product){
+  // 1. Search for candidate URLs
+  const candidates = await searchImageUrl(product);
+  if(!candidates?.length) return null;
+
+  // 2. Download best image and upload to Supabase Storage
+  const storedUrl = await downloadAndUpload(candidates, product.id, product.sku);
+  return storedUrl;
 }
 
 function stopImageSearch(){
