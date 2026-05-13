@@ -574,280 +574,6 @@ a{text-decoration:none}
 .nav-link:hover{background:rgba(0,0,0,.08);color:var(--bk)}
 .nav-link.active{background:rgba(0,0,0,.1);color:var(--bk)}
 @media(max-width:640px){.hdr-nav{display:none}}
-/* ══════════════════════════════
-   SHIPPING BANNER V2
-══════════════════════════════ */
-.ship-banner{
-  position:relative;overflow:hidden;
-  background:#0A0A0A;
-  margin:0 48px;border-radius:20px;
-  padding:56px 48px;
-  margin-bottom:24px;
-}
-.ship-bg-grid{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(220,38,38,.06) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(220,38,38,.06) 1px,transparent 1px);
-  background-size:40px 40px;
-  animation:gridSlide 20s linear infinite;
-  pointer-events:none;
-}
-@keyframes gridSlide{from{background-position:0 0}to{background-position:40px 40px}}
-.ship-inner{
-  position:relative;z-index:1;
-  display:grid;grid-template-columns:1.2fr 1.1fr .8fr;
-  gap:48px;align-items:center;
-}
-.ship-eyebrow{
-  display:flex;align-items:center;gap:8px;
-  font-size:11px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.15em;color:rgba(255,255,255,.5);
-  margin-bottom:20px;
-}
-.ship-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#DC2626;
-  box-shadow:0 0 12px rgba(220,38,38,.6);
-  animation:pulse-red 2s ease-in-out infinite;
-}
-@keyframes pulse-red{0%,100%{box-shadow:0 0 8px rgba(220,38,38,.5)}50%{box-shadow:0 0 20px rgba(220,38,38,.9)}}
-.ship-title{
-  font-size:clamp(32px,4vw,56px);font-weight:800;
-  color:#fff;line-height:1.05;letter-spacing:-.03em;
-  margin-bottom:32px;
-}
-.ship-title em{
-  font-style:normal;color:#DC2626;
-  display:block;
-}
-.ship-acts{display:flex;gap:12px;flex-wrap:wrap}
-.ship-btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:13px 28px;background:#DC2626;border-radius:50px;
-  font-weight:800;font-size:14px;color:#fff;
-  transition:all .25s ease;text-decoration:none;
-  box-shadow:0 4px 24px rgba(220,38,38,.35);
-}
-.ship-btn-primary svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
-.ship-btn-primary:hover{background:#B91C1C;transform:translateY(-2px);box-shadow:0 8px 32px rgba(220,38,38,.5)}
-.ship-btn-primary:hover svg{transform:translateX(4px)}
-.ship-btn-ghost{
-  display:inline-flex;align-items:center;
-  padding:13px 24px;border:1.5px solid rgba(255,255,255,.15);border-radius:50px;
-  font-weight:700;font-size:14px;color:rgba(255,255,255,.65);
-  transition:all .25s;text-decoration:none;
-}
-.ship-btn-ghost:hover{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.06)}
-/* Features */
-.ship-mid{display:flex;flex-direction:column;gap:20px}
-.ship-feat{
-  display:flex;align-items:center;gap:14px;
-  padding:14px 16px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:12px;
-  transform:translateX(20px);opacity:0;
-  animation:slideInFeat .5s ease forwards;
-}
-.ship-feat-1{animation-delay:.1s}
-.ship-feat-2{animation-delay:.2s}
-.ship-feat-3{animation-delay:.3s}
-@keyframes slideInFeat{to{transform:translateX(0);opacity:1}}
-.ship-feat-ico{
-  width:40px;height:40px;border-radius:10px;
-  background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.25);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.ship-feat-ico svg{width:18px;height:18px;stroke:#DC2626;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.ship-feat-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px}
-.ship-feat-desc{font-size:11.5px;font-weight:500;color:rgba(255,255,255,.4)}
-/* Map animation */
-.ship-right{
-  position:relative;display:flex;align-items:center;justify-content:center;
-  height:200px;
-}
-.ship-map-ring{
-  position:absolute;border-radius:50%;border:1px solid rgba(220,38,38,.2);
-  animation:expandRing 3s ease-out infinite;
-}
-.ship-map-ring-1{width:80px;height:80px;animation-delay:0s}
-.ship-map-ring-2{width:140px;height:140px;animation-delay:.8s}
-.ship-map-ring-3{width:200px;height:200px;animation-delay:1.6s}
-@keyframes expandRing{
-  0%{transform:scale(.6);opacity:.8}
-  100%{transform:scale(1.2);opacity:0}
-}
-.ship-pin{
-  position:relative;z-index:2;
-  width:52px;height:52px;
-  background:linear-gradient(135deg,#DC2626,#991B1B);
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 32px rgba(220,38,38,.5);
-  animation:pinBounce 2s ease-in-out infinite;
-}
-.ship-pin svg{
-  width:22px;height:22px;stroke:#fff;fill:rgba(255,255,255,.2);
-  stroke-width:1.8;stroke-linecap:round;
-  transform:rotate(45deg);
-}
-@keyframes pinBounce{
-  0%,100%{transform:rotate(-45deg) translateY(0)}
-  50%{transform:rotate(-45deg) translateY(-8px)}
-}
-
-/* ══════════════════════════════
-   TRUST V2
-══════════════════════════════ */
-.trust-v2{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:0;margin:0 48px 24px;
-  background:#fff;border:1px solid #EBEBEB;
-  border-radius:20px;overflow:hidden;
-}
-.tv2-card{
-  padding:32px 28px;position:relative;overflow:hidden;
-  border-right:1px solid #EBEBEB;
-  transition:all .3s ease;cursor:default;
-}
-.tv2-card:last-child{border-right:none}
-.tv2-card::before{
-  content:'';position:absolute;bottom:0;left:0;
-  width:0;height:3px;background:#DC2626;
-  transition:width .4s ease;
-}
-.tv2-card:hover::before{width:100%}
-.tv2-card:hover{background:#FAFAFA}
-.tv2-num{
-  font-size:11px;font-weight:800;color:#DC2626;
-  letter-spacing:.15em;margin-bottom:16px;
-  font-variant-numeric:tabular-nums;
-}
-.tv2-ico{
-  width:44px;height:44px;border-radius:12px;
-  background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.15);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:16px;transition:all .3s;
-}
-.tv2-card:hover .tv2-ico{background:rgba(220,38,38,.15);transform:scale(1.08)}
-.tv2-ico svg{width:20px;height:20px;stroke:#DC2626;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tv2-title{font-size:15px;font-weight:700;color:#0A0A0A;margin-bottom:6px}
-.tv2-desc{font-size:12.5px;font-weight:500;color:#888;line-height:1.6}
-.tv2-line{
-  position:absolute;top:0;right:0;
-  width:1px;height:0;background:#DC2626;
-  transition:height .4s ease;
-}
-.tv2-card:hover .tv2-line{height:100%}
-
-/* ══════════════════════════════
-   CLUB V2
-══════════════════════════════ */
-.club-v2{
-  margin:0 48px 24px;
-  background:#fff;border:1px solid #EBEBEB;
-  border-radius:20px;overflow:hidden;
-  position:relative;
-}
-.club-v2::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#DC2626,#991B1B,#DC2626);
-  background-size:200% 100%;
-  animation:shimmer-red 3s linear infinite;
-}
-@keyframes shimmer-red{from{background-position:200% 0}to{background-position:-200% 0}}
-.club-v2-inner{
-  display:grid;grid-template-columns:1.2fr 1.4fr 1fr;
-  gap:48px;padding:48px;align-items:center;
-}
-.club-v2-tag{
-  display:flex;align-items:center;gap:8px;
-  font-size:10.5px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.15em;color:#DC2626;margin-bottom:16px;
-}
-.club-v2-dot{
-  width:6px;height:6px;border-radius:50%;background:#DC2626;
-}
-.club-v2-title{
-  font-size:clamp(28px,3vw,40px);font-weight:800;
-  color:#0A0A0A;line-height:1.1;letter-spacing:-.03em;
-  margin-bottom:16px;
-}
-.club-v2-title span:first-child{color:#DC2626}
-.club-crown{font-size:.8em;color:#DC2626;margin-left:4px}
-.club-v2-sub{font-size:14px;font-weight:500;color:#888;line-height:1.7}
-/* Benefits */
-.club-v2-benefits{display:flex;flex-direction:column;gap:16px}
-.club-v2-benefit{
-  display:flex;align-items:center;gap:16px;
-  padding:16px 18px;border-radius:12px;
-  border:1px solid #EBEBEB;background:#FAFAFA;
-  transition:all .3s;
-  transform:translateY(10px);opacity:0;
-  animation:fadeUp .5s ease forwards;
-}
-.cv2-b1{animation-delay:.1s}
-.cv2-b2{animation-delay:.2s}
-.cv2-b3{animation-delay:.3s}
-@keyframes fadeUp{to{transform:translateY(0);opacity:1}}
-.club-v2-benefit:hover{border-color:rgba(220,38,38,.2);background:#FFF5F5;transform:translateX(4px)}
-.cv2-ico{
-  width:40px;height:40px;border-radius:10px;
-  background:rgba(220,38,38,.08);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:all .3s;
-}
-.club-v2-benefit:hover .cv2-ico{background:rgba(220,38,38,.15)}
-.cv2-ico svg{width:18px;height:18px;stroke:#DC2626;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.cv2-label{font-size:13.5px;font-weight:700;color:#0A0A0A;margin-bottom:2px}
-.cv2-sub{font-size:11.5px;font-weight:500;color:#888}
-/* Form */
-.cv2-form-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:#DC2626;margin-bottom:6px}
-.cv2-form-sub{font-size:22px;font-weight:700;color:#0A0A0A;margin-bottom:20px;letter-spacing:-.02em}
-.cv2-input-wrap{display:flex;gap:8px;margin-bottom:12px}
-.cv2-input{
-  flex:1;padding:13px 16px;
-  border:1.5px solid #EBEBEB;border-radius:10px;
-  font-family:var(--f);font-size:13.5px;font-weight:500;
-  color:#0A0A0A;outline:none;transition:border-color .2s;
-  background:#FAFAFA;
-}
-.cv2-input:focus{border-color:#DC2626;background:#fff;box-shadow:0 0 0 3px rgba(220,38,38,.08)}
-.cv2-btn{
-  padding:13px 24px;background:#DC2626;border:none;border-radius:10px;
-  font-family:var(--f);font-size:13.5px;font-weight:800;color:#fff;
-  cursor:pointer;transition:all .25s;white-space:nowrap;
-  box-shadow:0 4px 16px rgba(220,38,38,.3);
-}
-.cv2-btn:hover{background:#B91C1C;transform:translateY(-1px);box-shadow:0 8px 24px rgba(220,38,38,.4)}
-.cv2-privacy{
-  display:flex;align-items:center;gap:6px;
-  font-size:11px;font-weight:600;color:#aaa;
-}
-
-/* ══ RESPONSIVE ══ */
-@media(max-width:1024px){
-  .ship-banner,.trust-v2,.club-v2{margin:0 20px 20px}
-  .ship-inner{grid-template-columns:1fr 1fr;gap:32px}
-  .ship-right{display:none}
-  .club-v2-inner{grid-template-columns:1fr 1fr;gap:32px}
-}
-@media(max-width:768px){
-  .ship-banner{padding:36px 24px}
-  .ship-inner{grid-template-columns:1fr;gap:24px}
-  .trust-v2{grid-template-columns:1fr 1fr;margin:0 16px 16px}
-  .tv2-card{border-bottom:1px solid #EBEBEB}
-  .club-v2-inner{grid-template-columns:1fr;gap:28px;padding:32px 24px}
-  .ship-banner,.trust-v2,.club-v2{margin:0 16px 16px;border-radius:14px}
-}
-@media(max-width:480px){
-  .trust-v2{grid-template-columns:1fr}
-  .ship-title{font-size:28px}
-  .club-v2-title{font-size:26px}
-}
-
 </style>
 </head>
 <body>
@@ -1048,156 +774,39 @@ a{text-decoration:none}
     <div class="pgrid" id="productsGrid"></div>
   </section>
 
-  <!-- ═══ SHIPPING BANNER ═══ -->
-  <section class="ship-banner">
-    <div class="ship-bg-grid"></div>
-    <div class="ship-inner">
-
-      <div class="ship-left">
-        <div class="ship-eyebrow">
-          <span class="ship-dot"></span>
-          <span>Logística Express</span>
-        </div>
-        <h2 class="ship-title">Envío gratis<br><em>desde $50</em></h2>
-        <div class="ship-acts">
-          <a href="tienda.html" class="ship-btn-primary">Comprar ahora <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-          <a href="#" class="ship-btn-ghost">Ver condiciones</a>
-        </div>
-      </div>
-
-      <div class="ship-mid">
-        <div class="ship-feat ship-feat-1">
-          <div class="ship-feat-ico">
-            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg>
-          </div>
-          <div>
-            <div class="ship-feat-title">24–48h en todo el país</div>
-            <div class="ship-feat-desc">Entrega rápida y segura</div>
-          </div>
-        </div>
-        <div class="ship-feat ship-feat-2">
-          <div class="ship-feat-ico">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-          </div>
-          <div>
-            <div class="ship-feat-title">Seguimiento en tiempo real</div>
-            <div class="ship-feat-desc">Sabe dónde está tu pedido</div>
-          </div>
-        </div>
-        <div class="ship-feat ship-feat-3">
-          <div class="ship-feat-ico">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          </div>
-          <div>
-            <div class="ship-feat-title">Sin costos ocultos</div>
-            <div class="ship-feat-desc">Transparencia garantizada</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="ship-right">
-        <div class="ship-map-ring ship-map-ring-1"></div>
-        <div class="ship-map-ring ship-map-ring-2"></div>
-        <div class="ship-map-ring ship-map-ring-3"></div>
-        <div class="ship-pin">
-          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-      </div>
-
+  <!-- PROMO -->
+  <div class="promo rev">
+    <div class="promo-cnt">
+      <div class="ptag"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>Logística express</div>
+      <div class="ptitle">Envío gratis <span>desde $50</span></div>
+      <div class="psub">Entrega en 24–48 horas en todo el país. Seguimiento en tiempo real incluido.</div>
     </div>
-  </section>
-
-  <!-- ═══ TRUST CARDS ═══ -->
-  <section class="trust-v2">
-    <div class="tv2-card tv2-d1">
-      <div class="tv2-num">01</div>
-      <div class="tv2-ico">
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </div>
-      <div class="tv2-title">Envío Express</div>
-      <div class="tv2-desc">24–48h en todo el país sin condiciones adicionales</div>
-      <div class="tv2-line"></div>
+    <div class="promo-acts">
+      <button class="btn-y">Comprar ahora <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      <button class="btn-ghost">Ver condiciones</button>
     </div>
-    <div class="tv2-card tv2-d2">
-      <div class="tv2-num">02</div>
-      <div class="tv2-ico">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-      </div>
-      <div class="tv2-title">Calidad Certificada</div>
-      <div class="tv2-desc">Repuestos 100% originales con garantía de fábrica</div>
-      <div class="tv2-line"></div>
+  </div>
+
+  <!-- TRUST -->
+  <div class="trust">
+    <div class="tcard rev d1"><div class="tico"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div><div><div class="ttitle">Envío Express</div><div class="tdesc">24–48h en todo el país</div></div></div>
+    <div class="tcard rev d2"><div class="tico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="ttitle">Calidad Garantizada</div><div class="tdesc">Productos 100% originales</div></div></div>
+    <div class="tcard rev d3"><div class="tico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div><div><div class="ttitle">30 Días de devolución</div><div class="tdesc">Sin preguntas ni complicaciones</div></div></div>
+    <div class="tcard rev d4"><div class="tico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.08 6.08l1.27-.56a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div><div><div class="ttitle">Soporte 24/7</div><div class="tdesc">Expertos siempre disponibles</div></div></div>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="nl rev">
+    <div class="nl-left">
+      <div class="stag">Novedades y ofertas</div>
+      <h3>Únete al club<br>IVAMAXO</h3>
+      <p>Recibe primero las mejores ofertas y lanzamientos exclusivos.</p>
     </div>
-    <div class="tv2-card tv2-d3">
-      <div class="tv2-num">03</div>
-      <div class="tv2-ico">
-        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      </div>
-      <div class="tv2-title">30 Días</div>
-      <div class="tv2-desc">Devolución sin preguntas ni complicaciones</div>
-      <div class="tv2-line"></div>
+    <div class="nl-form">
+      <input type="email" placeholder="tu@email.com">
+      <button>Suscribirme</button>
     </div>
-    <div class="tv2-card tv2-d4">
-      <div class="tv2-num">04</div>
-      <div class="tv2-ico">
-        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.08 6.08l1.27-.56a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-      </div>
-      <div class="tv2-title">Soporte 24/7</div>
-      <div class="tv2-desc">Expertos técnicos siempre disponibles por WhatsApp</div>
-      <div class="tv2-line"></div>
-    </div>
-  </section>
-
-  <!-- ═══ CLUB NEWSLETTER ═══ -->
-  <section class="club-v2">
-    <div class="club-v2-inner">
-
-      <div class="club-v2-left">
-        <div class="club-v2-tag">
-          <span class="club-v2-dot"></span> Novedades y Ofertas
-        </div>
-        <h2 class="club-v2-title">Únete al club<br><span>IVAMAXO</span> <span class="club-crown">♛</span></h2>
-        <p class="club-v2-sub">Recibe primero las mejores ofertas y lanzamientos exclusivos para tu vehículo.</p>
-      </div>
-
-      <div class="club-v2-benefits">
-        <div class="club-v2-benefit cv2-b1">
-          <div class="cv2-ico">
-            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-          </div>
-          <div class="cv2-label">Ofertas exclusivas</div>
-          <div class="cv2-sub">Descuentos solo para miembros</div>
-        </div>
-        <div class="club-v2-benefit cv2-b2">
-          <div class="cv2-ico">
-            <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
-          </div>
-          <div class="cv2-label">Lanzamientos anticipados</div>
-          <div class="cv2-sub">Sé el primero en conocerlos</div>
-        </div>
-        <div class="club-v2-benefit cv2-b3">
-          <div class="cv2-ico">
-            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div class="cv2-label">Contenido especial</div>
-          <div class="cv2-sub">Guías y consejos para tu auto</div>
-        </div>
-      </div>
-
-      <div class="club-v2-form">
-        <div class="cv2-form-label">Únete gratis</div>
-        <div class="cv2-form-sub">No te pierdas nada.</div>
-        <div class="cv2-input-wrap">
-          <input type="email" placeholder="tu@email.com" class="cv2-input">
-          <button class="cv2-btn" onclick="subscribeClub(this)">Suscribirme</button>
-        </div>
-        <div class="cv2-privacy">
-          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Tu información está protegida. Sin spam.
-        </div>
-      </div>
-
-    </div>
-  </section>
+  </div>
 
 </div><!-- /main -->
 
@@ -1633,19 +1242,6 @@ async function loadCategories(){
       <div class="ccount">${count} producto${count!==1?'s':''}</div>
     </div>`;
   }).join('');
-}
-
-
-function subscribeClub(btn){
-  const input = btn.previousElementSibling;
-  if(!input?.value?.includes('@')){ 
-    input.style.borderColor='#DC2626'; 
-    input.focus(); return; 
-  }
-  btn.textContent='✓ Suscrito';
-  btn.style.background='#16A34A';
-  btn.disabled=true;
-  input.disabled=true;
 }
 
 function goToProduct(id){ window.location.href='producto.html?id='+id; }
