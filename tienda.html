@@ -107,6 +107,17 @@ button{font-family:var(--f)}
 .search-clear svg{width:12px;height:12px;stroke:var(--g700);fill:none;stroke-width:2.5;stroke-linecap:round}
 .search-clear:hover{background:var(--g300)}
 .sort-select{padding:9px 14px;border:1.5px solid var(--g200);border-radius:50px;font-family:var(--f);font-size:12.5px;font-weight:600;color:var(--g700);background:var(--wh);cursor:pointer;outline:none;transition:var(--t)}
+
+/* ── Selector de vertical: autos / motos ── */
+.vswitch{display:flex;gap:3px;padding:3px;background:var(--g100);border-radius:50px;flex-shrink:0}
+.vs-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:50px;background:none;font-family:var(--f);font-size:12.5px;font-weight:700;color:var(--g500);cursor:pointer;transition:var(--t);white-space:nowrap}
+.vs-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.vs-btn:hover{color:var(--bk)}
+.vs-btn.active{background:var(--bk);color:var(--y);box-shadow:0 2px 8px rgba(0,0,0,.14)}
+@media(max-width:640px){
+  .vswitch{width:100%;order:-1}
+  .vs-btn{flex:1;justify-content:center}
+}
 .sort-select:focus{border-color:var(--y)}
 .sb-count{font-size:12.5px;font-weight:600;color:var(--g500);white-space:nowrap;margin-left:auto}
 
@@ -457,6 +468,16 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <!-- SEARCH BAR -->
 <div class="searchbar">
   <div class="searchbar-in">
+    <div class="vswitch" id="vSwitch">
+      <button class="vs-btn" data-v="auto" onclick="setVehicleType('auto')">
+        <svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l1.6-5.6A2 2 0 0110 10h4a2 2 0 011.9 1.4L17.5 17"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg>
+        Autos
+      </button>
+      <button class="vs-btn" data-v="moto" onclick="setVehicleType('moto')">
+        <svg viewBox="0 0 24 24"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h5l3-6h3M13 11l-2-3H8M16 11l-2-3h4"/></svg>
+        Motos
+      </button>
+    </div>
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="searchInput" placeholder="Buscar por nombre, marca, referencia..." autocomplete="off">
@@ -606,6 +627,15 @@ const sb=createClient(SB_URL,SB_KEY);
 let ALL_PRODUCTS=[], FILTERED=[];
 let cart=JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
 let activeCategory='todos', activeBrands=new Set(), wishlist=new Set();
+
+// Vertical activa: 'auto' o 'moto'. Manda la URL; si no, lo que eligio
+// el usuario la ultima vez; por defecto autos.
+let activeVehicle = (()=>{
+  const fromUrl = new URLSearchParams(location.search).get('v');
+  if(fromUrl==='auto'||fromUrl==='moto') return fromUrl;
+  const saved = localStorage.getItem('ivamaxo_vehiculo');
+  return (saved==='auto'||saved==='moto') ? saved : 'auto';
+})();
 let currentPage=1; const PER_PAGE=12;
 
 const CAT_ICONS={
@@ -629,12 +659,43 @@ const TIENDA_PER_PAGE = 24;
 let tiendaTotal = 0;
 let tiendaSearchTimer;
 
+// ── SELECTOR DE VERTICAL ─────────────────────────────────
+function paintVehicleSwitch(){
+  document.querySelectorAll('.vs-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.v === activeVehicle);
+  });
+  const inp = document.getElementById('searchInput');
+  if(inp) inp.placeholder = activeVehicle==='moto'
+    ? 'Buscar repuesto de moto: modelo, marca, referencia...'
+    : 'Buscar por nombre, marca, referencia...';
+}
+
+function setVehicleType(v){
+  if(v===activeVehicle) return;
+  activeVehicle = v;
+  localStorage.setItem('ivamaxo_vehiculo', v);
+
+  // Las categorias no son las mismas entre verticales: se reinicia el filtro
+  activeCategory = 'todos';
+  activeBrands.clear();
+  tiendaPage = 1;
+
+  const url = new URL(location.href);
+  url.searchParams.set('v', v);
+  history.replaceState(null, '', url);
+
+  paintVehicleSwitch();
+  loadProducts();
+}
+
 async function loadProducts(){
   showSkeletons();
   const {data:setting}=await sb.from('settings').select('value').eq('key','global_markup').single();
   window.GLOBAL_MARKUP = parseFloat(setting?.value||'30');
-  const {data:catData}=await sb.from('categories').select('*').order('name');
+  // Solo las categorias con productos en la vertical activa
+  const {data:catData}=await sb.rpc('categories_for_vehicle',{v:activeVehicle});
   if(catData) window.ALL_CATS=catData;
+  paintVehicleSwitch();
   buildCategoryFilters(catData||[]);
   await fetchTiendaProducts();
 }
@@ -669,6 +730,7 @@ async function fetchTiendaProducts(){
     .eq('status','active')
     .range(from, to);
 
+  query = query.in('vehicle_type', [activeVehicle, 'universal']);
   if(activeCategory!=='todos') query = query.eq('categories.slug', activeCategory);
   if(activeBrands.size>0) query = query.in('brand', [...activeBrands]);
   if(q) query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%,oem.ilike.%${q}%`);
