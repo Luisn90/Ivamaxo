@@ -1442,7 +1442,11 @@ async function doForgot(){
   const email = document.getElementById('fEmail').value.trim();
   if(!email){ showAuthErr('Ingresa tu correo electrónico.'); return; }
   setAuthLoading('btnForgot', true);
-  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo:'https://luisn90.github.io/Ivamaxo/cliente.html'});
+  // Enviamos al mismo recuperar.html que usa el admin. El parametro next
+  // decide a donde vuelve al terminar (tienda para clientes, login para admin).
+  // URL relativa a proposito: sigue funcionando al mover el sitio de dominio.
+  const redirectTo = new URL('recuperar.html?next=tienda', window.location.href).href;
+  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo});
   document.getElementById('btnForgot').innerHTML='Enviar enlace';
   document.getElementById('btnForgot').disabled=false;
   if(error){ showAuthErr('Error al enviar. Verifica tu correo.'); return; }

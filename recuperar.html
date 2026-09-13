@@ -83,8 +83,8 @@ body{font-family:var(--f);background:var(--bk);min-height:100vh;display:flex;ali
         </svg>
       </div>
       <div class="card-title">Enlace no válido</div>
-      <p class="card-help" id="invalidMsg">Este enlace ya venció o se usó antes. Pide uno nuevo desde la pantalla de inicio de sesión.</p>
-      <a href="login.html" class="btn" style="display:block;text-align:center;text-decoration:none">Pedir un enlace nuevo</a>
+      <p class="card-help" id="invalidMsg">Este enlace ya venció o se usó antes. Pide uno nuevo e inténtalo de nuevo.</p>
+      <a href="login.html" id="btnRetry" class="btn" style="display:block;text-align:center;text-decoration:none">Pedir un enlace nuevo</a>
     </div>
 
     <!-- ── FORMULARIO DE NUEVA CONTRASEÑA ── -->
@@ -136,7 +136,7 @@ body{font-family:var(--f);background:var(--bk);min-height:100vh;display:flex;ali
       </div>
       <div class="card-title">Contraseña actualizada</div>
       <p class="card-help">Ya puedes entrar con tu contraseña nueva.</p>
-      <a href="login.html" class="btn" style="display:block;text-align:center;text-decoration:none">Ir al inicio de sesión</a>
+      <a href="login.html" id="btnDone" class="btn" style="display:block;text-align:center;text-decoration:none">Ir al inicio de sesión</a>
     </div>
   </div>
   <a href="index.html" class="back">← Volver a la tienda</a>
@@ -154,6 +154,20 @@ function show(id){
   if(id==='stateLoading') document.getElementById(id).style.display='flex';
 }
 
+// A donde vuelve el usuario al terminar. Se lee ANTES de limpiar la URL.
+// next=tienda -> cliente de la tienda | por defecto -> admin
+const NEXT = new URLSearchParams(window.location.search).get('next');
+const DEST = NEXT === 'tienda'
+  ? { href:'index.html', done:'Ir a la tienda', retry:'Volver a la tienda' }
+  : { href:'login.html', done:'Ir al inicio de sesión', retry:'Pedir un enlace nuevo' };
+
+document.addEventListener('DOMContentLoaded', () => {
+  const d = document.getElementById('btnDone');
+  const r = document.getElementById('btnRetry');
+  d.href = DEST.href; d.textContent = DEST.done;
+  r.href = DEST.href; r.textContent = DEST.retry;
+});
+
 function invalid(msg){
   if(msg) document.getElementById('invalidMsg').textContent = msg;
   show('stateInvalid');
@@ -170,8 +184,8 @@ function invalid(msg){
   const errDesc = query.get('error_description') || hash.get('error_description');
   if(errDesc){
     return invalid(/expired/i.test(errDesc)
-      ? 'Este enlace ya venció. Pide uno nuevo desde la pantalla de inicio de sesión.'
-      : 'No pudimos validar este enlace. Pide uno nuevo desde la pantalla de inicio de sesión.');
+      ? 'Este enlace ya venció. Pide uno nuevo e inténtalo de nuevo.'
+      : 'No pudimos validar este enlace. Pide uno nuevo e inténtalo de nuevo.');
   }
 
   const tokenHash = query.get('token_hash');
