@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>IVAMAXO — Nueva contraseña</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--y:#F9C200;--yd:#D9A800;--bk:#0A0A0A;--g100:#F5F5F5;--g200:#E8E8E8;--g500:#888;--wh:#fff;--f:'Montserrat',sans-serif;--r:12px;--t:all .2s ease}
+body{font-family:var(--f);background:var(--bk);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:400px}
+.logo-wrap{text-align:center;margin-bottom:40px}
+.logo-wrap svg{height:20px;width:auto}
+.card{background:var(--wh);border-radius:16px;padding:36px 32px;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.card-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--g500);margin-bottom:8px}
+.card-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px;color:var(--bk);line-height:1.15}
+.card-help{font-size:12.5px;font-weight:500;line-height:1.55;color:var(--g500);margin-bottom:22px}
+.card-help strong{color:var(--bk);font-weight:700}
+.fgroup{margin-bottom:16px}
+.flabel{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:6px}
+.fwrap{position:relative}
+.finput{width:100%;padding:11px 42px 11px 14px;border:1.5px solid var(--g200);border-radius:var(--r);font-family:var(--f);font-size:13px;font-weight:500;color:var(--bk);outline:none;transition:var(--t)}
+.finput:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(249,194,0,.15)}
+.finput::placeholder{color:var(--g500)}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:none;background:none;cursor:pointer;color:var(--g500);display:flex;align-items:center;justify-content:center;border-radius:8px;transition:var(--t)}
+.eye:hover{color:var(--bk);background:var(--g100)}
+.eye svg{width:17px;height:17px}
+.btn{width:100%;padding:13px;background:var(--y);border:none;border-radius:50px;font-family:var(--f);font-size:14px;font-weight:700;color:var(--bk);cursor:pointer;transition:var(--t);margin-top:8px;letter-spacing:.01em}
+.btn:hover{background:var(--yd);transform:scale(1.02)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.error{background:#FEE;border:1px solid #FCA5A5;border-radius:var(--r);padding:10px 14px;font-size:12.5px;font-weight:600;color:#DC2626;margin-bottom:16px;display:none}
+.error.show{display:block}
+.back{display:block;text-align:center;margin-top:20px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+.back:hover{color:var(--y)}
+.loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--bk);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-ico{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.state-ico svg{width:25px;height:25px}
+.state-ico.ok{background:rgba(16,185,129,.13);color:#059669}
+.state-ico.bad{background:rgba(220,38,38,.1);color:#DC2626}
+.rules{list-style:none;margin:-6px 0 18px;padding:0}
+.rules li{font-size:11.5px;font-weight:600;color:var(--g500);display:flex;align-items:center;gap:7px;padding:2.5px 0;transition:var(--t)}
+.rules li::before{content:'';width:13px;height:13px;border-radius:50%;border:1.5px solid var(--g200);flex-shrink:0;transition:var(--t)}
+.rules li.met{color:#059669}
+.rules li.met::before{background:#059669;border-color:#059669}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-wrap">
+    <svg width="160" height="21" viewBox="0 0 172 22" fill="none">
+      <g clip-path="url(#ll)">
+        <path d="M0 .594H5.67V21.4H0z" fill="white"/>
+        <path d="M21.086 22h-.05c-2.562 0-4.75-1.536-5.794-3.89L7.459.594h6.192l7.385 17.343L28.446.594h6.192l-7.783 17.491C25.81 20.44 23.622 22 21.061 22z" fill="white"/>
+        <path d="M45.133 0c2.66 0 5.073 1.536 6.167 3.865l5.57 11.892c1.591 3.394.149 5.648-3.606 5.648H41.552l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C39.91 1.511 42.572-.025 45.133-.025V0Z" fill="white"/>
+        <path d="M59.654 7.333c0-4.212 2.81-7.011 7.037-7.011 2.984 0 5.42 1.833 6.192 4.583l1.939 6.764 1.94-6.764c.77-2.725 3.207-4.583 6.191-4.583 4.203 0 7.037 2.824 7.037 7.011V21.43h-5.67V6.863c0-.793-.546-1.338-1.367-1.338-.472 0-.87.297-.994.743l-4.377 15.113h-5.545l-4.376-15.113c-.124-.447-.547-.743-.994-.743-.846 0-1.368.545-1.368 1.338V21.43h-5.67V7.333Z" fill="white"/>
+        <path d="M106.154 0c2.661 0 5.073 1.536 6.167 3.865l5.57 11.892c1.592 3.394.149 5.648-3.605 5.648h-11.712l3.332-5.203h5.943l-5.67-12.22-8.106 17.34h-6.267l8.23-17.54C101.131 1.511 103.593-.025 106.154-.025V0Z" fill="white"/>
+        <path d="M128.808 11 119.707.594h7.51l5.197 6.318 5.197-6.318h7.51L136.02 11l9.1 10.406h-7.51l-5.197-6.318-5.197 6.318h-7.51L128.808 11Z" fill="white"/>
+        <path d="M155.415.446h6.242c6.191 0 10.344 4.137 10.344 10.455 0 6.317-4.004 10.628-10.046 10.628h-6.241c-6.192 0-10.345-4.137-10.345-10.455 0-6.317 4.004-10.628 10.046-10.628ZM151.04 10.926c0 3.32 1.913 5.4 4.997 5.4h5.271c3.11 0 4.998-2.056 4.998-5.277 0-3.22-1.914-5.4-4.998-5.4h-5.27c-3.11 0-4.998 2.056-4.998 5.277Z" fill="white"/>
+      </g>
+      <defs><clipPath id="ll"><rect width="172" height="22" fill="white"/></clipPath></defs>
+    </svg>
+  </div>
+
+  <div class="card">
+    <!-- ── VALIDANDO EL ENLACE ── -->
+    <div id="stateLoading" class="center">
+      <div style="padding:26px 0"><span class="loader" style="width:26px;height:26px;border-width:3px;border-color:var(--g200);border-top-color:var(--y);margin:0"></span></div>
+      <p class="card-help" style="margin:0">Verificando el enlace...</p>
+    </div>
+
+    <!-- ── ENLACE INVÁLIDO O VENCIDO ── -->
+    <div id="stateInvalid" style="display:none">
+      <div class="state-ico bad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="card-title">Enlace no válido</div>
+      <p class="card-help" id="invalidMsg">Este enlace ya venció o se usó antes. Pide uno nuevo desde la pantalla de inicio de sesión.</p>
+      <a href="login.html" class="btn" style="display:block;text-align:center;text-decoration:none">Pedir un enlace nuevo</a>
+    </div>
+
+    <!-- ── FORMULARIO DE NUEVA CONTRASEÑA ── -->
+    <div id="stateForm" style="display:none">
+      <div class="card-tag">Recuperar acceso</div>
+      <div class="card-title">Crea tu contraseña</div>
+      <p class="card-help">Cuenta: <strong id="userEmail"></strong></p>
+      <div class="error" id="formError"></div>
+
+      <div class="fgroup">
+        <label class="flabel">Nueva contraseña</label>
+        <div class="fwrap">
+          <input class="finput" type="password" id="pass1" placeholder="••••••••" autocomplete="new-password">
+          <button class="eye" onclick="toggleEye('pass1',this)" type="button" aria-label="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <ul class="rules">
+        <li id="rLen">Al menos 8 caracteres</li>
+        <li id="rNum">Incluye un número</li>
+        <li id="rUpp">Incluye una mayúscula</li>
+      </ul>
+
+      <div class="fgroup">
+        <label class="flabel">Repite la contraseña</label>
+        <div class="fwrap">
+          <input class="finput" type="password" id="pass2" placeholder="••••••••" autocomplete="new-password">
+          <button class="eye" onclick="toggleEye('pass2',this)" type="button" aria-label="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn" id="saveBtn" onclick="savePassword()">Guardar contraseña</button>
+    </div>
+
+    <!-- ── LISTO ── -->
+    <div id="stateDone" style="display:none">
+      <div class="state-ico ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="card-title">Contraseña actualizada</div>
+      <p class="card-help">Ya puedes entrar con tu contraseña nueva.</p>
+      <a href="login.html" class="btn" style="display:block;text-align:center;text-decoration:none">Ir al inicio de sesión</a>
+    </div>
+  </div>
+  <a href="index.html" class="back">← Volver a la tienda</a>
+</div>
+
+<script>
+const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
+const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal';
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_KEY);
+
+function show(id){
+  ['stateLoading','stateInvalid','stateForm','stateDone']
+    .forEach(s => document.getElementById(s).style.display = (s===id ? 'block' : 'none'));
+  if(id==='stateLoading') document.getElementById(id).style.display='flex';
+}
+
+function invalid(msg){
+  if(msg) document.getElementById('invalidMsg').textContent = msg;
+  show('stateInvalid');
+}
+
+// ── VALIDACIÓN DEL ENLACE ─────────────────────────────────
+// Supabase manda el enlace en uno de tres formatos segun la version
+// del proyecto: token_hash en query, code (PKCE) o tokens en el hash.
+// Los cubrimos los tres.
+(async () => {
+  const query = new URLSearchParams(window.location.search);
+  const hash  = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+  const errDesc = query.get('error_description') || hash.get('error_description');
+  if(errDesc){
+    return invalid(/expired/i.test(errDesc)
+      ? 'Este enlace ya venció. Pide uno nuevo desde la pantalla de inicio de sesión.'
+      : 'No pudimos validar este enlace. Pide uno nuevo desde la pantalla de inicio de sesión.');
+  }
+
+  const tokenHash = query.get('token_hash');
+  const code      = query.get('code');
+  const hasHashSession = hash.get('access_token');
+
+  try{
+    if(tokenHash){
+      const { error } = await sb.auth.verifyOtp({ type:'recovery', token_hash: tokenHash });
+      if(error) return invalid();
+    } else if(code){
+      const { error } = await sb.auth.exchangeCodeForSession(code);
+      if(error) return invalid();
+    } else if(!hasHashSession){
+      // Nadie llega aqui a mano: sin enlace no hay nada que hacer
+      return invalid('Abre esta página desde el enlace que te enviamos por correo.');
+    }
+  } catch(e){
+    return invalid();
+  }
+
+  // detectSessionInUrl ya consumio los tokens del hash si venian por ahi
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session) return invalid();
+
+  // Limpia la URL para que el token no quede en el historial del navegador
+  history.replaceState(null, '', window.location.pathname);
+
+  document.getElementById('userEmail').textContent = session.user.email;
+  show('stateForm');
+  document.getElementById('pass1').focus();
+})();
+
+// ── REGLAS DE LA CONTRASEÑA ───────────────────────────────
+const rules = {
+  rLen: v => v.length >= 8,
+  rNum: v => /[0-9]/.test(v),
+  rUpp: v => /[A-ZÁÉÍÓÚÑ]/.test(v)
+};
+
+document.getElementById('pass1').addEventListener('input', e => {
+  const v = e.target.value;
+  for(const id in rules){
+    document.getElementById(id).classList.toggle('met', rules[id](v));
+  }
+});
+
+document.getElementById('pass2').addEventListener('keydown', e => {
+  if(e.key === 'Enter') savePassword();
+});
+
+function toggleEye(inputId, btn){
+  const input = document.getElementById(inputId);
+  const shown = input.type === 'text';
+  input.type = shown ? 'password' : 'text';
+  btn.style.color = shown ? '' : 'var(--yd)';
+}
+
+function formError(msg){
+  const e = document.getElementById('formError');
+  e.textContent = msg;
+  e.classList.add('show');
+}
+
+async function savePassword(){
+  const p1  = document.getElementById('pass1').value;
+  const p2  = document.getElementById('pass2').value;
+  const btn = document.getElementById('saveBtn');
+  document.getElementById('formError').classList.remove('show');
+
+  if(!Object.values(rules).every(fn => fn(p1)))
+    return formError('La contraseña no cumple los requisitos.');
+  if(p1 !== p2)
+    return formError('Las contraseñas no coinciden.');
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="loader"></span>Guardando...';
+
+  const { error } = await sb.auth.updateUser({ password: p1 });
+
+  if(error){
+    btn.disabled = false;
+    btn.textContent = 'Guardar contraseña';
+    return formError(/different from the old/i.test(error.message)
+      ? 'La contraseña nueva debe ser distinta a la anterior.'
+      : 'No se pudo guardar. Pide un enlace nuevo e inténtalo otra vez.');
+  }
+
+  // Cierra la sesión temporal del enlace: que entre con la clave nueva
+  await sb.auth.signOut();
+  show('stateDone');
+}
+</script>
+</body>
+</html>
