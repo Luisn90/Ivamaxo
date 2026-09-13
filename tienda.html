@@ -178,6 +178,34 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .pcard:hover{border-color:var(--g300);box-shadow:var(--sm);transform:translateY(-3px)}
 .pimg{aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .pico-inner{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.3;transition:opacity .3s}
+
+/* ── Tarjeta sin foto: manda el codigo OEM, no el hueco de la imagen ── */
+.pnoimg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;width:100%;height:100%;padding:14px}
+.pnoimg-ico{opacity:.16;transition:opacity .3s}
+.pnoimg-ico svg{width:40px;height:40px;stroke:var(--bk);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.pcard:hover .pnoimg-ico{opacity:.26}
+.pnoimg-oem{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:800;letter-spacing:.02em;color:var(--bk);text-align:center;line-height:1.2;max-width:100%;word-break:break-word}
+.pnoimg-oem span{font-size:8.5px;font-weight:700;letter-spacing:.16em;color:var(--g500)}
+.pnoimg-brand{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g500)}
+
+/* ── Chip de disponibilidad ── */
+.pavail{position:absolute;top:10px;right:10px;z-index:2;padding:3.5px 9px;border-radius:50px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;pointer-events:none}
+.pavail.stk{background:#059669;color:#fff}
+.pavail.ped{background:rgba(10,10,10,.06);color:var(--g700);border:1px solid var(--g200)}
+.pcard.is-pedido .pimg{background:linear-gradient(160deg,var(--g100) 0%,#fff 100%)}
+
+/* ── Compatibilidad de vehiculo (reemplaza las estrellas inventadas) ── */
+.pcompat{display:flex;align-items:center;gap:5px;margin-bottom:10px;min-height:16px;overflow:hidden}
+.pcompat svg{width:13px;height:13px;stroke:var(--g500);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pcompat span{font-size:10.5px;font-weight:600;color:var(--g700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcompat.empty span{color:var(--g500);font-style:italic;font-weight:500}
+.pref{font-size:9.5px;font-weight:600;color:var(--g500);margin-top:1px;letter-spacing:.01em}
+
+/* ── Boton consultar (bajo pedido) ── */
+.askbtn{width:34px;height:34px;border-radius:50%;background:#0A0A0A;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--t);flex-shrink:0}
+.askbtn svg{width:16px;height:16px;stroke:var(--y);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.askbtn:hover{background:#25D366;transform:scale(1.08)}
+.askbtn:hover svg{stroke:#fff}
 .pico-inner svg{width:44px;height:44px;stroke:var(--g700);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .pico-inner span{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g500)}
 .pcard:hover .pico-inner{opacity:.45}
@@ -511,7 +539,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
         <div class="stock-opts">
           <label class="stock-opt">
             <input type="checkbox" id="inStockOnly" onchange="applyFilters()">
-            <span class="stock-opt-lbl">Solo en stock</span>
+            <span class="stock-opt-lbl">Solo disponible en tienda</span>
           </label>
           <label class="stock-opt">
             <input type="checkbox" id="onSaleOnly" onchange="applyFilters()">
@@ -642,11 +670,14 @@ async function fetchTiendaProducts(){
 
   if(activeCategory!=='todos') query = query.eq('categories.slug', activeCategory);
   if(activeBrands.size>0) query = query.in('brand', [...activeBrands]);
-  if(q) query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%`);
-  if(inStock) query = query.gt('stock', 0);
+  if(q) query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,sku.ilike.%${q}%,oem.ilike.%${q}%`);
+  if(inStock) query = query.eq('availability', 'stock');
   if(onSale) query = query.not('old_price', 'is', null);
   if(pMin>0) query = query.gte('price', pMin);
   if(pMax<999999) query = query.lte('price', pMax);
+
+  // Lo que tenemos fisicamente va primero siempre: 'stock' antes que 'pedido'
+  query = query.order('availability',{ascending:false});
 
   if(sortVal==='price-asc') query = query.order('price',{ascending:true});
   else if(sortVal==='price-desc') query = query.order('price',{ascending:false});
@@ -675,9 +706,13 @@ async function fetchTiendaProducts(){
     image_url:p.image_url||null,
     markup_override:p.markup_override,
     stock:parseInt(p.stock)||0,
+    availability:p.availability||'pedido',
+    oem:p.oem||'',
+    vehicleBrand:p.vehicle_brand||'',
+    models:p.compatible_models||'',
+    years:p.compatible_years||'',
     featured:p.featured, sku:p.sku||'',
     discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
-    stars:5, reviews:Math.floor(Math.random()*180+20),
   }));
 
   FILTERED = ALL_PRODUCTS;
@@ -842,6 +877,28 @@ function removeFilter(i){ window._filterRemovers[i]?.(); }
 // ── RENDER PRODUCTS ──
 function starHTML(n){ return Array.from({length:5},(_,i)=>`<span class="star${i>=n?' e':''}">★</span>`).join(''); }
 
+const ADMIN_PHONE = '584127449626';
+
+// Productos "bajo pedido": no van al carrito, se consultan por WhatsApp.
+// Nunca prometemos un precio cerrado sobre catalogo de mayorista.
+function askProduct(ev, id){
+  ev.stopPropagation();
+  const p = ALL_PRODUCTS.find(x => x.id === id);
+  if(!p) return;
+  const compat = [[p.vehicleBrand, p.models].filter(Boolean).join(' '), p.years]
+                   .filter(Boolean).join(' · ');
+  const msg = encodeURIComponent(
+    `Hola IVAMAXO, quiero consultar disponibilidad y precio de:\n\n` +
+    `*${p.name}*\n` +
+    `Marca: ${p.brand}\n` +
+    (p.oem   ? `OEM: ${p.oem}\n`   : '') +
+    (compat  ? `Aplica a: ${compat}\n` : '') +
+    (p.sku   ? `Ref: ${p.sku}\n`   : '') +
+    `\nReferencia en la web: $${p.price.toFixed(2)}`
+  );
+  window.open(`https://wa.me/${ADMIN_PHONE}?text=${msg}`, '_blank');
+}
+
 function renderProducts(){
   const grid=document.getElementById('productsGrid');
   const total=FILTERED.length;
@@ -859,40 +916,60 @@ function renderProducts(){
     return;
   }
 
-  grid.innerHTML=page.map(p=>`
-    <div class="pcard" onclick="goProduct('${p.id}')">
+  grid.innerHTML=page.map(p=>{
+    const pedido = p.availability!=='stock';
+    // Compatibilidad legible: "Toyota Corolla · 2003-2008"
+    const compat = [ [p.vehicleBrand, p.models].filter(Boolean).join(' '), p.years ]
+                     .filter(Boolean).join(' · ');
+    return `
+    <div class="pcard${pedido?' is-pedido':''}" onclick="goProduct('${p.id}')">
       <div class="pimg">
         ${p.badge?`<span class="pbadge ${p.badge}">${p.badgeTxt||''}</span>`:''}
+        <span class="pavail ${pedido?'ped':'stk'}">${pedido?'Bajo pedido':'En stock'}</span>
         ${p.image_url
           ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:12px;transition:transform .4s ease" loading="lazy">`
-          : `<div class="pico-inner">${CAT_ICONS[p.icon]||CAT_ICONS['default']}<span>${p.brand}</span></div>`
+          : `<div class="pnoimg">
+               <div class="pnoimg-ico">${CAT_ICONS[p.icon]||CAT_ICONS['default']}</div>
+               ${p.oem?`<div class="pnoimg-oem"><span>OEM</span>${p.oem}</div>`:`<div class="pnoimg-brand">${p.brand}</div>`}
+             </div>`
         }
         <button class="pwish${wishlist.has(p.id)?' active':''}" onclick="toggleWish(event,'${p.id}')" title="Favorito">
           <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         </button>
-        <button class="pquick" onclick="addToCart(event,'${p.id}')">
+        ${pedido?'':`<button class="pquick" onclick="addToCart(event,'${p.id}')">
           <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Añadir al carrito
-        </button>
+        </button>`}
       </div>
       <div class="pinfo">
         <div class="pbrand">${p.brand}</div>
         <div class="pname">${p.name}</div>
-        <div class="pstars">${starHTML(p.stars)}<span class="prat">(${p.reviews})</span></div>
+        ${compat
+          ? `<div class="pcompat" title="${compat}">
+               <svg viewBox="0 0 24 24"><path d="M5 17h14M6 17l1.5-5.5A2 2 0 019.4 10h5.2a2 2 0 011.9 1.5L18 17"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
+               <span>${compat}</span>
+             </div>`
+          : `<div class="pcompat empty"><span>Consulta compatibilidad</span></div>`}
         <div class="prow">
           <div>
             ${p.old?`<div class="pprice-old">$${p.old.toFixed(2)}</div>`:''}
             <div class="pprice">$${p.price.toFixed(2)}</div>
+            ${pedido?'<div class="pref">Precio referencial</div>':''}
           </div>
           <div class="pright">
             ${p.discount?`<span class="pdsc">-${p.discount}%</span>`:''}
-            <button class="atcbtn" onclick="addToCart(event,'${p.id}')" aria-label="Añadir">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
+            ${pedido
+              ? `<button class="askbtn" onclick="askProduct(event,'${p.id}')" aria-label="Consultar disponibilidad">
+                   <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                 </button>`
+              : `<button class="atcbtn" onclick="addToCart(event,'${p.id}')" aria-label="Añadir">
+                   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                 </button>`}
           </div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   renderPagination(total);
 }

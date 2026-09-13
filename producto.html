@@ -115,6 +115,10 @@ img{display:block;width:100%}
 .btn-wish:hover{border-color:var(--red)}
 .btn-wish svg{width:20px;height:20px;stroke:var(--g500);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:var(--t)}
 .btn-wish.active svg{stroke:var(--red);fill:rgba(229,62,62,.1)}
+.btn-ask{width:100%;padding:14px;background:#25D366;border:none;border-radius:50px;font-family:var(--f);font-size:15px;font-weight:700;color:#fff;cursor:pointer;transition:var(--t);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-ask svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-ask:hover{background:#1DA851;transform:translateY(-1px)}
+.ask-note{font-size:11.5px;font-weight:500;color:var(--g500);text-align:center;margin-bottom:20px;line-height:1.5}
 .btn-checkout{width:100%;padding:14px;background:var(--bk);border:none;border-radius:50px;font-family:var(--f);font-size:15px;font-weight:700;color:var(--wh);cursor:pointer;transition:var(--t);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn-checkout:hover{background:var(--dk2);transform:scale(1.01)}
 .btn-checkout svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -340,7 +344,7 @@ img{display:block;width:100%}
           <span class="qty-n" id="qtyN">1</span>
           <button class="qty-btn" onclick="changeQty(1)">+</button>
         </div>
-        <button class="btn-atc" onclick="addToCart()">
+        <button class="btn-atc" id="btnAtc" onclick="addToCart()">
           <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Añadir al carrito
         </button>
@@ -349,10 +353,16 @@ img{display:block;width:100%}
         </button>
       </div>
 
-      <button class="btn-checkout" onclick="buyNow()">
+      <button class="btn-checkout" id="btnBuy" onclick="buyNow()">
         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Comprar ahora
       </button>
+
+      <button class="btn-ask" id="btnAsk" onclick="askWhatsapp()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Consultar disponibilidad
+      </button>
+      <p class="ask-note" id="askNote" style="display:none">Te respondemos por WhatsApp con el precio final y el tiempo de entrega.</p>
 
       <!-- Compatibility - dynamic -->
       <div class="pi-compat" id="piCompat" style="display:none">
@@ -512,6 +522,7 @@ async function loadProduct(){
     cat:p.categories?.name||'', catSlug:p.categories?.slug||'',
     price:parseFloat(p.price), old:p.old_price?parseFloat(p.old_price):null,
     stock:parseInt(p.stock)||0, sku:p.sku||'', badge:p.badge, badgeTxt:p.badge_text,
+    availability:p.availability||'pedido', oem:p.oem||'',
     icon:p.icon||'default', description:p.description||'',
     image_url:p.image_url||null,
     vehicle_brand:p.vehicle_brand||null,
@@ -635,12 +646,53 @@ const ICONS_SVG = {
 updateCartBadge();
 loadProduct();
 
+const ADMIN_PHONE = '584127449626';
+
+// Alterna carrito <-> consulta segun el nivel de catalogo del producto
+function updateActionsUI(){
+  const pedido = PRODUCT.availability !== 'stock';
+  const atc  = document.getElementById('btnAtc');
+  const buy  = document.getElementById('btnBuy');
+  const ask  = document.getElementById('btnAsk');
+  const note = document.getElementById('askNote');
+  const qtyWrap = document.querySelector('.qty-ctrl');
+
+  if(atc)  atc.style.display  = pedido ? 'none' : '';
+  if(buy)  buy.style.display  = pedido ? 'none' : '';
+  if(qtyWrap) qtyWrap.style.display = pedido ? 'none' : '';
+  if(ask)  ask.style.display  = pedido ? 'flex' : 'none';
+  if(note) note.style.display = pedido ? 'block' : 'none';
+}
+
+function askWhatsapp(){
+  const compat = [[PRODUCT.vehicle_brand, PRODUCT.compatible_models].filter(Boolean).join(' '),
+                  PRODUCT.compatible_years].filter(Boolean).join(' · ');
+  const msg = encodeURIComponent(
+    `Hola IVAMAXO, quiero consultar disponibilidad y precio de:\n\n` +
+    `*${PRODUCT.name}*\n` +
+    `Marca: ${PRODUCT.brand}\n` +
+    (PRODUCT.oem ? `OEM: ${PRODUCT.oem}\n` : '') +
+    (compat      ? `Aplica a: ${compat}\n` : '') +
+    (PRODUCT.sku ? `Ref: ${PRODUCT.sku}\n` : '') +
+    `\nReferencia en la web: $${PRODUCT.price.toFixed(2)}\n` +
+    `${window.location.href}`
+  );
+  window.open(`https://wa.me/${ADMIN_PHONE}?text=${msg}`, '_blank');
+}
+
 function updateStockUI(){
+  updateActionsUI();
   const dot = document.getElementById('stockDot');
   const txt = document.getElementById('stockTxt');
   const qty = document.getElementById('stockQty');
   qty.textContent = PRODUCT.stock;
-  if(PRODUCT.stock===0){ dot.className='stock-dot sd-out'; txt.innerHTML='<span>Sin stock</span> — Notificarme cuando esté disponible'; }
+  // Bajo pedido: no afirmamos existencias que no tenemos
+  if(PRODUCT.availability!=='stock'){
+    dot.className='stock-dot sd-low';
+    txt.innerHTML='<span>Bajo pedido</span> — lo traemos de nuestro mayorista. Consulta disponibilidad y tiempo de entrega.';
+    return;
+  }
+  if(PRODUCT.stock===0){ dot.className='stock-dot sd-out'; txt.innerHTML='<span>Agotado</span> — consúltanos por reposición'; }
   else if(PRODUCT.stock<10){ dot.className='stock-dot sd-low'; txt.innerHTML='Stock bajo — solo <span>'+PRODUCT.stock+'</span> unidades'; }
   else { dot.className='stock-dot sd-ok'; txt.innerHTML='En stock — <span>'+PRODUCT.stock+'</span> unidades disponibles'; }
 }

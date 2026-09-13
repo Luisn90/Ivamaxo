@@ -121,6 +121,9 @@ input,textarea,select,button{font-family:var(--f)}
 .p-brand{font-size:10.5px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
 .p-price{font-size:14px;font-weight:600;letter-spacing:-.01em}
 .p-cat{display:inline-flex;padding:3px 10px;border-radius:50px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--g100);color:var(--g700)}
+.stock-badge.avail-ped{background:rgba(10,10,10,.05);color:#666;border:1px solid var(--g200)}
+.row-btn.on{background:rgba(5,150,105,.12)}
+.row-btn.on svg{stroke:#059669}
 .stock-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:10.5px;font-weight:700}
 .stock-badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sb-ok{background:var(--green-l);color:var(--green)}.sb-ok::before{background:var(--green)}
@@ -1458,12 +1461,19 @@ function renderTable(){
         <div class="p-price">$${p.price.toFixed(2)}</div>
         ${p.old?`<div style="font-size:11px;color:var(--g500);text-decoration:line-through">$${p.old.toFixed(2)}</div>`:''}
       </td>
-      <td><span class="stock-badge ${stockClass(p.stock)}">${stockLabel(p.stock)}</span></td>
+      <td>
+        ${p.availability==='stock'
+          ? `<span class="stock-badge ${stockClass(p.stock)}">${stockLabel(p.stock)}</span>`
+          : `<span class="stock-badge avail-ped">Bajo pedido</span>`}
+      </td>
       <td><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:${statusDot(p.status)};display:inline-block;flex-shrink:0"></span>${statusLabel(p.status)}</span></td>
       <td>
         <div class="row-actions">
           <button class="row-btn" onclick="editProduct('${p.id}')" title="Editar">
             <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="row-btn${p.availability==='stock'?' on':''}" onclick="toggleAvailability('${p.id}')" title="${p.availability==='stock'?'Pasar a bajo pedido':'Marcar como inventario propio'}">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           </button>
           <button class="row-btn" onclick="dupeProduct('${p.id}')" title="Duplicar">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -1543,6 +1553,27 @@ function saveProduct(){
     showToast('Producto creado','ok');
   }
   closeDrawer(); renderTable();
+}
+
+// Mueve un producto entre inventario propio y catalogo del mayorista.
+// Al pasar a 'pedido' el stock vuelve a cero: no arrastramos cantidades falsas.
+async function toggleAvailability(id){
+  const p = PRODUCTS.find(x => String(x.id) === String(id));
+  if(!p) return;
+  const nuevo = p.availability === 'stock' ? 'pedido' : 'stock';
+  const patch = nuevo === 'pedido'
+    ? {availability:'pedido', stock:0, updated_at:new Date()}
+    : {availability:'stock', updated_at:new Date()};
+
+  const {error} = await sb.from('products').update(patch).eq('id', id);
+  if(error){ showToast('No se pudo cambiar la disponibilidad','err'); return; }
+
+  p.availability = nuevo;
+  if(nuevo === 'pedido') p.stock = 0;
+  renderTable();
+  showToast(nuevo === 'stock'
+    ? 'Ahora es inventario propio. Edita el producto para poner la cantidad.'
+    : 'Movido a bajo pedido', 'ok');
 }
 
 function deleteProduct(id){
@@ -3577,6 +3608,7 @@ async function fetchProducts(){
     image_url: p.image_url || null,
     markup_override: p.markup_override,
     supplier: p.supplier || '',
+    availability: p.availability || 'pedido',
   }));
 
   renderTable();
