@@ -42,6 +42,12 @@ body{font-family:var(--f);background:var(--bk);min-height:100vh;display:flex;ali
 .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--bk);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IVAMAXO">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 <body>
 <div class="wrap">
@@ -205,6 +211,14 @@ async function doReset(){
   // No revelamos si el correo existe o no: misma respuesta siempre
   document.getElementById('sentTo').textContent = email;
   showPanel('sent');
+}
+</script>
+<script>
+// PWA: registro del service worker. Falla en silencio si el navegador no lo soporta.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
 }
 </script>
 </body>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>Sin conexión — IVAMAXO</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#0A0A0A;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.wrap{max-width:340px}
+.ico{width:74px;height:74px;margin:0 auto 24px;border-radius:50%;background:rgba(249,194,0,.12);display:flex;align-items:center;justify-content:center}
+.ico svg{width:34px;height:34px;stroke:#F9C200;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+h1{font-size:23px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px}
+p{font-size:13.5px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.5);margin-bottom:26px}
+button{background:#F9C200;color:#0A0A0A;border:none;border-radius:50px;padding:13px 30px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+button:hover{background:#D9A800;transform:scale(1.03)}
+.tel{display:block;margin-top:22px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.35);text-decoration:none}
+.tel:hover{color:#F9C200}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="ico">
+    <svg viewBox="0 0 24 24"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.58 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+  </div>
+  <h1>Sin conexión</h1>
+  <p>No pudimos cargar esta página. Revisa tu conexión a internet e inténtalo de nuevo.</p>
+  <button onclick="location.reload()">Reintentar</button>
+  <a class="tel" href="https://wa.me/584127449626">O escríbenos por WhatsApp</a>
+</div>
+<script>
+// Vuelve solo apenas haya red
+window.addEventListener('online', () => location.reload());
+</script>
+</body>
+</html>

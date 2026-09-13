@@ -5,7 +5,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#F9C200">
+
 <title>IVAMAXO — Auto Repuestos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -575,6 +575,12 @@ a{text-decoration:none}
 .nav-link.active{background:rgba(0,0,0,.1);color:var(--bk)}
 @media(max-width:640px){.hdr-nav{display:none}}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IVAMAXO">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 <body>
 
@@ -1466,6 +1472,14 @@ document.addEventListener('keydown', e=>{
 window.addEventListener('load',()=>{
   setTimeout(()=>document.getElementById('loader').classList.add('done'), 1600);
 });
+</script>
+<script>
+// PWA: registro del service worker. Falla en silencio si el navegador no lo soporta.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>

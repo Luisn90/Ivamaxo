@@ -136,6 +136,12 @@ a{text-decoration:none}
   .stats-mini{grid-template-columns:1fr 1fr 1fr}
 }
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IVAMAXO">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 <body>
 
@@ -422,6 +428,14 @@ function showToast(msg){
   const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
   c.appendChild(el);
   setTimeout(()=>{el.style.transition='all .3s';el.style.opacity='0';el.style.transform='translateX(12px)';setTimeout(()=>el.remove(),300);},2500);
+}
+</script>
+<script>
+// PWA: registro del service worker. Falla en silencio si el navegador no lo soporta.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
 }
 </script>
 </body>
