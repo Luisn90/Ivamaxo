@@ -25,6 +25,7 @@
   --hh:64px;--nh:48px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{font-family:var(--f);background:var(--g100);color:var(--bk);overflow-x:hidden}
 svg{display:block}a{text-decoration:none;color:inherit}
@@ -114,6 +115,11 @@ button{font-family:var(--f)}
 .vs-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .vs-btn:hover{color:var(--bk)}
 .vs-btn.active{background:var(--bk);color:var(--y);box-shadow:0 2px 8px rgba(0,0,0,.14)}
+/* Sin el flash azul de Android ni el anillo azul del sistema */
+.vs-btn{-webkit-tap-highlight-color:transparent}
+.vs-btn:focus{outline:none}
+.vs-btn:focus-visible{outline:2px solid var(--y);outline-offset:2px}
+.vs-btn:active{transform:scale(.97)}
 @media(max-width:640px){
   .vswitch{width:100%;order:-1}
   .vs-btn{flex:1;justify-content:center}
