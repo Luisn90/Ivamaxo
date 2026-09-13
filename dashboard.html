@@ -2215,7 +2215,7 @@ async function openClientDrawer(id){
 
   // WhatsApp & email buttons
   const phone = (c.phone||'').replace(/\D/g,'');
-  const waMsg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Auto Repuestos. 😊`);
+  const waMsg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Repuestos. 😊`);
   document.getElementById('clientWaBtn').onclick = phone.length>=10
     ? ()=>window.open(`https://wa.me/${phone}?text=${waMsg}`,'_blank')
     : ()=>showToast('Sin número de teléfono','err');
@@ -2292,7 +2292,7 @@ function quickWaClient(id){
   const phone = (c.phone||'').replace(/\D/g,'');
   if(!phone){ showToast('Sin número de teléfono','err'); return; }
   const name = c.full_name || c.email?.split('@')[0] || 'cliente';
-  const msg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Auto Repuestos. 😊`);
+  const msg = encodeURIComponent(`Hola ${name.split(' ')[0]}, te contactamos desde IVAMAXO Repuestos. 😊`);
   window.open(`https://wa.me/${phone}?text=${msg}`,'_blank');
 }
 
