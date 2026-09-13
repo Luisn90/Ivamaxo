@@ -11,7 +11,7 @@
  *   Supabase y wa.me  → nunca se cachean. Son datos vivos.
  */
 
-const VERSION    = 'v3';
+const VERSION    = 'v4';
 const CACHE_APP  = `ivamaxo-app-${VERSION}`;
 const CACHE_EST  = `ivamaxo-est-${VERSION}`;
 
