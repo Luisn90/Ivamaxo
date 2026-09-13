@@ -494,6 +494,7 @@ a{text-decoration:none}
 .hero-main{background:var(--g100);position:relative;overflow:hidden;padding:72px 28px 64px;border-bottom:1px solid var(--g200)}
 .hero-main::before{display:none}
 .hero-main::after{display:none}
+.hero-dots{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
 .hero-main-inner{max-width:900px;margin:0 auto;text-align:center;position:relative;z-index:1}
 .hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.1);border-radius:50px;padding:6px 16px;font-size:12px;font-weight:700;color:var(--black);letter-spacing:.04em;text-transform:uppercase;margin-bottom:24px}
 .hero-tag svg{width:13px;height:13px;stroke:var(--black);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -664,6 +665,7 @@ a{text-decoration:none}
 
   <!-- HERO -->
   <section class="hero-main">
+    <canvas class="hero-dots" id="heroDots" aria-hidden="true"></canvas>
     <div class="hero-main-inner">
       <div class="hero-tag">
         <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -1474,6 +1476,120 @@ window.addEventListener('load',()=>{
 });
 </script>
 <script>
+// ── FONDO DE PUNTOS INTERACTIVO DEL HERO ────────────────────
+// Rejilla en canvas. Los puntos cercanos al cursor crecen, se tiñen
+// de amarillo de marca y se apartan un poco, como limadura de hierro.
+// Sin cursor, una onda muy lenta la mantiene viva.
+(function(){
+  const cv = document.getElementById('heroDots');
+  if(!cv) return;
+  const ctx = cv.getContext('2d', {alpha:true});
+  const hero = cv.parentElement;
+
+  const SEP    = 26;    // separacion de la rejilla en px
+  const R_BASE = 1.5;   // radio en reposo
+  const R_MAX  = 3.6;   // radio bajo el cursor
+  const ALCANCE= 150;   // radio de influencia del cursor
+  const EMPUJE = 14;    // cuanto se aparta el punto, en px
+
+  const AMARILLO = [249,194,0];
+  const GRIS     = [190,190,190];
+
+  const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let puntos = [], ancho = 0, alto = 0, dpr = 1;
+  let mx = -9999, my = -9999, activo = false, t = 0, raf = null;
+
+  function construir(){
+    const r = hero.getBoundingClientRect();
+    ancho = r.width; alto = r.height;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width  = Math.round(ancho * dpr);
+    cv.height = Math.round(alto  * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    puntos = [];
+    const cols = Math.ceil(ancho / SEP), filas = Math.ceil(alto / SEP);
+    const offX = (ancho - (cols-1)*SEP)/2, offY = (alto - (filas-1)*SEP)/2;
+    for(let i=0;i<cols;i++){
+      for(let j=0;j<filas;j++){
+        const x = offX + i*SEP, y = offY + j*SEP;
+        puntos.push({x, y, dx:0, dy:0, k:0, fase:(i*0.6 + j*0.9)});
+      }
+    }
+  }
+
+  function pintar(){
+    ctx.clearRect(0,0,ancho,alto);
+    t += 0.006;
+
+    for(const p of puntos){
+      // objetivo de intensidad segun distancia al cursor
+      let destino = 0, ex = 0, ey = 0;
+      if(activo){
+        const dx = p.x - mx, dy = p.y - my;
+        const d  = Math.hypot(dx, dy);
+        if(d < ALCANCE){
+          // caida suave: 1 en el centro, 0 en el borde
+          const f = 1 - d/ALCANCE;
+          destino = f*f;
+          const n = d || 1;
+          ex = (dx/n) * EMPUJE * destino;
+          ey = (dy/n) * EMPUJE * destino;
+        }
+      }
+
+      // interpolacion: entra rapido, sale lento
+      p.k  += (destino - p.k) * (destino > p.k ? 0.18 : 0.07);
+      p.dx += (ex - p.dx) * 0.12;
+      p.dy += (ey - p.dy) * 0.12;
+
+      // respiracion de fondo, casi imperceptible
+      const onda = menosMovimiento ? 0 : Math.sin(t*2 + p.fase) * 0.12 + 0.12;
+
+      const k = p.k;
+      const r = R_BASE + (R_MAX - R_BASE)*k + onda;
+      const a = 0.30 + 0.65*k + onda*0.25;
+      const c = [
+        Math.round(GRIS[0] + (AMARILLO[0]-GRIS[0])*k),
+        Math.round(GRIS[1] + (AMARILLO[1]-GRIS[1])*k),
+        Math.round(GRIS[2] + (AMARILLO[2]-GRIS[2])*k)
+      ];
+
+      ctx.beginPath();
+      ctx.arc(p.x + p.dx, p.y + p.dy, r, 0, 6.2832);
+      ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(pintar);
+  }
+
+  function arrancar(){ if(!raf) raf = requestAnimationFrame(pintar); }
+  function parar(){ if(raf){ cancelAnimationFrame(raf); raf = null; } }
+
+  hero.addEventListener('pointermove', e => {
+    const r = hero.getBoundingClientRect();
+    mx = e.clientX - r.left; my = e.clientY - r.top; activo = true;
+  }, {passive:true});
+  hero.addEventListener('pointerleave', () => { activo = false; }, {passive:true});
+
+  let tmr;
+  window.addEventListener('resize', () => {
+    clearTimeout(tmr); tmr = setTimeout(construir, 150);
+  }, {passive:true});
+
+  // No gastar bateria dibujando un hero que no se ve
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(([e]) => e.isIntersecting ? arrancar() : parar(),
+      {threshold:0}).observe(hero);
+  }
+  document.addEventListener('visibilitychange', () =>
+    document.hidden ? parar() : arrancar());
+
+  construir();
+  arrancar();
+})();
+
 // PWA: registro del service worker. Falla en silencio si el navegador no lo soporta.
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
