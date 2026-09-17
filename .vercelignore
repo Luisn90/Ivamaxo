@@ -1,0 +1,3 @@
+# No publicar en el sitio: esquemas de base de datos y datos crudos de importación
+*.sql
+compat_data.json

@@ -2,11 +2,32 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>/* dominio único: GitHub Pages redirige a ivamaxo.com */if(/github\.io$/.test(location.hostname)){location.replace('https://ivamaxo.com'+location.pathname.replace(/^\/Ivamaxo/i,'')+location.search+location.hash);}</script>
+<!-- SEO:START -->
+<meta name="description" content="Ficha de repuesto en IVAMAXO.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://ivamaxo.com/tienda.html">
+<meta property="og:site_name" content="IVAMAXO Repuestos">
+<meta property="og:locale" content="es_VE">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Repuesto | IVAMAXO">
+<meta property="og:description" content="Ficha de repuesto en IVAMAXO.">
+<meta property="og:url" content="https://ivamaxo.com/tienda.html">
+<meta property="og:image" content="https://ivamaxo.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Repuesto | IVAMAXO">
+<meta name="twitter:description" content="Ficha de repuesto en IVAMAXO.">
+<meta name="twitter:image" content="https://ivamaxo.com/og-image.jpg">
+<meta name="theme-color" content="#F9C200">
+
+<!-- SEO:END -->
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>IVAMAXO — Producto</title>
+<title>Repuesto | IVAMAXO</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -178,6 +199,7 @@ img{display:block;width:100%}
 
 /* RELATED */
 .related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+a.pcard{display:block;text-decoration:none;color:inherit}
 .pcard{background:var(--wh);border-radius:var(--r);overflow:hidden;border:1.5px solid var(--g200);transition:var(--t);cursor:pointer}
 .pcard:hover{border-color:var(--y);box-shadow:0 4px 20px rgba(249,194,0,.15);transform:translateY(-2px)}
 .pc-img{aspect-ratio:1;background:var(--g100);display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
@@ -261,7 +283,7 @@ img{display:block;width:100%}
     <nav class="hdr-nav">
       <a href="./" class="nav-link">Inicio</a>
       <a href="tienda.html" class="nav-link active">Tienda</a>
-      <a href="#" class="nav-link">Ofertas</a>
+      <a href="tienda.html?sale=1" class="nav-link">Ofertas</a>
       <a href="https://wa.me/584127449626" target="_blank" rel="noopener" class="nav-link">Contacto</a>
     </nav>
     <div class="hdr-right">
@@ -403,7 +425,8 @@ const sb=createClient(SB_URL,SB_KEY);
 let cart=JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
 let qty=1, wished=false;
 let PRODUCT={}, RELATED=[];
-const PRODUCT_ID=new URLSearchParams(location.search).get('id');
+const PRODUCT_ID=window.__PRODUCT_ID__||new URLSearchParams(location.search).get('id');
+const SSR=!!window.__PRODUCT_ID__; // la ficha llegó renderizada desde el servidor
 
 const CAT_ICONS_SVG={
   spark:`<svg viewBox="0 0 100 120" fill="none"><rect x="37" y="5" width="26" height="24" rx="4" fill="#CACACA"/><rect x="33" y="27" width="34" height="14" rx="3" fill="#B0B0B0"/><rect x="35" y="39" width="30" height="8" rx="2" fill="#A0A0A0"/><rect x="36" y="46" width="28" height="46" rx="3" fill="#BCBCBC"/><polygon points="50,29 63,36 63,52 50,59 37,52 37,36" fill="#D0D0D0" stroke="#BFBFBF" stroke-width="1.5"/><rect x="36" y="66" width="28" height="5" rx="1.5" fill="#F9C200"/><path d="M43 108 L50 99 L48 109 L55 101" stroke="#F9C200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
@@ -419,11 +442,13 @@ async function loadProduct(){
   if(!PRODUCT_ID){ showNotFound(); return; }
 
   const {data:p,error}=await sb.from('products').select('*,categories(name,slug)').eq('id',PRODUCT_ID).single();
+  if(!error&&p&&p.slug&&!SSR&&location.protocol.startsWith('http')){ location.replace('/repuesto/'+p.slug); return; }
 
-  if(error||!p){ showNotFound(); return; }
+  // Si la ficha vino del servidor y Supabase falla, se conserva lo renderizado
+  if(error||!p){ if(SSR && PRODUCT_ID!=='__none__') return; showNotFound(); return; }
 
   PRODUCT={
-    id:p.id, name:p.name, brand:p.brand,
+    id:p.id, name:p.seo_name||p.name, brand:p.brand, slug:p.slug||'',
     cat:p.categories?.name||'', catSlug:p.categories?.slug||'',
     price:parseFloat(p.price), old:p.old_price?parseFloat(p.old_price):null,
     stock:parseInt(p.stock)||0, sku:p.sku||'', badge:p.badge, badgeTxt:p.badge_text,
@@ -438,13 +463,13 @@ async function loadProduct(){
   };
 
   // Populate UI
-  document.title = 'IVAMAXO — '+PRODUCT.name;
+  if(!SSR) document.title = PRODUCT.name+' | IVAMAXO';
   document.getElementById('piBrand').firstChild.textContent = PRODUCT.brand;
   document.getElementById('piName').textContent = PRODUCT.name;
   document.getElementById('piSku').textContent = PRODUCT.sku||'—';
   document.getElementById('piPrice').textContent = '$'+PRODUCT.price.toFixed(2);
   document.getElementById('breadCat').textContent = PRODUCT.cat;
-  document.getElementById('breadCat').href = 'tienda.html?cat='+PRODUCT.catSlug;
+  document.getElementById('breadCat').href = PRODUCT.catSlug ? '/categoria/'+PRODUCT.catSlug : 'tienda.html';
   document.getElementById('breadName').textContent = PRODUCT.name;
   // Remove loading flash
   const grid = document.getElementById('prodGrid');
@@ -505,19 +530,20 @@ async function loadProduct(){
   const specRows=[['Marca',PRODUCT.brand],['Referencia',PRODUCT.sku],['Código OEM',PRODUCT.oem],
     ['Vehículo',PRODUCT.vehicle_brand],['Modelos',PRODUCT.compatible_models],
     ['Años',PRODUCT.compatible_years],['Motor',PRODUCT.engine_codes]].filter(r=>r[1]);
-  if(specRows.length>1){
+  if(specRows.length>1 && !SSR){
     const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     document.getElementById('specsTable').innerHTML=specRows.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td></tr>`).join('');
     document.getElementById('specsTabBtn').style.display='';
   }
 
   // Description
-  if(PRODUCT.description){
+  if(PRODUCT.description && !SSR){
     document.getElementById('tab-desc').querySelector('.desc-body').innerHTML =
       '<p>'+PRODUCT.description.split('\n').join('</p><p>')+'</p>';
   }
 
   // Load related
+  if(SSR && document.getElementById('relatedGrid').dataset.ssr){ if(document.getElementById('specsTable').innerHTML.trim()) document.getElementById('specsTabBtn').style.display=''; return; }
   const {data:related}=await sb.from('products').select('*,categories(name)').eq('status','active').neq('id',PRODUCT_ID).limit(4);
   if(related?.length) renderRelated(related);
 }
@@ -533,7 +559,7 @@ function showNotFound(){
 function renderRelated(products){
   const icons={encendido:'spark',filtros:'filter',lubricantes:'oil',frenos:'brake',electrico:'battery'};
   document.getElementById('relatedGrid').innerHTML=products.map(p=>`
-    <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
+    <a class="pcard" href="${p.slug?'/repuesto/'+p.slug:'producto.html?id='+p.id}">
       <div class="pc-img">
         ${p.badge?`<span class="pc-badge pcb-y">${p.badge_text||''}</span>`:''}
         ${p.image_url 
@@ -547,7 +573,7 @@ function renderRelated(products){
         ${p.old_price?`<div class="pc-old">$${parseFloat(p.old_price).toFixed(2)}</div>`:''}
         <div class="pc-price">$${parseFloat(p.price).toFixed(2)}</div>
       </div>
-    </div>`).join('');
+    </a>`).join('');
 }
 
 const ICONS_SVG = {

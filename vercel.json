@@ -1,0 +1,36 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false,
+  "functions": {
+    "api/repuesto.js": { "includeFiles": "producto.html", "maxDuration": 10 },
+    "api/listado.js": { "includeFiles": "tienda.html", "maxDuration": 10 },
+    "api/sitemap.js": { "maxDuration": 15 }
+  },
+  "redirects": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "ivamaxo.vercel.app" }], "destination": "https://ivamaxo.com/:path*", "permanent": true },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "www.ivamaxo.com" }], "destination": "https://ivamaxo.com/:path*", "permanent": true },
+    { "source": "/tienda.html", "has": [{ "type": "query", "key": "v", "value": "moto" }], "missing": [{ "type": "query", "key": "q" }, { "type": "query", "key": "cat" }], "destination": "/repuestos-de-motos", "permanent": true },
+    { "source": "/tienda.html", "has": [{ "type": "query", "key": "cat", "value": "(?<cat>[a-z0-9-]+)" }], "missing": [{ "type": "query", "key": "q" }], "destination": "/categoria/:cat", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/producto.html", "has": [{ "type": "query", "key": "id" }], "destination": "/api/repuesto" },
+    { "source": "/repuesto/:slug", "destination": "/api/repuesto?slug=:slug" },
+    { "source": "/categoria/:cat", "destination": "/api/listado?tipo=cat&cat=:cat" },
+    { "source": "/repuestos/:marca/:modelo", "destination": "/api/listado?tipo=veh&marca=:marca&modelo=:modelo" },
+    { "source": "/repuestos/:marca", "destination": "/api/listado?tipo=veh&marca=:marca" },
+    { "source": "/repuestos-de-autos", "destination": "/api/listado?tipo=auto" },
+    { "source": "/repuestos-de-motos", "destination": "/api/listado?tipo=moto" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap?part=index" },
+    { "source": "/sitemap-paginas.xml", "destination": "/api/sitemap?part=paginas" },
+    { "source": "/sitemap-productos-:n.xml", "destination": "/api/sitemap?part=productos&n=:n" }
+  ],
+  "headers": [
+    { "source": "/(dashboard|checkout|cliente|login|recuperar|offline)\\.html", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/api/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/(.*)\\.(png|jpg|webp|webm|mp4|svg)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+    ] }
+  ]
+}

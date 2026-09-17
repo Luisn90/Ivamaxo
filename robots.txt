@@ -1,0 +1,14 @@
+# IVAMAXO Repuestos — https://ivamaxo.com
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /checkout.html
+Disallow: /cliente.html
+Disallow: /login.html
+Disallow: /recuperar.html
+Disallow: /offline.html
+Disallow: /api/
+Disallow: /*?q=
+Disallow: /tienda.html?*sale=
+
+Sitemap: https://ivamaxo.com/sitemap.xml
