@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SITE = 'https://ivamaxo.com';
+const SITE = 'https://www.ivamaxo.com';
 const SB_URL = 'https://gpvugjjjbypjposqvdmo.supabase.co';
 const SB_KEY = 'sb_publishable_JZAJIHL36EvC9Frwgqid_g_k9NwpUal'; // clave pública (RLS protege)
 const PHONE = '+584127449626';
