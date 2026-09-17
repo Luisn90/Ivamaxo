@@ -262,7 +262,7 @@ img{display:block;width:100%}
       <a href="./" class="nav-link">Inicio</a>
       <a href="tienda.html" class="nav-link active">Tienda</a>
       <a href="#" class="nav-link">Ofertas</a>
-      <a href="#" class="nav-link">Contacto</a>
+      <a href="https://wa.me/584127449626" target="_blank" rel="noopener" class="nav-link">Contacto</a>
     </nav>
     <div class="hdr-right">
       <button class="icon-btn" onclick="window.location.href='./'" title="Tienda">
@@ -313,22 +313,10 @@ img{display:block;width:100%}
     <div class="prod-info">
       <div class="pi-badges">
         <span class="pi-badge pib-k" id="badgeEl" style="display:none"></span>
-        <span class="pi-badge pib-y">Disponible</span>
-      </div>
+              </div>
       <div class="pi-brand" id="piBrand" style="min-height:16px">&nbsp;</div>
       <h1 class="pi-name" id="piName" style="min-height:32px"></h1>
       <div class="pi-sku" style="min-height:18px">Referencia: <span id="piSku"></span></div>
-
-      <div class="pi-rating">
-        <div class="stars">
-          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-        </div>
-        <span class="rat-score" id="ratScore">—</span>
-        <div class="rat-sep"></div>
-        <span class="rat-count">128 reseñas</span>
-        <div class="rat-sep"></div>
-        <span class="rat-count" style="color:var(--green);font-weight:700">43 vendidos este mes</span>
-      </div>
 
       <div class="pi-price-block">
         <div class="pi-price-old" id="piOld" style="display:none"></div>
@@ -336,12 +324,12 @@ img{display:block;width:100%}
           <span id="piPrice">—</span>
           <span class="pi-discount" id="piDisc" style="display:none"></span>
         </div>
-        <div class="pi-tax">Precio incluye IVA · Envío calculado al hacer checkout</div>
+        <div class="pi-tax">Precio referencial en USD. Te confirmamos precio final y envío por WhatsApp.</div>
       </div>
 
       <div class="pi-stock">
         <span class="stock-dot sd-ok" id="stockDot"></span>
-        <span class="stock-txt" id="stockTxt">En stock — <span id="stockQty">43</span> unidades disponibles</span>
+        <span class="stock-txt" id="stockTxt"><span id="stockQty"></span></span>
       </div>
 
       <!-- QTY + CTA -->
@@ -375,28 +363,9 @@ img{display:block;width:100%}
       <div class="pi-compat" id="piCompat" style="display:none">
         <div class="pi-compat-title">
           <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
-          Compatibilidad verificada
+          Compatibilidad según referencia
         </div>
         <div class="compat-tags" id="compatTags"></div>
-      </div>
-
-      <!-- Trust -->
-      <div class="pi-trust">
-        <div class="pit">
-          <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg>
-          <div class="pit-t">Envío 24h</div>
-          <div class="pit-s">Todo el país</div>
-        </div>
-        <div class="pit">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-          <div class="pit-t">Original</div>
-          <div class="pit-s">100% garantizado</div>
-        </div>
-        <div class="pit">
-          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          <div class="pit-t">30 días</div>
-          <div class="pit-s">Devolución</div>
-        </div>
       </div>
     </div>
   </div>
@@ -404,87 +373,16 @@ img{display:block;width:100%}
   <!-- TABS -->
   <div class="tabs">
     <button class="tab-btn active" onclick="showTab('desc',this)">Descripción</button>
-    <button class="tab-btn" onclick="showTab('specs',this)">Especificaciones</button>
-    <button class="tab-btn" onclick="showTab('reviews',this)">Reseñas (128)</button>
+    <button class="tab-btn" id="specsTabBtn" onclick="showTab('specs',this)" style="display:none">Especificaciones</button>
   </div>
 
   <div id="tab-desc" class="tab-panel active" style="margin-bottom:48px">
-    <div class="desc-body">
-      <p>La bujía NGK BKR6EIX Iridium IX ofrece un rendimiento excepcional en motores de gasolina modernos. La punta de electrodo de iridio ultrafino de 0.6mm permite una ignición más fácil y reduce el voltaje necesario para el encendido, mejorando la eficiencia del combustible y la potencia del motor.</p>
-      <p>Su construcción de precisión japonesa garantiza una vida útil hasta 4 veces mayor que las bujías convencionales de cobre. El diseño de la punta fina del electrodo central maximiza la exposición de la chispa a la mezcla de aire y combustible, resultando en una combustión más completa.</p>
-      <p>Ideal para vehículos que requieren alto rendimiento y eficiencia. Compatible con la mayoría de motores de 4 cilindros de fabricantes japoneses, coreanos y americanos de los últimos 15 años.</p>
+    <div class="desc-body"><p style="color:var(--g500)">Consúltanos por WhatsApp si necesitas más detalles de esta referencia.</p>
     </div>
   </div>
 
   <div id="tab-specs" class="tab-panel" style="margin-bottom:48px">
-    <table class="specs-table">
-      <tr><td>Marca</td><td>NGK</td></tr>
-      <tr><td>Modelo</td><td>BKR6EIX — Iridium IX</td></tr>
-      <tr><td>Material electrodo</td><td>Iridio 0.6mm</td></tr>
-      <tr><td>Hilo de rosca</td><td>14mm x 1.25mm</td></tr>
-      <tr><td>Longitud de rosca</td><td>19mm (3/4")</td></tr>
-      <tr><td>Llave de montaje</td><td>5/8" (16mm)</td></tr>
-      <tr><td>Brecha recomendada</td><td>1.0–1.1mm</td></tr>
-      <tr><td>Rango térmico</td><td>6 (frío medio)</td></tr>
-      <tr><td>Vida útil estimada</td><td>60,000–100,000 km</td></tr>
-      <tr><td>País de fabricación</td><td>Japón</td></tr>
-      <tr><td>Código OEM</td><td>90919-01253, 22401-8H515</td></tr>
-      <tr><td>Resistencia interna</td><td>5 kΩ</td></tr>
-    </table>
-  </div>
-
-  <div id="tab-reviews" class="tab-panel" style="margin-bottom:48px">
-    <div class="rev-summary">
-      <div class="rev-score">
-        <div class="rev-big">4.9</div>
-        <div class="stars rev-stars">
-          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-        </div>
-        <div class="rev-total">128 reseñas</div>
-      </div>
-      <div class="rev-bars">
-        <div class="rbar-row"><span class="rbar-lbl">5</span><div class="rbar-track"><div class="rbar-fill" style="width:88%"></div></div><span class="rbar-count">113</span></div>
-        <div class="rbar-row"><span class="rbar-lbl">4</span><div class="rbar-track"><div class="rbar-fill" style="width:8%"></div></div><span class="rbar-count">10</span></div>
-        <div class="rbar-row"><span class="rbar-lbl">3</span><div class="rbar-track"><div class="rbar-fill" style="width:3%"></div></div><span class="rbar-count">4</span></div>
-        <div class="rbar-row"><span class="rbar-lbl">2</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span class="rbar-count">1</span></div>
-        <div class="rbar-row"><span class="rbar-lbl">1</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
-      </div>
-    </div>
-    <div>
-      <div class="rev-item">
-        <div class="rev-header">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="rev-avatar">C</div>
-            <div><div class="rev-author">Carlos M.</div><div class="rev-date">hace 3 días</div></div>
-          </div>
-          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
-        </div>
-        <div class="rev-txt">Excelente producto. Mi Toyota Corolla 2018 mejoró notablemente el consumo de gasolina. Arranca perfecto incluso en frío. Lo recomiendo totalmente, llegó bien empaquetado y en 24 horas.</div>
-        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
-      </div>
-      <div class="rev-item">
-        <div class="rev-header">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="rev-avatar" style="background:var(--g200);color:var(--g700)">L</div>
-            <div><div class="rev-author">Luis R.</div><div class="rev-date">hace 1 semana</div></div>
-          </div>
-          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
-        </div>
-        <div class="rev-txt">Las cambié en mi Civic y la diferencia es inmediata. El motor responde mucho mejor, sin tirones. Precio excelente comparado con el concesionario. Ya pedí otro juego para el carro de mi esposa.</div>
-        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
-      </div>
-      <div class="rev-item">
-        <div class="rev-header">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="rev-avatar" style="background:var(--bk);color:var(--y)">M</div>
-            <div><div class="rev-author">María G.</div><div class="rev-date">hace 2 semanas</div></div>
-          </div>
-          <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star e">★</span></div>
-        </div>
-        <div class="rev-txt">Buena bujía, correcta para mi Nissan Sentra. Quité una estrella porque el empaque llegó un poco golpeado, pero el producto estaba perfecto. El envío fue rápido.</div>
-        <div class="rev-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Compra verificada</div>
-      </div>
-    </div>
+    <table class="specs-table" id="specsTable"></table>
   </div>
 
   <!-- RELATED PRODUCTS -->
@@ -603,6 +501,16 @@ async function loadProduct(){
     mainImgEl.innerHTML = CAT_ICONS_SVG[PRODUCT.icon]||CAT_ICONS_SVG['default'];
   }
 
+  // Especificaciones: solo campos reales del producto
+  const specRows=[['Marca',PRODUCT.brand],['Referencia',PRODUCT.sku],['Código OEM',PRODUCT.oem],
+    ['Vehículo',PRODUCT.vehicle_brand],['Modelos',PRODUCT.compatible_models],
+    ['Años',PRODUCT.compatible_years],['Motor',PRODUCT.engine_codes]].filter(r=>r[1]);
+  if(specRows.length>1){
+    const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    document.getElementById('specsTable').innerHTML=specRows.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td></tr>`).join('');
+    document.getElementById('specsTabBtn').style.display='';
+  }
+
   // Description
   if(PRODUCT.description){
     document.getElementById('tab-desc').querySelector('.desc-body').innerHTML =
@@ -628,8 +536,8 @@ function renderRelated(products){
     <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
       <div class="pc-img">
         ${p.badge?`<span class="pc-badge pcb-y">${p.badge_text||''}</span>`:''}
-        \${p.image_url 
-          ? \`<img src="\${p.image_url}" alt="\${p.name}" style="width:90%;height:90%;object-fit:contain">\`
+        ${p.image_url 
+          ? `<img src="${p.image_url}" alt="${p.name}" style="width:90%;height:90%;object-fit:contain">`
           : '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:#D0D0D0;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>'
         }
       </div>
@@ -734,21 +642,6 @@ function updateCartBadge(){
   document.getElementById('cartBadge').textContent = total;
 }
 
-function renderRelated(){
-  document.getElementById('relatedGrid').innerHTML = RELATED.map(p=>`
-    <div class="pcard" onclick="window.location.href='producto.html?id=${p.id}'">
-      <div class="pc-img">
-        ${p.badge?`<span class="pc-badge pcb-y">${p.badge}</span>`:''}
-        ${ICONS_SVG[p.icon]||''}
-      </div>
-      <div class="pc-info">
-        <div class="pc-brand">${p.brand}</div>
-        <div class="pc-name">${p.name}</div>
-        ${p.old?`<div class="pc-old">$${p.old.toFixed(2)}</div>`:''}
-        <div class="pc-price">$${p.price.toFixed(2)}</div>
-      </div>
-    </div>`).join('');
-}
 
 function showTab(id, el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));

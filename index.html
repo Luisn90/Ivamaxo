@@ -201,7 +201,7 @@ a{text-decoration:none}
 .btn-ghost:hover{border-color:rgba(255,255,255,.4);color:var(--white)}
 
 /* TRUST */
-.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:52px}
+.trust{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:52px}
 .tcard{background:var(--white);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;transition:var(--t)}
 .tcard:hover{transform:translateY(-2px);box-shadow:var(--sm)}
 .tico{width:48px;height:48px;background:var(--yellow);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -298,7 +298,7 @@ a{text-decoration:none}
 @media(max-width:1200px){
   .catgrid{grid-template-columns:repeat(4,1fr)}
   .pgrid{grid-template-columns:repeat(3,1fr)}
-  .trust{grid-template-columns:repeat(2,1fr)}
+  .trust{grid-template-columns:repeat(3,1fr)}
   .foot-main{grid-template-columns:1fr 1fr;gap:32px}
 }
 
@@ -670,10 +670,10 @@ a{text-decoration:none}
     <div class="hero-main-inner">
       <div class="hero-tag">
         <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Más de 500 repuestos disponibles
+        Tienda online en Carabobo
       </div>
       <h1 class="hero-h1">Todo lo que<br>tu auto <span>necesita</span></h1>
-      <p class="hero-sub">Repuestos originales y accesorios de las mejores marcas del mundo.<br>Entrega en 24–48h en todo el país.</p>
+      <p class="hero-sub">Repuestos y accesorios de distribuidores seleccionados.<br>Entregas en Carabobo y atención directa por WhatsApp.</p>
 
       <div class="hero-search">
         <div class="hs-wrap-outer">
@@ -700,13 +700,11 @@ a{text-decoration:none}
       </div>
 
       <div class="hero-stats">
-        <div class="hstat"><div class="hstat-n">500+</div><div class="hstat-l">Productos</div></div>
+        <div class="hstat"><div class="hstat-n">+20.000</div><div class="hstat-l">Referencias</div></div>
         <div class="hstat-div"></div>
-        <div class="hstat"><div class="hstat-n">50+</div><div class="hstat-l">Marcas</div></div>
+        <div class="hstat"><div class="hstat-n">Carabobo</div><div class="hstat-l">Entregas</div></div>
         <div class="hstat-div"></div>
-        <div class="hstat"><div class="hstat-n">24h</div><div class="hstat-l">Entrega</div></div>
-        <div class="hstat-div"></div>
-        <div class="hstat"><div class="hstat-n">100%</div><div class="hstat-l">Original</div></div>
+        <div class="hstat"><div class="hstat-n">WhatsApp</div><div class="hstat-l">Atención</div></div>
       </div>
     </div>
   </section>  </section>
@@ -786,35 +784,21 @@ a{text-decoration:none}
   <!-- PROMO -->
   <div class="promo rev">
     <div class="promo-cnt">
-      <div class="ptag"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>Logística express</div>
-      <div class="ptitle">Envío gratis <span>desde $50</span></div>
-      <div class="psub">Entrega en 24–48 horas en todo el país. Seguimiento en tiempo real incluido.</div>
+      <div class="ptag"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>Envío express</div>
+      <div class="ptitle">Entregas en <span>Carabobo</span></div>
+      <div class="psub">Coordinamos contigo el día y el costo del envío por WhatsApp.</div>
     </div>
     <div class="promo-acts">
-      <button class="btn-y">Comprar ahora <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-      <button class="btn-ghost">Ver condiciones</button>
+      <button class="btn-y" onclick="location.href='tienda.html'">Ver catálogo <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      <button class="btn-ghost" onclick="window.open('https://wa.me/584127449626','_blank')">Escríbenos</button>
     </div>
   </div>
 
   <!-- TRUST -->
   <div class="trust">
-    <div class="tcard rev d1"><div class="tico"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div><div><div class="ttitle">Envío Express</div><div class="tdesc">24–48h en todo el país</div></div></div>
-    <div class="tcard rev d2"><div class="tico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="ttitle">Calidad Garantizada</div><div class="tdesc">Productos 100% originales</div></div></div>
-    <div class="tcard rev d3"><div class="tico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div><div><div class="ttitle">30 Días de devolución</div><div class="tdesc">Sin preguntas ni complicaciones</div></div></div>
-    <div class="tcard rev d4"><div class="tico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.08 6.08l1.27-.56a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div><div><div class="ttitle">Soporte 24/7</div><div class="tdesc">Expertos siempre disponibles</div></div></div>
-  </div>
-
-  <!-- NEWSLETTER -->
-  <div class="nl rev">
-    <div class="nl-left">
-      <div class="stag">Novedades y ofertas</div>
-      <h3>Únete al club<br>IVAMAXO</h3>
-      <p>Recibe primero las mejores ofertas y lanzamientos exclusivos.</p>
-    </div>
-    <div class="nl-form">
-      <input type="email" placeholder="tu@email.com">
-      <button>Suscribirme</button>
-    </div>
+    <div class="tcard rev d1"><div class="tico"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div><div><div class="ttitle">Envío Express</div><div class="tdesc">Dentro de Carabobo</div></div></div>
+    <div class="tcard rev d2"><div class="tico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="ttitle">Distribuidores seleccionados</div><div class="tdesc">Te indicamos marca y origen de cada pieza</div></div></div>
+    <div class="tcard rev d4"><div class="tico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.08 6.08l1.27-.56a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div><div><div class="ttitle">Atención por WhatsApp</div><div class="tdesc">Te ayudamos a encontrar la pieza correcta</div></div></div>
   </div>
 
 </div><!-- /main -->
@@ -837,20 +821,16 @@ a{text-decoration:none}
           <defs><clipPath id="fc"><rect width="172" height="22" fill="#F9C200"/></clipPath></defs>
         </svg>
       </a>
-      <p class="fdesc">Tu tienda de confianza para repuestos y accesorios automotrices. Calidad, precio y servicio desde 1998.</p>
+      <p class="fdesc">Repuestos para autos y motos en Carabobo.</p>
       <div class="socials">
-        <a href="#" class="soc" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
-        <a href="#" class="soc" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-        <a href="#" class="soc" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
-        <a href="#" class="soc" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" style="fill:rgba(255,255,255,.5);stroke:none"/></svg></a>
+        <a href="https://wa.me/584127449626" target="_blank" rel="noopener" class="soc" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
       </div>
     </div>
-    <div class="fcol"><h4>Productos</h4><ul class="flinks"><li><a href="#">Bujías e Ignición</a></li><li><a href="#">Filtros</a></li><li><a href="#">Aceites y Lubricantes</a></li><li><a href="#">Sistema de Frenos</a></li><li><a href="#">Suspensión</a></li><li><a href="#">Sistema Eléctrico</a></li><li><a href="#">Neumáticos</a></li></ul></div>
-    <div class="fcol"><h4>Empresa</h4><ul class="flinks"><li><a href="#">Sobre Nosotros</a></li><li><a href="#">Nuestras Sucursales</a></li><li><a href="#">Blog Técnico</a></li><li><a href="#">Trabaja con nosotros</a></li><li><a href="#">Prensa</a></li><li><a href="#">Contacto</a></li></ul></div>
-    <div class="fcol"><h4>Ayuda</h4><ul class="flinks"><li><a href="#">Centro de ayuda</a></li><li><a href="#">Seguimiento de pedido</a></li><li><a href="#">Devoluciones</a></li><li><a href="#">Garantías</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Términos</a></li></ul></div>
+    <div class="fcol"><h4>Tienda</h4><ul class="flinks"><li><a href="tienda.html">Catálogo completo</a></li></ul></div>
+    <div class="fcol"><h4>Contacto</h4><ul class="flinks"><li><a href="https://wa.me/584127449626" target="_blank" rel="noopener">WhatsApp</a></li></ul></div>
   </div>
   <div class="foot-bot">
-    <span>© 2025 IVAMAXO Repuestos. Todos los derechos reservados.</span>
+    <span>© 2026 IVAMAXO Repuestos. Todos los derechos reservados.</span>
     <span>Hecho para los apasionados del motor</span>
   </div>
 </footer>
@@ -1073,7 +1053,7 @@ async function loadCatProducts(slug, el){
       badge:p.badge||null, badgeTxt:p.badge_text||null,
       icon:p.icon||'default',
       image_url:p.image_url||null,
-      stars:5, reviews:Math.floor(Math.random()*180+20),
+      stars:5, reviews:0,
       discount:p.old_price?Math.round((1-p.price/p.old_price)*100):null,
       featured:p.featured, stock:p.stock,
     }));
@@ -1136,7 +1116,7 @@ function renderProducts(){
       <div class="pinfo">
         <div class="pbrand">${p.brand}</div>
         <div class="pname">${p.name}</div>
-        <div class="pstars">${starHTML(p.stars)}<span class="prating">(${p.reviews})</span></div>
+        
         <div class="prow">
           <div>${p.old?`<span class="pprice-old">$${p.old.toFixed(2)}</span>`:''}<span class="pprice">$${p.price.toFixed(2)}</span></div>
           <div style="display:flex;align-items:center;gap:6px">

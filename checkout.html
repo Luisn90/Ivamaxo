@@ -232,13 +232,9 @@ svg{display:block}a{text-decoration:none}
       <div class="step-sep"></div>
       <div class="step active"><span class="step-n">2</span><span>Datos</span></div>
       <div class="step-sep"></div>
-      <div class="step"><span class="step-n">3</span><span>Pago</span></div>
+      <div class="step"><span class="step-n">3</span><span>WhatsApp</span></div>
       <div class="step-sep"></div>
       <div class="step"><span class="step-n">4</span><span>Confirmación</span></div>
-    </div>
-    <div class="hdr-secure">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Pago seguro
     </div>
   </div>
 </header>
@@ -302,32 +298,18 @@ svg{display:block}a{text-decoration:none}
             <label class="flabel">País</label>
             <select class="fselect" id="fCountry">
               <option>Venezuela</option>
-              <option>Colombia</option>
-              <option>Ecuador</option>
-              <option>Perú</option>
-              <option>Panamá</option>
             </select>
           </div>
           <div class="fg">
             <label class="flabel">Estado<span>*</span></label>
             <select class="fselect" id="fState">
-              <option value="">Seleccionar</option>
-              <option>Distrito Capital</option>
-              <option>Miranda</option>
-              <option>Carabobo</option>
-              <option>Zulia</option>
-              <option>Aragua</option>
-              <option>Lara</option>
-              <option>Bolívar</option>
-              <option>Mérida</option>
-              <option>Táchira</option>
-              <option>Anzoátegui</option>
+              <option selected>Carabobo</option>
             </select>
             <span class="ferr" id="errState">Selecciona un estado</span>
           </div>
           <div class="fg">
             <label class="flabel">Ciudad<span>*</span></label>
-            <input class="finput" type="text" id="fCity" placeholder="Caracas">
+            <input class="finput" type="text" id="fCity" placeholder="Valencia">
             <span class="ferr" id="errCity">Campo requerido</span>
           </div>
         </div>
@@ -348,32 +330,14 @@ svg{display:block}a{text-decoration:none}
       </div>
       <div class="sec-body">
         <div class="delivery-opts">
-          <div class="d-opt selected" onclick="selectDelivery(this,'0','express')">
+          <div class="d-opt selected">
             <div class="d-radio"><div class="d-radio-dot"></div></div>
             <div class="d-ico"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/></svg></div>
             <div class="d-info">
-              <div class="d-name">Envío Express 24h</div>
-              <div class="d-desc">Mañana antes de las 6pm si ordenas hoy antes de las 2pm</div>
+              <div class="d-name">Delivery en Carabobo</div>
+              <div class="d-desc">Coordinamos contigo el día de entrega por WhatsApp</div>
             </div>
-            <div class="d-price free">Gratis</div>
-          </div>
-          <div class="d-opt" onclick="selectDelivery(this,'3.50','moto')">
-            <div class="d-radio"><div class="d-radio-dot"></div></div>
-            <div class="d-ico"><svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9h-2"/><circle cx="9" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
-            <div class="d-info">
-              <div class="d-name">Moto delivery 2–4h</div>
-              <div class="d-desc">Entrega hoy mismo en tu zona</div>
-            </div>
-            <div class="d-price">$3.50</div>
-          </div>
-          <div class="d-opt" onclick="selectDelivery(this,'0','pickup')">
-            <div class="d-radio"><div class="d-radio-dot"></div></div>
-            <div class="d-ico"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
-            <div class="d-info">
-              <div class="d-name">Retirar en tienda</div>
-              <div class="d-desc">Av. Principal, Caracas · Listo en 1 hora</div>
-            </div>
-            <div class="d-price free">Gratis</div>
+            <div class="d-price free">Incluido</div>
           </div>
         </div>
       </div>
@@ -383,96 +347,12 @@ svg{display:block}a{text-decoration:none}
     <div class="section">
       <div class="sec-hdr">
         <div class="sec-num">4</div>
-        <div class="sec-title">Método de pago</div>
+        <div class="sec-title">Pago</div>
       </div>
       <div class="sec-body">
-        <div class="payment-tabs">
-          <button class="pm-tab active" onclick="showPayment('card',this)">
-            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Tarjeta
-          </button>
-          <button class="pm-tab" onclick="showPayment('transfer',this)">
-            <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12L8 16M12 12l4 4"/><path d="M20 12c0-4.42-3.58-8-8-8S4 7.58 4 12"/></svg>
-            Transferencia
-          </button>
-          <button class="pm-tab" onclick="showPayment('zelle',this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 9h8l-8 6h8"/></svg>
-            Zelle / PayPal
-          </button>
-          <button class="pm-tab" onclick="showPayment('cash',this)">
-            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-            Efectivo
-          </button>
-        </div>
-
-        <!-- CARD -->
-        <div class="pm-panel active" id="pm-card">
-          <div class="card-row">
-            <input class="finput" type="text" id="cardNum" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
-            <div class="card-ico">
-              <svg viewBox="0 0 40 26" fill="none"><rect width="40" height="26" rx="4" fill="#1A1F71"/><circle cx="15" cy="13" r="7" fill="#EB001B" opacity=".9"/><circle cx="25" cy="13" r="7" fill="#F79E1B" opacity=".9"/></svg>
-            </div>
-          </div>
-          <div class="frow">
-            <div class="fg">
-              <label class="flabel">Nombre en la tarjeta</label>
-              <input class="finput" type="text" id="cardName" placeholder="NOMBRE APELLIDO" style="text-transform:uppercase">
-            </div>
-            <div class="fg" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div class="fg">
-                <label class="flabel">Vence</label>
-                <input class="finput" type="text" id="cardExp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)">
-              </div>
-              <div class="cvv-wrap fg">
-                <label class="flabel">CVV</label>
-                <input class="finput" type="text" id="cardCvv" placeholder="123" maxlength="4">
-                <span class="cvv-tip" title="3 dígitos al dorso de tu tarjeta">
-                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-                </span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
-            <input type="checkbox" id="saveCard" style="accent-color:var(--y);width:16px;height:16px">
-            <label for="saveCard" style="font-size:12.5px;font-weight:500;color:var(--g500);cursor:pointer">Guardar tarjeta para próximas compras</label>
-          </div>
-        </div>
-
-        <!-- TRANSFER -->
-        <div class="pm-panel" id="pm-transfer">
-          <p style="font-size:13px;font-weight:500;color:var(--g500);margin-bottom:16px;line-height:1.7">Realiza la transferencia a los siguientes datos y envía el comprobante por WhatsApp.</p>
-          <div class="transfer-info">
-            <div class="ti-row"><span class="ti-lbl">Banco</span><span class="ti-val">Banesco</span></div>
-            <div class="ti-row"><span class="ti-lbl">Cuenta</span><span class="ti-val">0134-0000-00-0000000000</span><button class="copy-btn" onclick="copyText('0134000000000000000')">Copiar</button></div>
-            <div class="ti-row"><span class="ti-lbl">RIF</span><span class="ti-val">J-00000000-0</span></div>
-            <div class="ti-row"><span class="ti-lbl">Titular</span><span class="ti-val">IVAMAXO C.A.</span></div>
-            <div class="ti-row"><span class="ti-lbl">Concepto</span><span class="ti-val" id="txConcept">PEDIDO-001</span></div>
-          </div>
-          <div style="margin-top:14px">
-            <label class="flabel" style="margin-bottom:8px;display:block">Número de confirmación</label>
-            <input class="finput" type="text" id="txNum" placeholder="Ej: 00123456789">
-          </div>
-        </div>
-
-        <!-- ZELLE -->
-        <div class="pm-panel" id="pm-zelle">
-          <div class="transfer-info">
-            <div class="ti-row"><span class="ti-lbl">Zelle / PayPal</span><span class="ti-val">pagos@ivamaxo.com</span><button class="copy-btn" onclick="copyText('pagos@ivamaxo.com')">Copiar</button></div>
-            <div class="ti-row"><span class="ti-lbl">Monto</span><span class="ti-val" id="zelleAmount">$0.00 USD</span></div>
-            <div class="ti-row"><span class="ti-lbl">Concepto</span><span class="ti-val" id="zelleConcept">PEDIDO-001</span></div>
-          </div>
-          <div style="margin-top:14px">
-            <label class="flabel" style="margin-bottom:8px;display:block">ID de transacción</label>
-            <input class="finput" type="text" id="zelleId" placeholder="Ej: 1AB234567C">
-          </div>
-        </div>
-
-        <!-- CASH -->
-        <div class="pm-panel" id="pm-cash">
-          <div style="background:rgba(249,194,0,.08);border:1.5px solid rgba(249,194,0,.25);border-radius:12px;padding:18px">
-            <p style="font-size:13.5px;font-weight:600;color:var(--bk);margin-bottom:8px">Pago en efectivo al recibir</p>
-            <p style="font-size:13px;font-weight:400;color:var(--g500);line-height:1.7">El delivery acepta efectivo en dólares o bolívares a tasa del día. Asegúrate de tener el monto exacto.</p>
-          </div>
+        <div style="background:rgba(249,194,0,.08);border:1.5px solid rgba(249,194,0,.25);border-radius:12px;padding:18px">
+          <p style="font-size:13.5px;font-weight:600;color:var(--bk);margin-bottom:8px">Coordinamos el pago por WhatsApp</p>
+          <p style="font-size:13px;font-weight:400;color:var(--g500);line-height:1.7">En esta página no se realiza ningún cobro. Al enviar tu pedido te escribimos para confirmar disponibilidad, precio final y forma de pago.</p>
         </div>
       </div>
     </div>
@@ -487,15 +367,9 @@ svg{display:block}a{text-decoration:none}
     <div class="sum-items" id="sumItems">
       <!-- rendered by JS -->
     </div>
-    <div class="coupon-wrap">
-      <div class="coupon-row">
-        <input class="coupon-input" type="text" id="couponInput" placeholder="Código de descuento">
-        <button class="coupon-btn" onclick="applyCoupon()">Aplicar</button>
-      </div>
-    </div>
     <div class="sum-totals">
       <div class="tot-row"><span class="tot-lbl">Subtotal</span><span class="tot-val" id="totSub">$0.00</span></div>
-      <div class="tot-row"><span class="tot-lbl">Envío</span><span class="tot-val" id="totShip">Gratis</span></div>
+      <div class="tot-row"><span class="tot-lbl">Envío</span><span class="tot-val" id="totShip">Incluido</span></div>
       <div class="tot-row" id="discRow" style="display:none"><span class="tot-lbl" style="color:var(--green)">Descuento</span><span class="tot-val" style="color:var(--green)" id="totDisc">-$0.00</span></div>
       <div class="tot-sep"></div>
       <div class="tot-row tot-total"><span class="tot-lbl">Total</span><span class="tot-val" id="totTotal">$0.00</span></div>
@@ -503,12 +377,12 @@ svg{display:block}a{text-decoration:none}
     <div class="sum-cta">
       <button class="btn-pay" id="payBtn" onclick="processPayment()">
         <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="payBtnTxt">Confirmar pedido</span>
+        <span id="payBtnTxt">Enviar pedido</span>
         <div class="pay-loader" id="payLoader"></div>
       </button>
       <div class="sum-secure">
         <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Pago 100% seguro y encriptado
+        Sin cobros en la web · pago por WhatsApp
       </div>
       <div class="sum-back" onclick="window.location.href='index.html'">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -525,14 +399,14 @@ svg{display:block}a{text-decoration:none}
     <div class="success-icon">
       <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
-    <h2>¡Pedido confirmado!</h2>
-    <p>Gracias por tu compra. Recibirás un correo con los detalles de tu pedido.</p>
+    <h2>¡Pedido recibido!</h2>
+    <p>Gracias. Toca el botón de abajo para enviarnos tu pedido por WhatsApp.</p>
     <div class="order-num" id="orderNumDisplay">IVA-20260503-4821</div>
-    <p style="font-size:13px">Tu pedido llegará en <strong>24–48 horas</strong>.<br>Te notificaremos cuando salga en camino.</p>
+    <p style="font-size:13px">Te escribiremos por WhatsApp para coordinar el pago y la entrega.</p>
     <div class="success-btns">
       <button class="btn-ok primary" id="btnWaAdmin" onclick="window.open(window._waAdmin,'_blank')" style="background:#25D366;display:flex;align-items:center;justify-content:center;gap:10px">
         <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Confirmar por WhatsApp
+        Enviar pedido por WhatsApp
       </button>
       <button class="btn-ok ghost" id="btnWaClient" onclick="window._waClient&&window.open(window._waClient,'_blank')" style="display:flex;align-items:center;justify-content:center;gap:8px">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--g700)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -552,7 +426,6 @@ const sb = createClient(SB_URL, SB_KEY);
 let cart = JSON.parse(localStorage.getItem('ivamaxo_cart')||'[]');
 let shippingCost = 0;
 let discountAmt = 0;
-let activePayment = 'card';
 
 // ── RENDER SUMMARY ──
 function renderSummary(){
@@ -592,42 +465,9 @@ function updateTotals(){
   const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
   const total = sub + shippingCost - discountAmt;
   document.getElementById('totSub').textContent   = '$'+sub.toFixed(2);
-  document.getElementById('totShip').textContent  = shippingCost>0 ? '$'+shippingCost.toFixed(2) : 'Gratis';
+  document.getElementById('totShip').textContent  = 'Incluido';
   document.getElementById('totTotal').textContent = '$'+Math.max(0,total).toFixed(2);
-  document.getElementById('zelleAmount').textContent = '$'+Math.max(0,total).toFixed(2)+' USD';
   document.getElementById('payBtn').disabled = cart.length===0;
-}
-
-// ── DELIVERY ──
-function selectDelivery(el, price, type){
-  document.querySelectorAll('.d-opt').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');
-  shippingCost = parseFloat(price);
-  updateTotals();
-}
-
-// ── PAYMENT TABS ──
-function showPayment(id, el){
-  document.querySelectorAll('.pm-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.pm-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('pm-'+id).classList.add('active');
-  activePayment = id;
-}
-
-// ── COUPON ──
-function applyCoupon(){
-  const code = document.getElementById('couponInput').value.trim().toUpperCase();
-  const coupons = { 'IVA10': 0.10, 'PROMO20': 0.20 };
-  if(coupons[code]){
-    const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
-    discountAmt = sub * coupons[code];
-    document.getElementById('discRow').style.display='flex';
-    document.getElementById('totDisc').textContent = '-$'+discountAmt.toFixed(2);
-    updateTotals();
-  } else {
-    alert('Cupón no válido');
-  }
 }
 
 // ── VALIDATE ──
@@ -702,7 +542,6 @@ async function processPayment(){
     const address = document.getElementById('fAddress').value+', '+document.getElementById('fCity').value+', '+document.getElementById('fState').value;
     const itemsList = cart.map(p=>`• ${p.name} x${p.qty} — $${(p.price*p.qty).toFixed(2)}`).join('\n');
     const totalFmt = '$'+(cart.reduce((s,c)=>s+c.price*c.qty,0)+shippingCost-discountAmt).toFixed(2);
-    const payMethod = {card:'Tarjeta de crédito/débito',transfer:'Transferencia bancaria',zelle:'Zelle / PayPal',cash:'Efectivo al recibir'}[activePayment]||activePayment;
 
     // Message TO YOU (admin) — from the client
     const msgToAdmin = encodeURIComponent(
@@ -717,7 +556,8 @@ async function processPayment(){
 🛍️ *Productos:*
 ${itemsList}
 ━━━━━━━━━━━━━━━━━━━
-💳 Pago: ${payMethod}
+💳 Pago: por coordinar
+🚚 Entrega: delivery en Carabobo (incluido)
 💰 *Total: ${totalFmt}*
 ━━━━━━━━━━━━━━━━━━━
 Por favor confirmar disponibilidad y tiempo de entrega.`
@@ -725,7 +565,7 @@ Por favor confirmar disponibilidad y tiempo de entrega.`
 
     // Message TO CLIENT — from admin link
     const msgToClient = encodeURIComponent(
-`✅ *¡Hola ${clientName.split(' ')[0]}! Tu pedido fue confirmado.*
+`✅ *¡Hola ${clientName.split(' ')[0]}! Recibimos tu pedido.*
 ━━━━━━━━━━━━━━━━━━━
 🏪 *IVAMAXO Repuestos*
 📦 Pedido: *${orderNum}*
@@ -734,7 +574,7 @@ Por favor confirmar disponibilidad y tiempo de entrega.`
 🛍️ *Resumen:*
 ${itemsList}
 ━━━━━━━━━━━━━━━━━━━
-⏱️ Tu pedido está siendo procesado. Te avisaremos cuando salga en camino.
+Te confirmaremos disponibilidad, precio final y forma de pago, y coordinaremos la entrega.
 ¿Tienes alguna consulta? Estamos aquí para ayudarte. 😊`
     );
 
@@ -760,15 +600,6 @@ ${itemsList}
 }
 
 // ── UTILS ──
-function formatCard(el){
-  let v = el.value.replace(/\D/g,'').slice(0,16);
-  el.value = v.replace(/(.{4})/g,'$1 ').trim();
-}
-function formatExp(el){
-  let v = el.value.replace(/\D/g,'');
-  if(v.length>=3) v = v.slice(0,2)+'/'+v.slice(2,4);
-  el.value = v;
-}
 function copyText(txt){
   navigator.clipboard.writeText(txt).then(()=> alert('Copiado ✓'));
 }
